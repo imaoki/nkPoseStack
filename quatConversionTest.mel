@@ -1,0 +1,224 @@
+{
+  proc int reverseRotateOrder(int $order) {
+    int $reverseOrder[] = {5, 3, 4, 1, 2, 0};
+    return $reverseOrder[$order];
+  }
+  proc float[] eulerToQuat(float $r[], int $order) {
+    // $order = reverseRotateOrder($order);
+    float $qx = 0.0;
+    float $qy = 0.0;
+    float $qz = 0.0;
+    float $qw = 1.0;
+    float $rx = `deg_to_rad $r[0]`;
+    float $ry = `deg_to_rad $r[1]`;
+    float $rz = `deg_to_rad $r[2]`;
+    float $cx = cos(0.5 * $rx);
+    float $cy = cos(0.5 * $ry);
+    float $cz = cos(0.5 * $rz);
+    float $sx = sin(0.5 * $rx);
+    float $sy = sin(0.5 * $ry);
+    float $sz = sin(0.5 * $rz);
+    switch ($order) {
+      // XYZ
+      case 0:
+        $qx = $sx * $cy * $cz + $cx * $sy * $sz;
+        $qy = $cx * $sy * $cz - $sx * $cy * $sz;
+        $qz = $cx * $cy * $sz + $sx * $sy * $cz;
+        $qw = $cx * $cy * $cz - $sx * $sy * $sz;
+        break;
+      // YZX
+      case 1:
+        $qx = $sx * $cy * $cz + $cx * $sy * $sz;
+        $qy = $cx * $sy * $cz + $sx * $cy * $sz;
+        $qz = $cx * $cy * $sz - $sx * $sy * $cz;
+        $qw = $cx * $cy * $cz - $sx * $sy * $sz;
+        break;
+      // ZXY
+      case 2:
+        $qx = $sx * $cy * $cz - $cx * $sy * $sz;
+        $qy = $cx * $sy * $cz + $sx * $cy * $sz;
+        $qz = $cx * $cy * $sz + $sx * $sy * $cz;
+        $qw = $cx * $cy * $cz - $sx * $sy * $sz;
+        break;
+      // XZY
+      case 3:
+        $qx = $sx * $cy * $cz - $cx * $sy * $sz;
+        $qy = $cx * $sy * $cz - $sx * $cy * $sz;
+        $qz = $cx * $cy * $sz + $sx * $sy * $cz;
+        $qw = $cx * $cy * $cz + $sx * $sy * $sz;
+        break;
+      // YXZ
+      case 4:
+        $qx = $sx * $cy * $cz + $cx * $sy * $sz;
+        $qy = $cx * $sy * $cz - $sx * $cy * $sz;
+        $qz = $cx * $cy * $sz - $sx * $sy * $cz;
+        $qw = $cx * $cy * $cz + $sx * $sy * $sz;
+        break;
+      // ZYX
+      case 5:
+        $qx = $sx * $cy * $cz - $cx * $sy * $sz;
+        $qy = $cx * $sy * $cz + $sx * $cy * $sz;
+        $qz = $cx * $cy * $sz - $sx * $sy * $cz;
+        $qw = $cx * $cy * $cz + $sx * $sy * $sz;
+        break;
+      default: break;
+    }
+    return {$qx, $qy, $qz, $qw};
+  }
+  proc float[] quatToEuler(float $q[], int $order) {
+    // $order = reverseRotateOrder($order);
+    float $rx = 0.0;
+    float $ry = 0.0;
+    float $rz = 0.0;
+    float $qx = $q[0];
+    float $qy = $q[1];
+    float $qz = $q[2];
+    float $qw = $q[3];
+    float $sx;
+    float $sy;
+    float $sz;
+    int $unlocked;
+    switch ($order) {
+      // XYZ
+      case 0:
+        $sy = 2 * $qx * $qz + 2 * $qy * $qw;
+        $unlocked = abs($sy) < 0.9999999;
+        $rx = $unlocked ? atan2(-(2 * $qy * $qz - 2 * $qx * $qw), 2 * $qw * $qw + 2 * $qz * $qz - 1)
+            : atan2(2 * $qy * $qz + 2 * $qx * $qw, 2 * $qw * $qw + 2 * $qy * $qy - 1);
+        $ry = asin($sy);
+        $rz = $unlocked ? atan2(-(2 * $qx * $qy - 2 * $qz * $qw), 2 * $qw * $qw + 2 * $qx * $qx - 1) : 0;
+        break;
+      // YZX
+      case 1:
+        $sz = 2 * $qx * $qy + 2 * $qz * $qw;
+        $unlocked = abs($sz) < 0.9999999;
+        $rx = $unlocked ? atan2(-(2 * $qy * $qz - 2 * $qx * $qw), 2 * $qw * $qw + 2 * $qy * $qy - 1) : 0;
+        $ry = $unlocked ? atan2(-(2 * $qx * $qz - 2 * $qy * $qw), 2 * $qw * $qw + 2 * $qx * $qx - 1)
+            : atan2(2 * $qx * $qz + 2 * $qy * $qw, 2 * $qw * $qw + 2 * $qz * $qz - 1);
+        $rz = asin($sz);
+        break;
+      // ZXY
+      case 2:
+        $sx = 2 * $qy * $qz + 2 * $qx * $qw;
+        $unlocked = abs($sx) < 0.9999999;
+        $rx = asin($sx);
+        $ry = $unlocked ? atan2(-(2 * $qx * $qz - 2 * $qy * $qw), 2 * $qw * $qw + 2 * $qz * $qz - 1) : 0;
+        $rz = $unlocked ? atan2(-(2 * $qx * $qy - 2 * $qz * $qw), 2 * $qw * $qw + 2 * $qy * $qy - 1)
+            : atan2(2 * $qx * $qy + 2 * $qz * $qw, 2 * $qw * $qw + 2 * $qx * $qx - 1);
+        break;
+      // XZY
+      case 3:
+        $sz = -(2 * $qx * $qy - 2 * $qz * $qw);
+        $unlocked = abs($sz) < 0.9999999;
+        $rx = $unlocked ? atan2(2 * $qy * $qz + 2 * $qx * $qw, 2 * $qw * $qw + 2 * $qy * $qy - 1)
+            : atan2(-(2 * $qy * $qz - 2 * $qx * $qw), 2 * $qw * $qw + 2 * $qz * $qz - 1);
+        $ry = $unlocked ? atan2(2 * $qx * $qz + 2 * $qy * $qw, 2 * $qw * $qw + 2 * $qx * $qx - 1) : 0;
+        $rz = asin($sz);
+        break;
+      // YXZ
+      case 4:
+        $sx = -(2 * $qy * $qz - 2 * $qx * $qw);
+        $unlocked = abs($sx) < 0.9999999;
+        $rx = asin($sx);
+        $ry = $unlocked ? atan2(2 * $qx * $qz + 2 * $qy * $qw, 2 * $qw * $qw + 2 * $qz * $qz - 1)
+            : atan2(-(2 * $qx * $qz - 2 * $qy * $qw), 2 * $qw * $qw + 2 * $qx * $qx - 1);
+        $rz = $unlocked ? atan2(2 * $qx * $qy + 2 * $qz * $qw, 2 * $qw * $qw + 2 * $qy * $qy - 1) : 0;
+        break;
+      // ZYX
+      case 5:
+        $sy = -(2 * $qx * $qz - 2 * $qy * $qw);
+        $unlocked = abs($sy) < 0.9999999;
+        $rx = $unlocked ? atan2(2 * $qy * $qz + 2 * $qx * $qw, 2 * $qw * $qw + 2 * $qz * $qz - 1) : 0;
+        $ry = asin($sy);
+        $rz = $unlocked ? atan2(2 * $qx * $qy + 2 * $qz * $qw, 2 * $qw * $qw + 2 * $qx * $qx - 1)
+            : atan2(-(2 * $qx * $qy - 2 * $qz * $qw), 2 * $qw * $qw + 2 * $qy * $qy - 1);
+        break;
+      default: break;
+    }
+    $rx = `rad_to_deg $rx`;
+    $ry = `rad_to_deg $ry`;
+    $rz = `rad_to_deg $rz`;
+    return {$rx, $ry, $rz};
+  }
+
+  string $orders[] = {"XYZ", "YZX", "ZXY", "XZY", "YXZ", "ZYX"};
+  // float $q[] = {-0.218428282, -0.5500387664, 0.5266370234, 0.6102457592};
+  matrix $rm[6][3] = <<
+    25.443, -19.502, -20.480;
+    25.443, -19.502, -20.480;
+    25.443, -19.502, -20.480;
+    25.443, -19.502, -20.480;
+    25.443, -19.502, -20.480;
+    25.443, -19.502, -20.480
+  >>;
+  matrix $qm[6][4] = <<
+    0.184207, -0.201167, -0.134199, 0.952674;
+    0.184207, -0.124000, -0.207609, 0.952674;
+    0.242950, -0.124000, -0.134199, 0.952674;
+    0.242950, -0.201167, -0.134199, 0.939413;
+    0.184207, -0.201167, -0.207609, 0.939413;
+    0.242950, -0.124000, -0.207609, 0.939413
+  >>;
+  // print("q:{" + floatArrayToString($q, ", ") + "}\n");
+  print("eulerToQuat\n");
+  for ($o = 0; $o < `size $orders`; $o++) {
+    int $order = reverseRotateOrder($o);
+    float $r[] = {$rm[$o][0], $rm[$o][1], $rm[$o][2]};
+    float $q[] = eulerToQuat($r, $order);
+    print($orders[$o] + ":{" + floatArrayToString($q, ", ") + "}\n");
+  }
+  print("\n");
+  print("quatToEuler\n");
+  for ($o = 0; $o < `size $orders`; $o++) {
+    int $order = reverseRotateOrder($o);
+    float $q[] = {$qm[$o][0], $qm[$o][1], $qm[$o][2], $qm[$o][3]};
+    float $r[] = quatToEuler($q, $order);
+    print($orders[$o] + ":{" + floatArrayToString($r, ", ") + "}\n");
+  }
+}
+/*
+eulerToQuat
+XYZ:{0.184207, -0.201167, -0.134199, 0.952674}
+YZX:{0.184207, -0.124000, -0.207609, 0.952674}
+ZXY:{0.242950, -0.124000, -0.134199, 0.952674}
+XZY:{0.242950, -0.201167, -0.134199, 0.939413}
+YXZ:{0.184207, -0.201167, -0.207609, 0.939413}
+ZYX:{0.242950, -0.124000, -0.207609, 0.939413}
+
+quatToEuler
+XYZ:{25.443, -19.502, -20.480}
+YZX:{25.443, -19.502, -20.480}
+ZXY:{25.443, -19.502, -20.480}
+XZY:{25.443, -19.502, -20.480}
+YXZ:{25.443, -19.502, -20.480}
+ZYX:{25.443, -19.502, -20.480}
+*/
+
+{
+  string $n = "|X|ROOT|XY_L1";
+  print("\n");
+  print("n:" + $n + "\n");
+  print("decomposeMatrix.outputQuat\n");
+  string $orders[] = {"XYZ", "YZX", "ZXY", "XZY", "YXZ", "ZYX"};
+  for ($i = 0; $i < 6; $i++) {
+    setAttr ($n + ".rotateOrder") $i;
+    // float $r[] = `getAttr ($n + ".rotate")`;
+    // print($orders[$i] + ":{" + floatArrayToString($r, ", ") + "}\n");
+    float $q[] = `getAttr "decomposeMatrix1.outputQuat"`;
+    print($orders[$i] + ":{" + floatArrayToString($q, ", ") + "}\n");
+  }
+}
+/*
+n:|X|ROOT|XY_L1
+decomposeMatrix.outputQuat
+XYZ:{0.184207, -0.201167, -0.134199, 0.952674}
+YZX:{0.184207, -0.124000, -0.207609, 0.952674}
+ZXY:{0.242950, -0.124000, -0.134199, 0.952674}
+XZY:{0.242950, -0.201167, -0.134199, 0.939413}
+YXZ:{0.184207, -0.201167, -0.207609, 0.939413}
+ZYX:{0.242950, -0.124000, -0.207609, 0.939413}
+*/
+
+/*
+eval ("source \"" + `getenv "MAYA_APP_DIR"` + "/library/nkCopyPose/quatConversionTest.mel\"");
+*/

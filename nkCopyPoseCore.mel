@@ -1,0 +1,987 @@
+/*! © 2023 imaoki | MIT License | https://github.com/imaoki */
+/*-
+@var <string[]>
+*/
+global string $nkCopyPosePoses[];
+
+// -----------------------------------------------------------------------------
+// クォータニオン
+// -----------------------------------------------------------------------------
+/*-
+@param $degree <float>
+@param $axis <float[]>
+@returns <float[]>
+@remarks https://github.com/mrdoob/three.js/blob/dev/LICENSE
+*/
+proc float[] angleAxisToQuat(float $degree, float $axis[]) {
+  float $ha = `deg_to_rad $degree` * 0.5;
+  float $s = sin($ha);
+  float $qx = $axis[0] * $s;
+  float $qy = $axis[1] * $s;
+  float $qz = $axis[2] * $s;
+  float $qw = cos($ha);
+  return {$qx, $qy, $qz, $qw};
+}
+/*-
+@param $order <int>
+@returns <int>
+*/
+proc int reverseRotateOrder(int $order) {
+  int $reverseOrder[] = {5, 3, 4, 1, 2, 0};
+  return $reverseOrder[$order];
+}
+/*-
+@param $r <float[]>
+@param $order <int>
+@returns <float[]>
+@remarks https://github.com/mrdoob/three.js/blob/dev/LICENSE
+*/
+proc float[] eulerToQuat(float $r[], int $order) {
+  float $qx = 0.0;
+  float $qy = 0.0;
+  float $qz = 0.0;
+  float $qw = 1.0;
+  float $rx = `deg_to_rad $r[0]`;
+  float $ry = `deg_to_rad $r[1]`;
+  float $rz = `deg_to_rad $r[2]`;
+  float $cx = cos(0.5 * $rx);
+  float $cy = cos(0.5 * $ry);
+  float $cz = cos(0.5 * $rz);
+  float $sx = sin(0.5 * $rx);
+  float $sy = sin(0.5 * $ry);
+  float $sz = sin(0.5 * $rz);
+  switch ($order) {
+    // XYZ
+    case 0:
+      $qx = $sx * $cy * $cz + $cx * $sy * $sz;
+      $qy = $cx * $sy * $cz - $sx * $cy * $sz;
+      $qz = $cx * $cy * $sz + $sx * $sy * $cz;
+      $qw = $cx * $cy * $cz - $sx * $sy * $sz;
+      break;
+    // YZX
+    case 1:
+      $qx = $sx * $cy * $cz + $cx * $sy * $sz;
+      $qy = $cx * $sy * $cz + $sx * $cy * $sz;
+      $qz = $cx * $cy * $sz - $sx * $sy * $cz;
+      $qw = $cx * $cy * $cz - $sx * $sy * $sz;
+      break;
+    // ZXY
+    case 2:
+      $qx = $sx * $cy * $cz - $cx * $sy * $sz;
+      $qy = $cx * $sy * $cz + $sx * $cy * $sz;
+      $qz = $cx * $cy * $sz + $sx * $sy * $cz;
+      $qw = $cx * $cy * $cz - $sx * $sy * $sz;
+      break;
+    // XZY
+    case 3:
+      $qx = $sx * $cy * $cz - $cx * $sy * $sz;
+      $qy = $cx * $sy * $cz - $sx * $cy * $sz;
+      $qz = $cx * $cy * $sz + $sx * $sy * $cz;
+      $qw = $cx * $cy * $cz + $sx * $sy * $sz;
+      break;
+    // YXZ
+    case 4:
+      $qx = $sx * $cy * $cz + $cx * $sy * $sz;
+      $qy = $cx * $sy * $cz - $sx * $cy * $sz;
+      $qz = $cx * $cy * $sz - $sx * $sy * $cz;
+      $qw = $cx * $cy * $cz + $sx * $sy * $sz;
+      break;
+    // ZYX
+    case 5:
+      $qx = $sx * $cy * $cz - $cx * $sy * $sz;
+      $qy = $cx * $sy * $cz + $sx * $cy * $sz;
+      $qz = $cx * $cy * $sz - $sx * $sy * $cz;
+      $qw = $cx * $cy * $cz + $sx * $sy * $sz;
+      break;
+    default: break;
+  }
+  return {$qx, $qy, $qz, $qw};
+}
+/*-
+@param $q <float[]>
+@param $order <int>
+@returns <float[]>
+@remarks https://github.com/aadebdeb/MatrixQuaternionEulerAngleConversions
+*/
+proc float[] quatToEuler(float $q[], int $order) {
+  float $rx = 0.0;
+  float $ry = 0.0;
+  float $rz = 0.0;
+  float $qx = $q[0];
+  float $qy = $q[1];
+  float $qz = $q[2];
+  float $qw = $q[3];
+  float $sx;
+  float $sy;
+  float $sz;
+  int $unlocked;
+  switch ($order) {
+    // XYZ
+    case 0:
+      $sy = 2 * $qx * $qz + 2 * $qy * $qw;
+      $unlocked = abs($sy) < 0.9999999;
+      $rx = $unlocked ? atan2(-(2 * $qy * $qz - 2 * $qx * $qw), 2 * $qw * $qw + 2 * $qz * $qz - 1)
+          : atan2(2 * $qy * $qz + 2 * $qx * $qw, 2 * $qw * $qw + 2 * $qy * $qy - 1);
+      $ry = asin($sy);
+      $rz = $unlocked ? atan2(-(2 * $qx * $qy - 2 * $qz * $qw), 2 * $qw * $qw + 2 * $qx * $qx - 1) : 0;
+      break;
+    // YZX
+    case 1:
+      $sz = 2 * $qx * $qy + 2 * $qz * $qw;
+      $unlocked = abs($sz) < 0.9999999;
+      $rx = $unlocked ? atan2(-(2 * $qy * $qz - 2 * $qx * $qw), 2 * $qw * $qw + 2 * $qy * $qy - 1) : 0;
+      $ry = $unlocked ? atan2(-(2 * $qx * $qz - 2 * $qy * $qw), 2 * $qw * $qw + 2 * $qx * $qx - 1)
+          : atan2(2 * $qx * $qz + 2 * $qy * $qw, 2 * $qw * $qw + 2 * $qz * $qz - 1);
+      $rz = asin($sz);
+      break;
+    // ZXY
+    case 2:
+      $sx = 2 * $qy * $qz + 2 * $qx * $qw;
+      $unlocked = abs($sx) < 0.9999999;
+      $rx = asin($sx);
+      $ry = $unlocked ? atan2(-(2 * $qx * $qz - 2 * $qy * $qw), 2 * $qw * $qw + 2 * $qz * $qz - 1) : 0;
+      $rz = $unlocked ? atan2(-(2 * $qx * $qy - 2 * $qz * $qw), 2 * $qw * $qw + 2 * $qy * $qy - 1)
+          : atan2(2 * $qx * $qy + 2 * $qz * $qw, 2 * $qw * $qw + 2 * $qx * $qx - 1);
+      break;
+    // XZY
+    case 3:
+      $sz = -(2 * $qx * $qy - 2 * $qz * $qw);
+      $unlocked = abs($sz) < 0.9999999;
+      $rx = $unlocked ? atan2(2 * $qy * $qz + 2 * $qx * $qw, 2 * $qw * $qw + 2 * $qy * $qy - 1)
+          : atan2(-(2 * $qy * $qz - 2 * $qx * $qw), 2 * $qw * $qw + 2 * $qz * $qz - 1);
+      $ry = $unlocked ? atan2(2 * $qx * $qz + 2 * $qy * $qw, 2 * $qw * $qw + 2 * $qx * $qx - 1) : 0;
+      $rz = asin($sz);
+      break;
+    // YXZ
+    case 4:
+      $sx = -(2 * $qy * $qz - 2 * $qx * $qw);
+      $unlocked = abs($sx) < 0.9999999;
+      $rx = asin($sx);
+      $ry = $unlocked ? atan2(2 * $qx * $qz + 2 * $qy * $qw, 2 * $qw * $qw + 2 * $qz * $qz - 1)
+          : atan2(-(2 * $qx * $qz - 2 * $qy * $qw), 2 * $qw * $qw + 2 * $qx * $qx - 1);
+      $rz = $unlocked ? atan2(2 * $qx * $qy + 2 * $qz * $qw, 2 * $qw * $qw + 2 * $qy * $qy - 1) : 0;
+      break;
+    // ZYX
+    case 5:
+      $sy = -(2 * $qx * $qz - 2 * $qy * $qw);
+      $unlocked = abs($sy) < 0.9999999;
+      $rx = $unlocked ? atan2(2 * $qy * $qz + 2 * $qx * $qw, 2 * $qw * $qw + 2 * $qz * $qz - 1) : 0;
+      $ry = asin($sy);
+      $rz = $unlocked ? atan2(2 * $qx * $qy + 2 * $qz * $qw, 2 * $qw * $qw + 2 * $qx * $qx - 1)
+          : atan2(-(2 * $qx * $qy - 2 * $qz * $qw), 2 * $qw * $qw + 2 * $qy * $qy - 1);
+      break;
+    default: break;
+  }
+  $rx = `rad_to_deg $rx`;
+  $ry = `rad_to_deg $ry`;
+  $rz = `rad_to_deg $rz`;
+  return {$rx, $ry, $rz};
+}
+/*-
+@param $q1 <float[]>
+@param $q2 <float[]>
+@returns <float[]>
+*/
+proc float[] quatAdd(float $q1[], float $q2[]) {
+  float $q1x = $q1[0];
+  float $q1y = $q1[1];
+  float $q1z = $q1[2];
+  float $q1w = $q1[3];
+  float $q2x = $q2[0];
+  float $q2y = $q2[1];
+  float $q2z = $q2[2];
+  float $q2w = $q2[3];
+  float $qx = $q1x + $q2x;
+  float $qy = $q1y + $q2y;
+  float $qz = $q1z + $q2z;
+  float $qw = $q1w + $q2w;
+  return {$qx, $qy, $qz, $qw};
+}
+/*-
+@param $q1 <float[]>
+@param $q2 <float[]>
+@returns <float[]>
+*/
+proc float[] quatSubtract(float $q1[], float $q2[]) {
+  float $q1x = $q1[0];
+  float $q1y = $q1[1];
+  float $q1z = $q1[2];
+  float $q1w = $q1[3];
+  float $q2x = $q2[0];
+  float $q2y = $q2[1];
+  float $q2z = $q2[2];
+  float $q2w = $q2[3];
+  float $qx = $q1x - $q2x;
+  float $qy = $q1y - $q2y;
+  float $qz = $q1z - $q2z;
+  float $qw = $q1w - $q2w;
+  return {$qx, $qy, $qz, $qw};
+}
+/*-
+@param $q1 <float[]>
+@param $q2 <float[]>
+@returns <float[]>
+@remarks https://github.com/mrdoob/three.js/blob/dev/LICENSE
+*/
+proc float[] quatMultiply(float $q1[], float $q2[]) {
+  float $q1x = $q1[0];
+  float $q1y = $q1[1];
+  float $q1z = $q1[2];
+  float $q1w = $q1[3];
+  float $q2x = $q2[0];
+  float $q2y = $q2[1];
+  float $q2z = $q2[2];
+  float $q2w = $q2[3];
+  float $qx = $q1x * $q2w + $q1w * $q2x + $q1y * $q2z - $q1z * $q2y;
+  float $qy = $q1y * $q2w + $q1w * $q2y + $q1z * $q2x - $q1x * $q2z;
+  float $qz = $q1z * $q2w + $q1w * $q2z + $q1x * $q2y - $q1y * $q2x;
+  float $qw = $q1w * $q2w - $q1x * $q2x - $q1y * $q2y - $q1z * $q2z;
+  return {$qx, $qy, $qz, $qw};
+}
+/*-
+@param $q <float[]>
+@returns <float[]>
+*/
+proc float[] quatInverse(float $q[]) {
+  return {$q[0] * -1, $q[1] * -1, $q[2] * -1, $q[3]};
+}
+/*-
+@param $v <float[]>
+@param $q <float[]>
+@returns <float[]>
+*/
+proc float[] rotateVectorByQuat(float $v[], float $q[]) {
+  float $iq[] = quatInverse($q);
+  float $vq[] = {$v[0], $v[1], $v[2], 0};
+  $vq = quatMultiply(quatMultiply($q, $vq), $iq);
+  return {$vq[0], $vq[1], $vq[2]};
+}
+/*-
+@param $q <float[]>
+@param $axis <float[]>
+@returns <float[]>
+*/
+proc float[] quatFlip(float $q[], float $axis[]) {
+  float $flipQ[] = angleAxisToQuat(180.0, $axis);
+  return quatMultiply($flipQ, $q);
+}
+
+// -----------------------------------------------------------------------------
+// ノード関連
+// -----------------------------------------------------------------------------
+/*-
+@returns <string[]>
+*/
+proc string[] getSelectedNodes() {
+  return `ls -l -sl -typ "joint" -typ "transform"`;
+}
+/*-
+@param $n <string>
+@returns <string>
+*/
+proc string getParentNode(string $n) {
+  string $parent;
+  string $parents[] = `listRelatives -f -p $n`;
+  if (`size $parents` > 0) $parent = $parents[0];
+  return $parent;
+}
+
+// -----------------------------------------------------------------------------
+// トランスフォーム関連
+// -----------------------------------------------------------------------------
+/*-
+@param $nodes <string[]>
+@returns <string[]>
+*/
+proc string[] getTransformAttributes(string $nodes[]) {
+  print("getTransformAttributes\n");
+  // print("  nodes:{" + stringArrayToString($nodes, ", ") + "}\n");
+  string $matrices[];
+  for ($n in $nodes) {
+    string $type = `nodeType $n`;
+    if ($type == "transform" || $type == "joint") {
+      float $t[] = `getAttr ($n + ".translate")`;
+      float $r[] = `getAttr ($n + ".rotate")`;
+      float $s[] = `getAttr ($n + ".scale")`;
+      float $h[] = `getAttr ($n + ".shear")`;
+      // print("  t:{" + floatArrayToString($t, ", ") + "}\n");
+      // print("  r:{" + floatArrayToString($r, ", ") + "}\n");
+      // print("  s:{" + floatArrayToString($s, ", ") + "}\n");
+      // print("  h:{" + floatArrayToString($h, ", ") + "}\n");
+
+      int $o = `getAttr ($n + ".rotateOrder")`;
+      $o = reverseRotateOrder($o);
+      int $oXYZ = reverseRotateOrder(0);
+
+      float $rq[] = eulerToQuat($r, $o);
+
+      float $ra[] = `getAttr ($n + ".rotateAxis")`;
+      $ra = eulerToQuat($ra, $oXYZ);
+
+      float $jo[] = {0, 0, 0, 1};
+      if (`attributeQuery -n $n -ex "jointOrient"`) {
+        $jo = `getAttr ($n + ".jointOrient")`;
+        $jo = eulerToQuat($jo, $oXYZ);
+      }
+
+      float $q[] = quatMultiply($jo, quatMultiply($ra, $rq));
+
+      print("  o :" + $o + "\n");
+      print("  rq:{" + floatArrayToString($rq, ", ") + "}\n");
+      print("  ra:{" + floatArrayToString($ra, ", ") + "}\n");
+      print("  jo:{" + floatArrayToString($jo, ", ") + "}\n");
+      print("  q :{" + floatArrayToString($q, ", ") + "}\n");
+
+      int $i = `size $matrices`;
+      $matrices[$i] = floatArrayToString($t, ",");
+      $matrices[$i] = $matrices[$i] + "," + (floatArrayToString($r, ","));
+      $matrices[$i] = $matrices[$i] + "," + (floatArrayToString($s, ","));
+      $matrices[$i] = $matrices[$i] + "," + (floatArrayToString($h, ","));
+      $matrices[$i] = $matrices[$i] + "," + (floatArrayToString($q, ","));
+    }
+  }
+  return $matrices;
+}
+/*-
+@param $n <string>
+@param $m <float[]>
+@param $shouldSetT <int>
+@param $shouldSetR <int>
+@param $shouldSetS <int>
+@returns <>
+*/
+proc setTransformAttributes(
+  string $n,
+  float $m[],
+  int $shouldSetT,
+  int $shouldSetR,
+  int $shouldSetS
+) {
+  // print("setTransformAttributes\n");
+  // print("  n         :" + $n + "\n");
+  // print("  m         :{" + floatArrayToString($m, ", ") + "}\n");
+  // print("  shouldSetT:" + $shouldSetT + "\n");
+  // print("  shouldSetR:" + $shouldSetR + "\n");
+  // print("  shouldSetS:" + $shouldSetS + "\n");
+  if (`objExists $n` && `size $m` == 16) {
+    float $t[] = {$m[0], $m[1], $m[2]};
+    float $r[] = {$m[3], $m[4], $m[5]};
+    float $s[] = {$m[6], $m[7], $m[8]};
+    float $h[] = {$m[9], $m[10], $m[11]};
+    float $q[] = {$m[12], $m[13], $m[14], $m[15]};
+    // print("  t:{" + floatArrayToString($t, ", ") + "}\n");
+    // print("  r:{" + floatArrayToString($r, ", ") + "}\n");
+    // print("  s:{" + floatArrayToString($s, ", ") + "}\n");
+    // print("  h:{" + floatArrayToString($h, ", ") + "}\n");
+    // print("  q:{" + floatArrayToString($q, ", ") + "}\n");
+
+    string $tx = $n + ".tx";
+    string $ty = $n + ".ty";
+    string $tz = $n + ".tz";
+    string $rx = $n + ".rx";
+    string $ry = $n + ".ry";
+    string $rz = $n + ".rz";
+    string $sx = $n + ".sx";
+    string $sy = $n + ".sy";
+    string $sz = $n + ".sz";
+
+    if ($shouldSetT) {
+      if (!`getAttr -l $tx`) setAttr $tx $t[0];
+      if (!`getAttr -l $ty`) setAttr $ty $t[1];
+      if (!`getAttr -l $tz`) setAttr $tz $t[2];
+    }
+    if ($shouldSetR) {
+      if (!`getAttr -l $rx`) setAttr $rx $r[0];
+      if (!`getAttr -l $ry`) setAttr $ry $r[1];
+      if (!`getAttr -l $rz`) setAttr $rz $r[2];
+    }
+    if ($shouldSetS) {
+      if (!`getAttr -l $sx`) setAttr $sx $s[0];
+      if (!`getAttr -l $sy`) setAttr $sy $s[1];
+      if (!`getAttr -l $sz`) setAttr $sz $s[2];
+    }
+  }
+}
+/*-
+@param $n <string>
+@param $m <float[]>
+@returns <float[]>
+*/
+proc float[] asIsTransform(string $n, float $m[]) {
+  print("asIsTransform\n");
+  // print("  n :" + $n + "\n");
+  // print("  m :{" + floatArrayToString($m, ", ") + "}\n");
+
+  float $t[] = {$m[0], $m[1], $m[2]};
+  float $s[] = {$m[6], $m[7], $m[8]};
+  float $h[] = {$m[9], $m[10], $m[11]};
+  float $q[] = {$m[12], $m[13], $m[14], $m[15]};
+  // print("  t :{" + floatArrayToString($t, ", ") + "}\n");
+  // print("  s :{" + floatArrayToString($s, ", ") + "}\n");
+  // print("  h :{" + floatArrayToString($h, ", ") + "}\n");
+  // print("  q :{" + floatArrayToString($q, ", ") + "}\n");
+
+  int $o = `getAttr ($n + ".rotateOrder")`;
+  $o = reverseRotateOrder($o);
+  int $oXYZ = reverseRotateOrder(0);
+
+  float $ra[] = `getAttr ($n + ".rotateAxis")`;
+  $ra = quatInverse(eulerToQuat($ra, $oXYZ));
+
+  float $jo[] = {0, 0, 0, 1};
+  if (`attributeQuery -n $n -ex "jointOrient"`) {
+    $jo = `getAttr ($n + ".jointOrient")`;
+    $jo = quatInverse(eulerToQuat($jo, $oXYZ));
+  }
+
+  float $rq[] = quatMultiply($jo, quatMultiply($ra, $q));
+  float $r[] = quatToEuler($rq, $o);
+
+  print("  o :" + $o + "\n");
+  print("  q :{" + floatArrayToString($q, ", ") + "}\n");
+  print("  ra:{" + floatArrayToString($ra, ", ") + "}\n");
+  print("  jo:{" + floatArrayToString($jo, ", ") + "}\n");
+  print("  rq:{" + floatArrayToString($rq, ", ") + "}\n");
+  print("  r :{" + floatArrayToString($r, ", ") + "}\n");
+
+  float $newMatrix[] = {
+    $t[0], $t[1], $t[2],
+    $r[0], $r[1], $r[2],
+    $s[0], $s[1], $s[2],
+    $h[0], $h[1], $h[2],
+    $q[0], $q[1], $q[2], $q[3]
+  };
+  // print("  newMatrix:{" + floatArrayToString($newMatrix, ", ") + "}\n");
+
+  return $newMatrix;
+}
+/*-
+@param $n <string>
+@param $m <float[]>
+@param $isRoot <boolean>
+@param $mirrorAxis <int>
+@param $primaryAxis <int>
+@param $secondaryAxis <int>
+@param $invertPrimaryAxis <boolean>
+@param $invertSecondaryAxis <boolean>
+@returns <float[]>
+*/
+proc float[] mirrorTransform(
+  string $n,
+  float $m[],
+  int $isRoot,
+  int $mirrorAxis,
+  int $primaryAxis,
+  int $secondaryAxis,
+  int $invertPrimaryAxis,
+  int $invertSecondaryAxis
+) {
+  print("mirrorTransform\n");
+  // print("  n                  :" + $n + "\n");
+  // print("  m                  :{" + floatArrayToString($m, ", ") + "}\n");
+  // print("  isRoot             :" + $isRoot + "\n");
+  // print("  mirrorAxis         :" + $mirrorAxis + "\n");
+  // print("  primaryAxis        :" + $primaryAxis + "\n");
+  // print("  secondaryAxis      :" + $secondaryAxis + "\n");
+  // print("  invertPrimaryAxis  :" + $invertPrimaryAxis + "\n");
+  // print("  invertSecondaryAxis:" + $invertSecondaryAxis + "\n");
+
+  float $t[] = {$m[0], $m[1], $m[2]};
+  float $s[] = {$m[6], $m[7], $m[8]};
+  float $h[] = {$m[9], $m[10], $m[11]};
+  float $q[] = {$m[12], $m[13], $m[14], $m[15]};
+  // print("  t :{" + floatArrayToString($t, ", ") + "}\n");
+  // print("  s :{" + floatArrayToString($s, ", ") + "}\n");
+  // print("  h :{" + floatArrayToString($h, ", ") + "}\n");
+  // print("  q :{" + floatArrayToString($q, ", ") + "}\n");
+
+  // 位置のミラーリング
+  if ($isRoot) {
+    $t[$mirrorAxis] *= -1;
+  }
+  else {
+    if ($invertPrimaryAxis) $t[$primaryAxis] *= -1;
+    if ($invertSecondaryAxis) $t[$secondaryAxis] *= -1;
+    if ($invertPrimaryAxis == $invertSecondaryAxis) {
+      int $usedAxis[];
+      $usedAxis[$primaryAxis] = 1;
+      $usedAxis[$secondaryAxis] = 1;
+      int $i;
+      for ($i = 0; $i < 3; $i++) if (!$usedAxis[$i]) break;
+      print("  tertiaryAxis:" + $i + "\n");
+      $t[$i] *= -1;
+    }
+  }
+
+  // 回転のミラーリング
+  int $o = `getAttr ($n + ".rotateOrder")`;
+  $o = reverseRotateOrder($o);
+  int $oXYZ = reverseRotateOrder(0);
+
+  float $ra[] = `getAttr ($n + ".rotateAxis")`;
+  $ra = quatInverse(eulerToQuat($ra, $oXYZ));
+
+  float $jo[] = {0, 0, 0, 1};
+  if (`attributeQuery -n $n -ex "jointOrient"`) {
+    $jo = `getAttr ($n + ".jointOrient")`;
+    $jo = quatInverse(eulerToQuat($jo, $oXYZ));
+  }
+
+  float $mq[] = $q;
+  $mq[$mirrorAxis] *= -1;
+  $mq[3] *= -1;
+  float $cq[] = quatMultiply($jo, quatMultiply($ra, $mq));
+
+  print("  o :" + $o + "\n");
+  print("  q :{" + floatArrayToString($q, ", ") + "}\n");
+  print("  ra:{" + floatArrayToString($ra, ", ") + "}\n");
+  print("  jo:{" + floatArrayToString($jo, ", ") + "}\n");
+  print("  mq:{" + floatArrayToString($mq, ", ") + "}\n");
+  print("  cq:{" + floatArrayToString($cq, ", ") + "}\n");
+
+  // ルート以外は親ノードの反転をリセットしておく
+  if (!$isRoot) {
+    if ($mirrorAxis == $primaryAxis || $mirrorAxis == $secondaryAxis) {
+      float $flipAxis[] = {0, 0, 0};
+      if ($mirrorAxis == $primaryAxis) {
+        $flipAxis[$secondaryAxis] = 1;
+      }
+      else if ($mirrorAxis == $secondaryAxis) {
+        $flipAxis[$primaryAxis] = 1;
+      }
+      $cq = quatFlip($cq, $flipAxis);
+      print("  cq:{" + floatArrayToString($cq, ", ") + "}\n");
+    }
+    if ($invertPrimaryAxis) {
+      float $flipAxis[] = {0, 0, 0};
+      $flipAxis[$secondaryAxis] = 1;
+      $cq = quatFlip($cq, $flipAxis);
+      print("  cq:{" + floatArrayToString($cq, ", ") + "}\n");
+    }
+    if ($invertSecondaryAxis) {
+      float $flipAxis[] = {0, 0, 0};
+      $flipAxis[$primaryAxis] = 1;
+      $cq = quatFlip($cq, $flipAxis);
+      print("  cq:{" + floatArrayToString($cq, ", ") + "}\n");
+    }
+  }
+
+  // プライマリとセカンダリを対象化するための反転
+  if ($mirrorAxis == $primaryAxis || $mirrorAxis == $secondaryAxis) {
+    float $flipAxis[] = {0, 0, 0};
+    if ($mirrorAxis == $primaryAxis) {
+      $flipAxis[$secondaryAxis] = 1;
+    }
+    else if ($mirrorAxis == $secondaryAxis) {
+      $flipAxis[$primaryAxis] = 1;
+    }
+    $flipAxis = rotateVectorByQuat($flipAxis, $cq);
+    $cq = quatFlip($cq, $flipAxis);
+    print("  cq:{" + floatArrayToString($cq, ", ") + "}\n");
+  }
+
+  // 任意の反転
+  if ($invertPrimaryAxis) {
+    float $flipAxis[] = {0, 0, 0};
+    $flipAxis[$secondaryAxis] = 1;
+    $flipAxis = rotateVectorByQuat($flipAxis, $cq);
+    $cq = quatFlip($cq, $flipAxis);
+    print("  cq:{" + floatArrayToString($cq, ", ") + "}\n");
+  }
+  if ($invertSecondaryAxis) {
+    float $flipAxis[] = {0, 0, 0};
+    $flipAxis[$primaryAxis] = 1;
+    $flipAxis = rotateVectorByQuat($flipAxis, $cq);
+    $cq = quatFlip($cq, $flipAxis);
+    print("  cq:{" + floatArrayToString($cq, ", ") + "}\n");
+  }
+
+  float $r[] = quatToEuler($cq, $o);
+  print("  r :{" + floatArrayToString($r, ", ") + "}\n");
+
+  float $newMatrix[] = {
+    $t[0], $t[1], $t[2],
+    $r[0], $r[1], $r[2],
+    $s[0], $s[1], $s[2],
+    $h[0], $h[1], $h[2],
+    $q[0], $q[1], $q[2], $q[3]
+  };
+  print("  newMatrix:{" + floatArrayToString($newMatrix, ", ") + "}\n");
+
+  return $newMatrix;
+}
+
+// -----------------------------------------------------------------------------
+// データ変換
+// -----------------------------------------------------------------------------
+/*-
+@param $poseName <string>
+@param $nodes <string[]>
+@param $matrices <string[]>
+@returns <string>
+*/
+proc string buildPose(string $poseName, string $nodes[], string $matrices[]) {
+  int $numNodes = `size $nodes`;
+  string $pose = $poseName + "@";
+  for ($i = 0; $i < $numNodes; $i++) {
+    $pose += $nodes[$i] + "=" + $matrices[$i];
+    if ($i < $numNodes - 1) {
+      $pose += ";";
+    }
+  }
+  return $pose;
+}
+/*-
+@param $pose <string>
+@returns <string>
+*/
+proc string extractPoseName(string $pose) {
+  string $poseName;
+  string $buffer[];
+  if (`tokenize $pose "@" $buffer` == 2) {
+    $poseName = $buffer[0];
+  }
+  return $poseName;
+}
+/*-
+@param $pose <string>
+@returns <string[]>
+*/
+proc string[] extractPoseValues(string $pose) {
+  string $poseValues[];
+  string $buffer1[];
+  if (`tokenize $pose "@" $buffer1` == 2) {
+    string $buffer2[];
+    if (`tokenize $buffer1[1] ";" $buffer2` > 0) {
+      $poseValues = $buffer2;
+    }
+  }
+  return $poseValues;
+}
+/*-
+@param $poseValue <string>
+@returns <string>
+*/
+proc string extractPoseNode(string $poseValue) {
+  string $poseNode;
+  string $buffer[];
+  if (`tokenize $poseValue "=" $buffer` == 2) {
+    $poseNode = $buffer[0];
+  }
+  return $poseNode;
+}
+/*-
+@param $poseValue <string>
+@returns <float[]>
+*/
+proc float[] extractPoseMatrix(string $poseValue) {
+  float $poseMatrix[];
+  string $buffer1[];
+  if (`tokenize $poseValue "=" $buffer1` == 2) {
+    string $buffer2[];
+    if (`tokenize $buffer1[1] "," $buffer2` == 16) {
+      for ($i = 0; $i < 16; $i++) {
+        $poseMatrix[$i] = (float) $buffer2[$i];
+      }
+    }
+  }
+  return $poseMatrix;
+}
+
+// -----------------------------------------------------------------------------
+// ポーズ関連
+// -----------------------------------------------------------------------------
+/*-
+@returns <>
+*/
+proc clearPoses() {
+  // print("clearPoses()\n");
+  global string $nkCopyPosePoses[];
+  clear $nkCopyPosePoses;
+  // refreshPoseList();
+}
+/*-
+@param $i <int>
+@returns <string>
+*/
+proc string getPose(int $i) {
+  global string $nkCopyPosePoses[];
+  string $pose;
+  if ($i >= 0 && $i < `size $nkCopyPosePoses`) {
+    $pose = $nkCopyPosePoses[$i];
+  }
+  return $pose;
+}
+/*-
+@returns <string[]>
+*/
+proc string[] getPoseNames() {
+  global string $nkCopyPosePoses[];
+  string $poseNames[];
+  for ($pose in $nkCopyPosePoses) {
+    string $poseName = extractPoseName($pose);
+    if (`size $poseName` > 0) {
+      $poseNames[`size $poseNames`] = $poseName;
+    }
+  }
+  return $poseNames;
+}
+/*-
+@param $baseName <string>
+@returns <string>
+*/
+proc string createUniquePoseName(string $baseName) {
+  string $poseNames[] = getPoseNames();
+  int $number = 1;
+  string $poseName = $baseName + "_pose" + $number;
+  int $index = stringArrayFind($poseName, 0, $poseNames);
+  while ($index >= 0) {
+    $number += 1;
+    $poseName = $baseName + "_pose" + $number;
+    $index = stringArrayFind($poseName, 0, $poseNames);
+  }
+  return $poseName;
+}
+/*-
+@param $poseName <string>
+@returns <boolean>
+*/
+proc int isValidPoseName(string $poseName) {
+  if (`size $poseName` == 0) return false;
+  if (`size (match("@", $poseName))` > 0) return false;
+  if (stringArrayContains($poseName, getPoseNames())) return false;
+  return true;
+}
+/*-
+@param $quiet <boolean>
+@returns <>
+*/
+proc addPose(int $quiet) {
+  // print("addPose quiet:" + $quiet + "\n");
+  global string $nkCopyPosePoses[];
+
+  // string $nodes[] = getHierarchies(true);
+  string $nodes[] = getSelectedNodes();
+  // print("  nodes:{" + (stringArrayToString($nodes, ", ")) + "}\n");
+  if (`size $nodes` == 0) return;
+
+  string $uniquePoseName = createUniquePoseName($nodes[0]);
+  // print("uniquePoseName:" + $uniquePoseName + "\n");
+
+  // string $result = "OK";
+  // if (!$quiet) {
+  //   $result = `promptDialog
+  //       -b "OK" -db "OK"
+  //       -b "Cancel"-cb "Cancel"
+  //       -m "Enter Pose Name:"
+  //       -t "Pose Name"
+  //       -tx $uniquePoseName`;
+  // }
+  // // print("result:" + $result + "\n");
+  // if ($result != "OK") return;
+
+  string $newPoseName = $uniquePoseName;
+  // if (!$quiet) $newPoseName = `promptDialog -q -tx`;
+  // // print("newPoseName:" + $newPoseName + "\n");
+  // if (!isValidPoseName($newPoseName)) {
+  //   confirmDialog
+  //       -b "OK"
+  //       -m "* More than one character required.\n* Do not contain \"@\".\n* Unique name required."
+  //       -t "Invalid Pose Name";
+  //   return;
+  // }
+
+  string $matrices[] = getTransformAttributes($nodes);
+  // print("  matrices:{\n    " + (stringArrayToString($matrices, "\n    ")) + "\n  }\n");
+
+  string $pose = buildPose($newPoseName, $nodes, $matrices);
+  // print("pose:" + $pose + "\n");
+
+  $nkCopyPosePoses[`size $nkCopyPosePoses`] = $pose;
+  // refreshPoseList();
+  // poseListSelectItem(`size $nkCopyPosePoses`);
+}
+/*-
+@param $pose <string>
+@param $isOpposite <boolean>
+@param $pasteAttributes <int[]>
+@param $mirrorAxis <int>
+@param $primaryAxis <int>
+@param $secondaryAxis <int>
+@param $invertAxis <int[]>
+@returns <>
+*/
+proc pastePose(
+  string $pose,
+  int $isOpposite,
+  int $pasteAttributes[],
+  int $mirrorAxis,
+  int $primaryAxis,
+  int $secondaryAxis,
+  int $invertAxis[]
+) {
+  // print("pastePose\n");
+  // print("  pose           :" + $pose + "\n");
+  // print("  isOpposite     :" + $isOpposite + "\n");
+  // print("  pasteAttributes:{" + intArrayToString($pasteAttributes, ", ") + "}\n");
+  // print("  mirrorAxis     :" + $mirrorAxis + "\n");
+  // print("  primaryAxis    :" + $primaryAxis + "\n");
+  // print("  secondaryAxis  :" + $secondaryAxis + "\n");
+  // print("  invertAxis     :{" + intArrayToString($invertAxis, ", ") + "}\n");
+
+  // string $selectedPose = getSelectedPose();
+  // print("selectedPose:" + $selectedPose + "\n");
+  // if (`size $selectedPose` == 0) return;
+  if (`size $pose` == 0) return;
+
+  // string $nodes[] = getHierarchies(true);
+  string $nodes[] = getSelectedNodes();
+  // print("  nodes:{\n    " + (stringArrayToString($nodes, "\n    ")) + "\n  }\n");
+  int $numNodes = `size $nodes`;
+  if ($numNodes == 0) return;
+
+  string $poseValues[] = extractPoseValues($pose);
+  // print("  poseValues:{\n    " + stringArrayToString($poseValues, ",\n    ") + "\n  }\n");
+  int $numPoseValues = `size $poseValues`;
+  if ($numPoseValues == 0) return;
+
+  int $numTargets = `min $numNodes $numPoseValues`;
+  // print("  numTargets:" + $numTargets + "\n");
+
+  for ($i = 0; $i < $numTargets; $i++) {
+    string $poseValue = $poseValues[$i];
+    float $matrix[] = extractPoseMatrix($poseValue);
+    string $sourceNode = extractPoseNode($poseValue);
+    string $targetNode = $nodes[$i];
+    // print("  sourceNode:" + $sourceNode + "\n");
+    // print("  targetNode:" + $targetNode + "\n");
+    if ($isOpposite) {
+      string $sourceParent = getParentNode($sourceNode);
+      string $targetParent = getParentNode($targetNode);
+      // print("  sourceParent:" + $sourceParent + "\n");
+      // print("  targetParent:" + $targetParent + "\n");
+      int $isRoot = $sourceParent == $targetParent;
+      // print("  isRoot:" + $isRoot + "\n");
+      $matrix = mirrorTransform(
+        $targetNode,
+        $matrix,
+        $isRoot,
+        $mirrorAxis,
+        $primaryAxis,
+        $secondaryAxis,
+        $invertAxis[0],
+        $invertAxis[1]
+      );
+    }
+    else {
+      $matrix = asIsTransform($targetNode, $matrix);
+    }
+    // print("poseValue:" + $poseValue + "\n");
+    // print("  sourceNode:" + $sourceNode + "\n");
+    // print("  targetNode:" + $targetNode + "\n");
+    // print("  matrix:{" + floatArrayToString($matrix, ", ") + "}\n");
+
+    setTransformAttributes(
+      $targetNode,
+      $matrix,
+      $pasteAttributes[0],
+      $pasteAttributes[1],
+      $pasteAttributes[2]
+    );
+  }
+}
+
+if (0) {
+  string $roNames[] = {"XYZ", "YZX", "ZXY", "XZY", "YXZ", "ZYX"};
+  float $jo[] = {-90, 0, 90};
+  print("jo:{" + floatArrayToString($jo, ", ") + "}\n");
+  for ($i = 0; $i < `size $roNames`; $i++) {
+    int $o = reverseRotateOrder($i);
+    float $joq[] = quatInverse(eulerToQuat($jo, $o));
+    print($roNames[$i] + ":{" + floatArrayToString($joq, ", ") + "}\n");
+  }
+}
+
+if (1) {
+  print("--------------------------------------------------------------------------------\n");
+
+  string $axisNames[] = {"X", "Y", "Z"};
+  string $planeNames[] = {"XY", "XZ", "YX", "YZ", "ZX", "ZY"};
+  int $mirrorAxes[] = {0, 1, 2};
+  int $primaryAxes[] = {0, 0, 1, 1, 2, 2};
+  int $secondaryAxes[] = {1, 2, 0, 2, 0, 1};
+
+  // default:{0, 1, 2}
+  int $axisFlags[] = {0, 1, 2};
+  // default:{0, 1, 2, 3, 4, 5}
+  int $planeFlags[] = {0, 1, 2, 3, 4, 5};
+  // default:{0, 1, 2}
+  int $depthFlags[] = {0, 1, 2};
+
+  string $roNames[] = {"XYZ", "YZX", "ZXY", "XZY", "YXZ", "ZYX"};
+  int $rotateOrder = 0;
+
+  int $isOpposite = false;
+  int $pasteAttributes[] = {true, true, false};
+  int $invertAxis[] = {false, false};
+
+  for ($i = 0; $i < `size $axisFlags`; $i++) {
+    int $axisIndex = $axisFlags[$i];
+    int $mirrorAxis = $mirrorAxes[$axisIndex];
+    for ($j = 0; $j < `size $planeFlags`; $j++) {
+      int $planeIndex = $planeFlags[$j];
+      int $primaryAxis = $primaryAxes[$planeIndex];
+      int $secondaryAxis = $secondaryAxes[$planeIndex];
+      string $baseName = "|" + $axisNames[$axisIndex] + "|ROOT";
+      string $nL = $baseName;
+      string $nR = $baseName;
+      for ($k = 0; $k < `size $depthFlags`; $k++) {
+        int $depthIndex = $depthFlags[$k] + 1;
+        $nL += "|" + $planeNames[$planeIndex] + "_L" + $depthIndex;
+        $nR += "|" + $planeNames[$planeIndex] + "_R" + $depthIndex;
+
+        print("--------------------------------------------------------------------------------\n");
+        print("nL[" + `objExists $nL` + "]:" + $nL + "\n");
+        print("nR[" + `objExists $nR` + "]:" + $nR + "\n");
+
+        setAttr ($nL + ".rotateOrder") $rotateOrder;
+        select -r $nL;
+        clearPoses();
+        addPose(false);
+        string $pose = getPose(0);
+
+        // string $poseValues[] = extractPoseValues($pose);
+        // if (`size $poseValues` == 1) {
+        //   float $pm[] = extractPoseMatrix($poseValues[0]);
+        //   float $t[] = {$pm[0], $pm[1], $pm[2]};
+        //   float $r[] = {$pm[3], $pm[4], $pm[5]};
+        //   float $q[] = {$pm[12], $pm[13], $pm[14], $pm[15]};
+        //   print("--------------------------------------------------------------------------------\n");
+        //   print("rotateOrder:" + $roNames[$rotateOrder] + "\n");
+        //   print("translate  :{" + floatArrayToString($t, ", ") + "}\n");
+        //   print("rotate     :{" + floatArrayToString($r, ", ") + "}\n");
+        //   print("quaternion :{" + floatArrayToString($q, ", ") + "}\n");
+        //   print("--------------------------------------------------------------------------------\n");
+        // }
+
+        setAttr ($nR + ".rotateOrder") $rotateOrder;
+        select -r $nR;
+        pastePose(
+          $pose,
+          $isOpposite,
+          $pasteAttributes,
+          $mirrorAxis,
+          $primaryAxis,
+          $secondaryAxis,
+          $invertAxis
+        );
+      }
+    }
+  }
+
+  print("--------------------------------------------------------------------------------\n");
+}
+
+/*
+eval ("source \"" + `getenv "MAYA_APP_DIR"` + "/library/nkCopyPose/nkCopyPoseCore.mel\"");
+*/
