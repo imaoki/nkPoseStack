@@ -45,6 +45,9 @@ global string $nkCopyPosePromptPoseName;
 @var <int[]> `layoutDialog`用のポーズ設定バッファ。
 */
 global int $nkCopyPosePromptPoseSettings[];
+if (`size $nkCopyPosePromptPoseSettings` == 0) {
+  $nkCopyPosePromptPoseSettings = {0, 0, 1, 0, 0};
+}
 
 // -----------------------------------------------------------------------------
 // UIコントロール関連
@@ -1078,7 +1081,7 @@ proc addPose() {
 
   clear $nkCopyPosePromptControls;
   $nkCopyPosePromptPoseName = createUniquePoseName($nodes[0]);
-  $nkCopyPosePromptPoseSettings = {0, 0, 1, 0, 0};
+  // $nkCopyPosePromptPoseSettings = {0, 0, 1, 0, 0};
 
   string $result = `layoutDialog
       -p nkCopyPoseWindow
@@ -1881,7 +1884,7 @@ global proc nkCopyPoseInvokeEvent(string $event, string $control) {
 @returns <string>
 */
 global proc string nkCopyPoseVersion() {
-  return "2.2.0";
+  return "2.3.0";
 }
 
 /*-
