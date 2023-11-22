@@ -1007,17 +1007,20 @@ proc string[] getPoseMirrorSettingLabels() {
 }
 
 /*-
-@param $baseName <string>
+@param $n <string>
 @returns <string>
 */
-proc string createUniquePoseName(string $baseName) {
+proc string createUniquePoseName(string $n) {
+  string $buffer[];
+  tokenize $n "|" $buffer;
+  string $baseName = $buffer[`size $buffer` - 1] + "@" + `currentTime -q`;
   string $poseNames[] = getPoseNames();
   int $number = 1;
-  string $poseName = $baseName + "_pose" + $number;
+  string $poseName = $baseName + "_" + $number;
   int $index = stringArrayFind($poseName, 0, $poseNames);
   while ($index >= 0) {
     $number += 1;
-    $poseName = $baseName + "_pose" + $number;
+    $poseName = $baseName + "_" + $number;
     $index = stringArrayFind($poseName, 0, $poseNames);
   }
   return $poseName;
@@ -1111,7 +1114,7 @@ proc addPose() {
 /*-
 @returns <>
 */
-proc removePose() {
+proc deletePose() {
   global string $nkCopyPosePoses[];
   int $selectedIndices[] = poseListGetSelectedIndices();
   if (`size $selectedIndices` != 1) return;
@@ -1513,7 +1516,7 @@ proc buildMainWindow() {
   }
 
   string $addIcon = "item_add.png";
-  string $removeIcon = "item_delete.png";
+  string $deleteIcon = "item_delete.png";
   string $updateIcon = "refresh.png";
   string $editIcon = "passSetRelationEditor.png";
   string $moveUpIcon = "item_up.png";
@@ -1535,49 +1538,101 @@ proc buildMainWindow() {
       separator -st "none" -vis false;
       string $addPoseButton = `iconTextButton
           // -bgc 0.25 0.5 0.5
-          -ann "Add Pose"
+          -ann "Add"
           -i $addIcon
           -w 23
           addPoseButton`;
-      string $removePoseButton = `iconTextButton
+      string $deletePoseButton = `iconTextButton
           // -bgc 0.25 0.5 0.5
-          -ann "Remove Pose"
-          -i $removeIcon
+          -ann "Delete"
+          -i $deleteIcon
           -w 23
-          removePoseButton`;
+          deletePoseButton`;
       string $updatePoseButton = `iconTextButton
           // -bgc 0.25 0.5 0.5
-          -ann "Update Selected Pose"
+          -ann "Update"
           -i $updateIcon
           -w 23
           updatePoseButton`;
       string $editPoseButton = `iconTextButton
           // -bgc 0.25 0.5 0.5
-          -ann "Edit Selected Pose"
+          -ann "Edit"
           -i $editIcon
           -w 23
           editPoseButton`;
       string $moveUpPoseButton = `iconTextButton
           // -bgc 0.25 0.5 0.5
-          -ann "Move Up Selected Pose"
+          -ann "Move Up"
           -i $moveUpIcon
           -w 23
           moveUpPoseButton`;
       string $moveDownPoseButton = `iconTextButton
           // -bgc 0.25 0.5 0.5
-          -ann "Move Down Selected Pose"
+          -ann "Move Down"
           -i $moveDownIcon
           -w 23
           moveDownPoseButton`;
       string $sortPoseButton = `iconTextButton
           // -bgc 0.25 0.5 0.5
-          -ann "Sort Poses"
+          -ann "Sort"
           -i $sortIcon
           -w 23
           sortPoseButton`;
     setParent ..;
 
     string $poseList = `textScrollList -ams false poseList`;
+
+    // string $poseTree = `treeView
+    //     -adr true
+    //     -ams false
+    //     -arp false
+    //     -enk true
+    //     // -fb true
+    //     -nb 3
+    //     -p $outerForm
+    //     poseTree`;
+
+    // treeView -e -ai "aaa" "" $poseTree;
+    // treeView -e -ai "bbb" "" $poseTree;
+    // treeView -e -ai "ccc" "" $poseTree;
+    // treeView -e -ai "ddd" "" $poseTree;
+    // treeView -e -ai "eee" "" $poseTree;
+    // treeView -e -ai "fff" "" $poseTree;
+
+    // treeView -e -bh "aaa" true $poseTree;
+    // treeView -e -or "bbb" 1 1 5 $poseTree;
+    // treeView -e -bs "ccc" 2 "2StateButton" $poseTree;
+    // treeView -e
+    //     -btc "ddd" 1 0.5 0.25 0.25 -bto "ddd" 1 true
+    //     -btc "ddd" 2 0.25 0.5 0.25 -bto "ddd" 2 true
+    //     -btc "ddd" 3 0.25 0.25 0.5 -bto "ddd" 3 true
+    //     $poseTree;
+    // treeView -e
+    //     -eb "eee" 1 false
+    //     -ibc "eee" 2 false
+    //     -ibc "eee" 3 true // 採用
+    //     $poseTree;
+    // treeView -e
+    //     -i "ddd" 2 "openAttribute.png"
+    //     -i "ddd" 3 "closeAttribute.png"
+    //     $poseTree;
+    // treeView -e
+    //     -bti "fff" 1 "X"
+    //     -bti "fff" 2 "-X"
+    //     -bti "fff" 3 "+Y"
+    //     $poseTree;
+    // // treeView -e
+    // //     -eb "fff" 1 false
+    // //     -eb "fff" 2 false
+    // //     -eb "fff" 3 false
+    // //     $poseTree;
+    // // treeView -e
+    // //     -bs "fff" 1 "2StateButton"
+    // //     -bs "fff" 2 "pushButton"
+    // //     -bs "fff" 3 "pushButton"
+    // //     $poseTree;
+    // treeView -e -dls "fff" "(fff)" $poseTree;
+    // treeView -e -dl "fff" "aaa" $poseTree;
 
     string $framesColumn = `columnLayout
         -adj true
@@ -1658,10 +1713,18 @@ proc buildMainWindow() {
       -af $listButtonsRow "top" 5
       -af $listButtonsRow "left" 5
       -af $listButtonsRow "right" 5
+
       -ac $poseList "top" 5 $listButtonsRow
       -af $poseList "left" 5
       -af $poseList "right" 5
       -ac $poseList "bottom" 5 $framesColumn
+
+      // -ap $poseList "bottom" 2 30
+      // -ap $poseTree "top" 2 30
+      // -af $poseTree "left" 5
+      // -af $poseTree "right" 5
+      // -ac $poseTree "bottom" 5 $framesColumn
+
       -af $framesColumn "left" 5
       -af $framesColumn "right" 5
       -af $framesColumn "bottom" 5
@@ -1695,7 +1758,7 @@ proc buildMainWindow() {
       $pasteButtonsForm;
 
   iconTextButton -e -c "nkCopyPoseInvokeEvent(\"c\", \"addPoseButton\");" $addPoseButton;
-  iconTextButton -e -c "nkCopyPoseInvokeEvent(\"c\", \"removePoseButton\");" $removePoseButton;
+  iconTextButton -e -c "nkCopyPoseInvokeEvent(\"c\", \"deletePoseButton\");" $deletePoseButton;
   iconTextButton -e -c "nkCopyPoseInvokeEvent(\"c\", \"updatePoseButton\");" $updatePoseButton;
   iconTextButton -e -c "nkCopyPoseInvokeEvent(\"c\", \"editPoseButton\");" $editPoseButton;
   iconTextButton -e -c "nkCopyPoseInvokeEvent(\"c\", \"moveUpPoseButton\");" $moveUpPoseButton;
@@ -1709,7 +1772,7 @@ proc buildMainWindow() {
   // print("// " + $window + "\n");
   // print("// " + $listButtonsRow + "\n");
   // print("// " + $addPoseButton + "\n");
-  // print("// " + $removePoseButton + "\n");
+  // print("// " + $deletePoseButton + "\n");
   // print("// " + $updatePoseButton + "\n");
   // print("// " + $editPoseButton + "\n");
   // print("// " + $moveUpPoseButton + "\n");
@@ -1767,7 +1830,7 @@ global proc nkCopyPoseInvokeEvent(string $event, string $control) {
     case "c":
       switch ($control) {
         case "addPoseButton": addPose(); break;
-        case "removePoseButton": removePose(); break;
+        case "deletePoseButton": deletePose(); break;
         case "updatePoseButton": updatePose(); break;
         case "editPoseButton": editPose(); break;
         case "moveUpPoseButton": moveUpPose(); break;
@@ -1818,7 +1881,7 @@ global proc nkCopyPoseInvokeEvent(string $event, string $control) {
 @returns <string>
 */
 global proc string nkCopyPoseVersion() {
-  return "2.1.0";
+  return "2.2.0";
 }
 
 /*-
