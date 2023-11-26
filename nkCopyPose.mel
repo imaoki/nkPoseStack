@@ -5,34 +5,24 @@
 // -----------------------------------------------------------------------------
 /*-
 @var <string[]>
-```mel
-{
-  "pose1[0,0,1,0,0]|a1=0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,1;|a1|a2=...",
-  "pose2[2,0,1,0,0]|b1=0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,1;|b1|b2=...",
-  "..."
-}
-```
-@remarks
 ```ebnf
            pose = '"' , pose_name , "[" , pose_settings , "]" , pose_values , '"' ;
       pose_name = { any_char - ( "[" | "]" ) } ;
   pose_settings = paste_settings , ";" , select_settings , ";" , mirror_settings ;
- paste_settings = bool, bool, bool ;
-select_settings = node_name , node_name ;
-mirror_settings = axis , axis, axis, bool , bool ;
+ paste_settings = bool , "," , bool , "," , bool ;
+select_settings = node_name , "," , node_name ;
+mirror_settings = axis , "," , axis , "," , axis , "," , bool , "," , bool ;
            axis = ? 0-2 ? ;
            bool = ? 0-1 ? ;
     pose_values = { node_path , "=" , pose_matrix , ";" }+ ;
       node_path = [ "|" ] , node_name , { "|" , node_name } ;
-      node_name = ( letter | "_" ) , { alphanumeric | "_" } ;
-    pose_matrix = t , "," , r , "," , s , "," , h , "," , q ;
+      node_name = letter , { letter | digit | "_" } ;
+    pose_matrix = t , "," , q , "," , s , "," , h ;
               t = number , "," , number , "," , number ;
-              r = number , "," , number , "," , number ;
+              q = number , "," , number , "," , number , "," , number ;
               s = number , "," , number , "," , number ;
               h = number , "," , number , "," , number ;
-              q = number , "," , number , "," , number , "," , number ;
          number = [ "-" ] , ( integer | real ) ;
-   alphanumeric = letter | digit ;
           digit = ? 0-9 ? ;
          letter = ? a-zA-Z ? ;
        any_char = ? Any visible characters ? ;
@@ -652,10 +642,9 @@ proc string[] getTransformAttributes(string $nodes[]) {
 
       int $i = `size $matrices`;
       $matrices[$i] = floatArrayToString($t, ",");
-      $matrices[$i] = $matrices[$i] + "," + (floatArrayToString($r, ","));
+      $matrices[$i] = $matrices[$i] + "," + (floatArrayToString($q, ","));
       $matrices[$i] = $matrices[$i] + "," + (floatArrayToString($s, ","));
       $matrices[$i] = $matrices[$i] + "," + (floatArrayToString($h, ","));
-      $matrices[$i] = $matrices[$i] + "," + (floatArrayToString($q, ","));
     }
   }
   return $matrices;
@@ -682,17 +671,15 @@ proc setTransformAttributes(
   print("  shouldSetT:" + $shouldSetT + "\n");
   print("  shouldSetR:" + $shouldSetR + "\n");
   print("  shouldSetS:" + $shouldSetS + "\n");
-  if (`objExists $n` && `size $m` == 16) {
+  if (`objExists $n` && `size $m` == 12) {
     float $t[] = {$m[0], $m[1], $m[2]};
     float $r[] = {$m[3], $m[4], $m[5]};
     float $s[] = {$m[6], $m[7], $m[8]};
     float $h[] = {$m[9], $m[10], $m[11]};
-    float $q[] = {$m[12], $m[13], $m[14], $m[15]};
     print("  t:{" + floatArrayToString($t, ", ") + "}\n");
     print("  r:{" + floatArrayToString($r, ", ") + "}\n");
     print("  s:{" + floatArrayToString($s, ", ") + "}\n");
     print("  h:{" + floatArrayToString($h, ", ") + "}\n");
-    print("  q:{" + floatArrayToString($q, ", ") + "}\n");
 
     string $tx = $n + ".tx";
     string $ty = $n + ".ty";
@@ -733,13 +720,13 @@ proc float[] asIsTransform(string $n, float $m[]) {
   print("  m :{" + floatArrayToString($m, ", ") + "}\n");
 
   float $t[] = {$m[0], $m[1], $m[2]};
-  float $s[] = {$m[6], $m[7], $m[8]};
-  float $h[] = {$m[9], $m[10], $m[11]};
-  float $q[] = {$m[12], $m[13], $m[14], $m[15]};
+  float $q[] = {$m[3], $m[4], $m[5], $m[6]};
+  float $s[] = {$m[7], $m[8], $m[9]};
+  float $h[] = {$m[10], $m[11], $m[12]};
   print("  t :{" + floatArrayToString($t, ", ") + "}\n");
+  print("  q :{" + floatArrayToString($q, ", ") + "}\n");
   print("  s :{" + floatArrayToString($s, ", ") + "}\n");
   print("  h :{" + floatArrayToString($h, ", ") + "}\n");
-  print("  q :{" + floatArrayToString($q, ", ") + "}\n");
 
   int $o = `getAttr ($n + ".rotateOrder")`;
   $o = reverseRotateOrder($o);
@@ -768,8 +755,7 @@ proc float[] asIsTransform(string $n, float $m[]) {
     $t[0], $t[1], $t[2],
     $r[0], $r[1], $r[2],
     $s[0], $s[1], $s[2],
-    $h[0], $h[1], $h[2],
-    $q[0], $q[1], $q[2], $q[3]
+    $h[0], $h[1], $h[2]
   };
   print("  newMatrix:{" + floatArrayToString($newMatrix, ", ") + "}\n");
 
@@ -808,13 +794,13 @@ proc float[] mirrorTransform(
   print("  invertSecondaryAxis:" + $invertSecondaryAxis + "\n");
 
   float $t[] = {$m[0], $m[1], $m[2]};
-  float $s[] = {$m[6], $m[7], $m[8]};
-  float $h[] = {$m[9], $m[10], $m[11]};
-  float $q[] = {$m[12], $m[13], $m[14], $m[15]};
+  float $q[] = {$m[3], $m[4], $m[5], $m[6]};
+  float $s[] = {$m[7], $m[8], $m[9]};
+  float $h[] = {$m[10], $m[11], $m[12]};
   print("  t :{" + floatArrayToString($t, ", ") + "}\n");
+  print("  q :{" + floatArrayToString($q, ", ") + "}\n");
   print("  s :{" + floatArrayToString($s, ", ") + "}\n");
   print("  h :{" + floatArrayToString($h, ", ") + "}\n");
-  print("  q :{" + floatArrayToString($q, ", ") + "}\n");
 
   // 位置のミラーリング
   if ($isRoot) {
@@ -917,8 +903,7 @@ proc float[] mirrorTransform(
     $t[0], $t[1], $t[2],
     $r[0], $r[1], $r[2],
     $s[0], $s[1], $s[2],
-    $h[0], $h[1], $h[2],
-    $q[0], $q[1], $q[2], $q[3]
+    $h[0], $h[1], $h[2]
   };
   print("  newMatrix:{" + floatArrayToString($newMatrix, ", ") + "}\n");
 
@@ -1097,11 +1082,12 @@ proc string extractPoseNode(string $poseValue) {
 */
 proc float[] extractPoseMatrix(string $poseValue) {
   float $poseMatrix[];
+  int $numMatrix = 13;
   string $buffer1[];
   if (`tokenize $poseValue "=" $buffer1` == 2) {
     string $buffer2[];
-    if (`tokenize $buffer1[1] "," $buffer2` == 16) {
-      for ($i = 0; $i < 16; $i++) {
+    if (`tokenize $buffer1[1] "," $buffer2` == $numMatrix) {
+      for ($i = 0; $i < $numMatrix; $i++) {
         $poseMatrix[$i] = (float) $buffer2[$i];
       }
     }
@@ -1112,6 +1098,14 @@ proc float[] extractPoseMatrix(string $poseValue) {
 // -----------------------------------------------------------------------------
 // ポーズ関連
 // -----------------------------------------------------------------------------
+/*-
+@returns <>
+*/
+proc clearPoses() {
+  global string $nkCopyPosePoses[];
+  clear $nkCopyPosePoses;
+}
+
 /*-
 @param $i <int>
 @returns <string>
@@ -2141,7 +2135,7 @@ global proc nkCopyPoseInvokeEvent(string $event, string $control) {
 @returns <string>
 */
 global proc string nkCopyPoseVersion() {
-  return "2.4.0";
+  return "2.5.0";
 }
 
 /*-
