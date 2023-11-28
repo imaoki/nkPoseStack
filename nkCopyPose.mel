@@ -134,6 +134,23 @@ proc int[] poseListGetSelectedIndices() {
 }
 
 /*-
+@returns <int>
+*/
+proc int poseNameTextGetInsertionPosition() {
+  global string $nkCopyPosePromptControls[];
+  return `textFieldGrp -q -ip $nkCopyPosePromptControls[0]`;
+}
+
+/*-
+@param $position <int>
+@returns <>
+*/
+proc poseNameTextSetInsertionPosition(int $position) {
+  global string $nkCopyPosePromptControls[];
+  textFieldGrp -e -ip $position $nkCopyPosePromptControls[0];
+}
+
+/*-
 @returns <string>
 */
 proc string poseNameTextGetText() {
@@ -170,6 +187,23 @@ proc pasteAttributesCheckBoxGrpSetValues(int $v1, int $v2, int $v3) {
 }
 
 /*-
+@returns <int>
+*/
+proc int selectPatternATextGetInsertionPosition() {
+  global string $nkCopyPosePromptControls[];
+  return `textFieldGrp -q -ip $nkCopyPosePromptControls[2]`;
+}
+
+/*-
+@param $position <int>
+@returns <>
+*/
+proc selectPatternATextSetInsertionPosition(int $position) {
+  global string $nkCopyPosePromptControls[];
+  textFieldGrp -e -ip $position $nkCopyPosePromptControls[2];
+}
+
+/*-
 @returns <string>
 */
 proc string selectPatternATextGetText() {
@@ -184,6 +218,23 @@ proc string selectPatternATextGetText() {
 proc selectPatternATextSetText(string $text) {
   global string $nkCopyPosePromptControls[];
   textFieldGrp -e -tx $text $nkCopyPosePromptControls[2];
+}
+
+/*-
+@returns <int>
+*/
+proc int selectPatternBTextGetInsertionPosition() {
+  global string $nkCopyPosePromptControls[];
+  return `textFieldGrp -q -ip $nkCopyPosePromptControls[3]`;
+}
+
+/*-
+@param $position <int>
+@returns <>
+*/
+proc selectPatternBTextSetInsertionPosition(int $position) {
+  global string $nkCopyPosePromptControls[];
+  textFieldGrp -e -ip $position $nkCopyPosePromptControls[3];
 }
 
 /*-
@@ -1166,18 +1217,12 @@ proc string[] getPoseMirrorSettingLabels() {
 @param $n <string>
 @returns <string>
 */
-proc string createUniquePoseName(string $n) {
+proc string makePoseName(string $n) {
+  string $poseName = $n;
   string $buffer[];
-  tokenize $n "|" $buffer;
-  string $baseName = $buffer[`size $buffer` - 1] + "@" + `currentTime -q`;
-  string $poseNames[] = getPoseNames();
-  int $number = 1;
-  string $poseName = $baseName + "_" + $number;
-  int $index = stringArrayFind($poseName, 0, $poseNames);
-  while ($index >= 0) {
-    $number += 1;
-    $poseName = $baseName + "_" + $number;
-    $index = stringArrayFind($poseName, 0, $poseNames);
+  int $depth = `tokenize $n "|" $buffer`;
+  if ($depth > 0) {
+    $poseName = (($depth > 1) ? $buffer[0] + "-" : "") + $buffer[$depth - 1];
   }
   return $poseName;
 }
@@ -1237,7 +1282,7 @@ proc addPose() {
   if (`size $nodes` == 0) return;
 
   clear $nkCopyPosePromptControls;
-  $nkCopyPosePromptPoseName = createUniquePoseName($nodes[0]);
+  $nkCopyPosePromptPoseName = makePoseName($nodes[0]);
 
   string $result = `layoutDialog
       -p "nkCopyPoseWindow"
@@ -1553,21 +1598,39 @@ proc pastePose(int $isOpposite) {
 @returns <>
 */
 proc poseNameTextChanged() {
-  poseNameTextSetText(sanitizePoseName(poseNameTextGetText()));
+  string $text = sanitizePoseName(poseNameTextGetText());
+  int $position = poseNameTextGetInsertionPosition();
+  if (`size $text` < $position) {
+    $position = 0;
+  }
+  poseNameTextSetText($text);
+  poseNameTextSetInsertionPosition($position);
 }
 
 /*-
 @returns <>
 */
 proc selectPatternATextChanged() {
-  selectPatternATextSetText(sanitizePoseName(selectPatternATextGetText()));
+  string $text = sanitizePoseName(selectPatternATextGetText());
+  int $position = selectPatternATextGetInsertionPosition();
+  if (`size $text` < $position) {
+    $position = 0;
+  }
+  selectPatternATextSetText($text);
+  selectPatternATextSetInsertionPosition($position);
 }
 
 /*-
 @returns <>
 */
 proc selectPatternBTextChanged() {
-  selectPatternBTextSetText(sanitizePoseName(selectPatternBTextGetText()));
+  string $text = sanitizePoseName(selectPatternBTextGetText());
+  int $position = selectPatternBTextGetInsertionPosition();
+  if (`size $text` < $position) {
+    $position = 0;
+  }
+  selectPatternBTextSetText($text);
+  selectPatternBTextSetInsertionPosition($position);
 }
 
 /*-
@@ -2135,7 +2198,7 @@ global proc nkCopyPoseInvokeEvent(string $event, string $control) {
 @returns <string>
 */
 global proc string nkCopyPoseVersion() {
-  return "2.5.0";
+  return "2.6.0";
 }
 
 /*-
