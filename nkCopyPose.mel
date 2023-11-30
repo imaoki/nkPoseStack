@@ -1382,15 +1382,6 @@ proc moveDownPose() {
 }
 
 /*-
-@returns <>
-*/
-proc sortPoses() {
-  global string $nkCopyPosePoses[];
-  $nkCopyPosePoses = `sort $nkCopyPosePoses`;
-  refreshPoseList();
-}
-
-/*-
 @param $isOpposite <boolean>
 @returns <>
 */
@@ -1876,7 +1867,6 @@ proc buildMainWindow() {
   string $editIcon = $iconDir + "editPose.png";
   string $moveUpIcon = $iconDir + "moveUpPose.png";
   string $moveDownIcon = $iconDir + "moveDownPose.png";
-  string $sortIcon = $iconDir + "sortPose.png";
   string $selectSourceIcon = $iconDir + "selectSource.png";
   string $selectOppositeIcon = $iconDir + "selectOpposite.png";
   string $pasteSourceIcon = $iconDir + "pasteSource.png";
@@ -1887,7 +1877,6 @@ proc buildMainWindow() {
   print("editIcon          :" + $editIcon + "\n");
   print("moveUpIcon        :" + $moveUpIcon + "\n");
   print("moveDownIcon      :" + $moveDownIcon + "\n");
-  print("sortIcon          :" + $sortIcon + "\n");
   print("selectSourceIcon  :" + $selectSourceIcon + "\n");
   print("selectOppositeIcon:" + $selectOppositeIcon + "\n");
   print("pasteSourceIcon   :" + $pasteSourceIcon + "\n");
@@ -1901,7 +1890,7 @@ proc buildMainWindow() {
     string $outerForm = `formLayout outerForm`;
       string $poseManipRow = `rowLayout
           // -bgc 0.5 0.25 0.25
-          -nc 8
+          -nc 7
           -adj 1
           poseManipRow`;
         separator -st "none" -vis false;
@@ -1941,12 +1930,6 @@ proc buildMainWindow() {
             -i $moveDownIcon
             -w 23
             moveDownPoseButton`;
-        string $sortPoseButton = `iconTextButton
-            -ann "Sort"
-            // -bgc 0.25 0.5 0.5
-            -i $sortIcon
-            -w 23
-            sortPoseButton`;
       setParent ..;
 
       string $poseList = `textScrollList -ams false poseList`;
@@ -2064,7 +2047,6 @@ proc buildMainWindow() {
   iconTextButton -e -c "nkCopyPoseInvokeEvent(\"c\", \"editPoseButton\");" $editPoseButton;
   iconTextButton -e -c "nkCopyPoseInvokeEvent(\"c\", \"moveUpPoseButton\");" $moveUpPoseButton;
   iconTextButton -e -c "nkCopyPoseInvokeEvent(\"c\", \"moveDownPoseButton\");" $moveDownPoseButton;
-  iconTextButton -e -c "nkCopyPoseInvokeEvent(\"c\", \"sortPoseButton\");" $sortPoseButton;
 
   textScrollList -e -dcc "nkCopyPoseInvokeEvent(\"dcc\", \"poseList\");" $poseList;
 
@@ -2082,7 +2064,6 @@ proc buildMainWindow() {
   print("// " + $editPoseButton + "\n");
   print("// " + $moveUpPoseButton + "\n");
   print("// " + $moveDownPoseButton + "\n");
-  print("// " + $sortPoseButton + "\n");
   print("// " + $poseList + "\n");
   print("// " + $nodeManipRow + "\n");
   print("// " + $selectSourceButton + "\n");
@@ -2132,7 +2113,6 @@ global proc nkCopyPoseInvokeEvent(string $event, string $control) {
         case "editPoseButton": editPose(); break;
         case "moveUpPoseButton": moveUpPose(); break;
         case "moveDownPoseButton": moveDownPose(); break;
-        case "sortPoseButton": sortPoses(); break;
         case "selectSourceButton": selectNodes(false); break;
         case "selectOppositeButton": selectNodes(true); break;
         case "pasteSourceButton": pastePose(false); break;
@@ -2186,7 +2166,7 @@ global proc nkCopyPoseInvokeEvent(string $event, string $control) {
 @returns <string>
 */
 global proc string nkCopyPoseVersion() {
-  return "2.8.1";
+  return "2.8.2";
 }
 
 /*-
