@@ -1808,13 +1808,13 @@ global proc buildPromptWindow() {
       -af $cancelButton "bottom" 0
       $buttonsForm;
 
-  textFieldGrp -e -tcc "nkCopyPoseInvokeEvent(\"tcc\", \"poseNameText\");" $poseNameText;
-  textFieldGrp -e -tcc "nkCopyPoseInvokeEvent(\"tcc\", \"selectPatternAText\");" $selectPatternAText;
-  textFieldGrp -e -tcc "nkCopyPoseInvokeEvent(\"tcc\", \"selectPatternBText\");" $selectPatternBText;
-  button -e -c "nkCopyPoseInvokeEvent(\"c\", \"okButton\");" $okButton;
-  button -e -c "nkCopyPoseInvokeEvent(\"c\", \"cancelButton\");" $cancelButton;
-  radioButtonGrp -e -onc "nkCopyPoseInvokeEvent(\"onc\", \"primaryAxisRadioButton\");" $primaryAxisRadioButton;
-  radioButtonGrp -e -onc "nkCopyPoseInvokeEvent(\"onc\", \"secondaryAxisRadioButton\");" $secondaryAxisRadioButton;
+  textFieldGrp -e -tcc "nkCopyPoseInvokeEvent(\"layoutDialog\", \"tcc\", \"poseNameText\");" $poseNameText;
+  textFieldGrp -e -tcc "nkCopyPoseInvokeEvent(\"layoutDialog\", \"tcc\", \"selectPatternAText\");" $selectPatternAText;
+  textFieldGrp -e -tcc "nkCopyPoseInvokeEvent(\"layoutDialog\", \"tcc\", \"selectPatternBText\");" $selectPatternBText;
+  button -e -c "nkCopyPoseInvokeEvent(\"layoutDialog\", \"c\", \"okButton\");" $okButton;
+  button -e -c "nkCopyPoseInvokeEvent(\"layoutDialog\", \"c\", \"cancelButton\");" $cancelButton;
+  radioButtonGrp -e -onc "nkCopyPoseInvokeEvent(\"layoutDialog\", \"onc\", \"primaryAxisRadioButton\");" $primaryAxisRadioButton;
+  radioButtonGrp -e -onc "nkCopyPoseInvokeEvent(\"layoutDialog\", \"onc\", \"secondaryAxisRadioButton\");" $secondaryAxisRadioButton;
 
   print("// " + $outerForm + "\n");
   print("// " + $settingsColumn + "\n");
@@ -2041,19 +2041,17 @@ proc buildMainWindow() {
       -af $nodeManipRow "bottom" 5
       $outerForm;
 
-  iconTextButton -e -c "nkCopyPoseInvokeEvent(\"c\", \"addPoseButton\");" $addPoseButton;
-  iconTextButton -e -c "nkCopyPoseInvokeEvent(\"c\", \"deletePoseButton\");" $deletePoseButton;
-  iconTextButton -e -c "nkCopyPoseInvokeEvent(\"c\", \"updatePoseButton\");" $updatePoseButton;
-  iconTextButton -e -c "nkCopyPoseInvokeEvent(\"c\", \"editPoseButton\");" $editPoseButton;
-  iconTextButton -e -c "nkCopyPoseInvokeEvent(\"c\", \"moveUpPoseButton\");" $moveUpPoseButton;
-  iconTextButton -e -c "nkCopyPoseInvokeEvent(\"c\", \"moveDownPoseButton\");" $moveDownPoseButton;
-
-  textScrollList -e -dcc "nkCopyPoseInvokeEvent(\"dcc\", \"poseList\");" $poseList;
-
-  iconTextButton -e -c "nkCopyPoseInvokeEvent(\"c\", \"selectSourceButton\");" $selectSourceButton;
-  iconTextButton -e -c "nkCopyPoseInvokeEvent(\"c\", \"selectOppositeButton\");" $selectOppositeButton;
-  iconTextButton -e -c "nkCopyPoseInvokeEvent(\"c\", \"pasteSourceButton\");" $pasteSourceButton;
-  iconTextButton -e -c "nkCopyPoseInvokeEvent(\"c\", \"pasteOppositeButton\");" $pasteOppositeButton;
+  iconTextButton -e -c "nkCopyPoseInvokeEvent(\"nkCopyPoseWindow\", \"c\", \"addPoseButton\");" $addPoseButton;
+  iconTextButton -e -c "nkCopyPoseInvokeEvent(\"nkCopyPoseWindow\", \"c\", \"deletePoseButton\");" $deletePoseButton;
+  iconTextButton -e -c "nkCopyPoseInvokeEvent(\"nkCopyPoseWindow\", \"c\", \"updatePoseButton\");" $updatePoseButton;
+  iconTextButton -e -c "nkCopyPoseInvokeEvent(\"nkCopyPoseWindow\", \"c\", \"editPoseButton\");" $editPoseButton;
+  iconTextButton -e -c "nkCopyPoseInvokeEvent(\"nkCopyPoseWindow\", \"c\", \"moveUpPoseButton\");" $moveUpPoseButton;
+  iconTextButton -e -c "nkCopyPoseInvokeEvent(\"nkCopyPoseWindow\", \"c\", \"moveDownPoseButton\");" $moveDownPoseButton;
+  textScrollList -e -dcc "nkCopyPoseInvokeEvent(\"nkCopyPoseWindow\", \"dcc\", \"poseList\");" $poseList;
+  iconTextButton -e -c "nkCopyPoseInvokeEvent(\"nkCopyPoseWindow\", \"c\", \"selectSourceButton\");" $selectSourceButton;
+  iconTextButton -e -c "nkCopyPoseInvokeEvent(\"nkCopyPoseWindow\", \"c\", \"selectOppositeButton\");" $selectOppositeButton;
+  iconTextButton -e -c "nkCopyPoseInvokeEvent(\"nkCopyPoseWindow\", \"c\", \"pasteSourceButton\");" $pasteSourceButton;
+  iconTextButton -e -c "nkCopyPoseInvokeEvent(\"nkCopyPoseWindow\", \"c\", \"pasteOppositeButton\");" $pasteOppositeButton;
 
   print("// " + $window + "\n");
   print("// " + $outerForm + "\n");
@@ -2099,63 +2097,67 @@ proc initialize() {
 // グローバルプロシージャ
 // -----------------------------------------------------------------------------
 /*-
+@param $window <string>
 @param $event <string>
 @param $control <string>
 @returns <>
 */
-global proc nkCopyPoseInvokeEvent(string $event, string $control) {
-  switch ($event) {
-    case "c":
-      switch ($control) {
-        case "addPoseButton": addPose(); break;
-        case "deletePoseButton": deletePose(); break;
-        case "updatePoseButton": updatePose(); break;
-        case "editPoseButton": editPose(); break;
-        case "moveUpPoseButton": moveUpPose(); break;
-        case "moveDownPoseButton": moveDownPose(); break;
-        case "selectSourceButton": selectNodes(false); break;
-        case "selectOppositeButton": selectNodes(true); break;
-        case "pasteSourceButton": pastePose(false); break;
-        case "pasteOppositeButton": pastePose(true); break;
-        case "okButton": okButtonPressed(); break;
-        case "cancelButton": cancelButtonPressed(); break;
+global proc nkCopyPoseInvokeEvent(
+  string $window,
+  string $event,
+  string $control
+) {
+  switch ($window) {
+    case "layoutDialog":
+      switch ($event) {
+        case "c":
+          switch ($control) {
+            case "okButton": okButtonPressed(); break;
+            case "cancelButton": cancelButtonPressed(); break;
+            default: break;
+          }
+          break;
+        case "onc":
+          switch ($control) {
+            case "primaryAxisRadioButton": primaryAxisRadioButtonChanged(); break;
+            case "secondaryAxisRadioButton": secondaryAxisRadioButtonChanged(); break;
+            default: break;
+          }
+          break;
+        case "tcc":
+          switch ($control) {
+            case "poseNameText": poseNameTextChanged(); break;
+            case "selectPatternAText": selectPatternATextChanged(); break;
+            case "selectPatternBText": selectPatternBTextChanged(); break;
+            default: break;
+          }
+          break;
         default: break;
       }
       break;
-    case "cc":
-      switch ($control) {
-        default: break;
-      }
-      break;
-    case "dcc":
-      switch ($control) {
-        case "poseList": editPose(); break;
-        default: break;
-      }
-      break;
-    case "ec":
-      switch ($control) {
-        default: break;
-      }
-      break;
-    case "onc":
-      switch ($control) {
-        case "primaryAxisRadioButton": primaryAxisRadioButtonChanged(); break;
-        case "secondaryAxisRadioButton": secondaryAxisRadioButtonChanged(); break;
-        default: break;
-      }
-      break;
-    case "pmc":
-      switch ($control) {
-        default: break;
-      }
-      break;
-    case "tcc":
-      switch ($control) {
-        case "poseNameText": poseNameTextChanged(); break;
-        case "selectPatternAText": selectPatternATextChanged(); break;
-        case "selectPatternBText": selectPatternBTextChanged(); break;
-        default: break;
+    case "nkCopyPoseWindow":
+      switch ($event) {
+        case "c":
+          switch ($control) {
+            case "addPoseButton": addPose(); break;
+            case "deletePoseButton": deletePose(); break;
+            case "updatePoseButton": updatePose(); break;
+            case "editPoseButton": editPose(); break;
+            case "moveUpPoseButton": moveUpPose(); break;
+            case "moveDownPoseButton": moveDownPose(); break;
+            case "selectSourceButton": selectNodes(false); break;
+            case "selectOppositeButton": selectNodes(true); break;
+            case "pasteSourceButton": pastePose(false); break;
+            case "pasteOppositeButton": pastePose(true); break;
+            default: break;
+          }
+          break;
+        case "dcc":
+          switch ($control) {
+            case "poseList": editPose(); break;
+            default: break;
+          }
+          break;
       }
       break;
     default: break;
@@ -2166,7 +2168,7 @@ global proc nkCopyPoseInvokeEvent(string $event, string $control) {
 @returns <string>
 */
 global proc string nkCopyPoseVersion() {
-  return "2.8.2";
+  return "2.8.3";
 }
 
 /*-
