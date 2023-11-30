@@ -1141,24 +1141,6 @@ proc string[] getPoseNames() {
 }
 
 /*-
-@returns <string[]>
-*/
-proc string[] getPoseMirrorSettingLabels() {
-  global string $nkCopyPosePoses[];
-  string $axisLabels[] = {"X", "Y", "Z"};
-  string $invertLabels[] = {"+", "-"};
-  string $mirrorSettingLabels[];
-  for ($pose in $nkCopyPosePoses) {
-    int $ms[] = extractMirrorSettings($pose);
-    string $label = $axisLabels[$ms[0]];
-    $label += $invertLabels[$ms[3]] +$axisLabels[$ms[1]];
-    $label += $invertLabels[$ms[4]] +$axisLabels[$ms[2]];
-    $mirrorSettingLabels[`size $mirrorSettingLabels`] = $label;
-  }
-  return $mirrorSettingLabels;
-}
-
-/*-
 @param $n <string>
 @returns <string>
 */
@@ -1192,17 +1174,13 @@ proc refreshPoseList() {
   int $selectedIndex = textScrollListGetSelectedIndex($poseList);
   textScrollListRemoveAll($poseList);
   string $poseNames[] = getPoseNames();
-  string $mirrorSettingLabels[] = getPoseMirrorSettingLabels();
   int $numPoseNames = `size $poseNames`;
-  int $numMirrorSettingLabels = `size $mirrorSettingLabels`;
-  int $numListItems = `min $numPoseNames $numMirrorSettingLabels`;
-  for ($i = 0; $i < $numListItems; $i++) {
-    string $item = "[" + $mirrorSettingLabels[$i] + "] " + $poseNames[$i];
-    textScrollListAppend($item, $poseList);
+  for ($poseName in $poseNames) {
+    textScrollListAppend($poseName, $poseList);
   }
-  if ($numListItems > 0 && $selectedIndex > 0) {
-    if ($selectedIndex > $numListItems) {
-      $selectedIndex = $numListItems;
+  if ($numPoseNames > 0 && $selectedIndex > 0) {
+    if ($selectedIndex > $numPoseNames) {
+      $selectedIndex = $numPoseNames;
     }
     textScrollListSelectItem($selectedIndex, $poseList);
   }
@@ -2208,7 +2186,7 @@ global proc nkCopyPoseInvokeEvent(string $event, string $control) {
 @returns <string>
 */
 global proc string nkCopyPoseVersion() {
-  return "2.8.0";
+  return "2.8.1";
 }
 
 /*-
