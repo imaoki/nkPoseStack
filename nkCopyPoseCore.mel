@@ -1,40 +1,47 @@
 /*! © 2023 imaoki | MIT License | https://github.com/imaoki */
 
+// /////////////////////////////////////////////////////////////////////////////
+// 汎用プロシージャ
+// /////////////////////////////////////////////////////////////////////////////
 // -----------------------------------------------------------------------------
-// グローバル変数
+// 文字列
 // -----------------------------------------------------------------------------
 /*-
-@var <string[]>
+@param $regex <string>
+@param $input <string>
+@returns <string[]>
 */
-global string $nkCopyPosePoses[];
-/*-
-@var <string[]> `layoutDialog`のコントロール配列。
-*/
-// global string $nkCopyPosePromptControls[];
-/*-
-@var <string> `layoutDialog`用のポーズ名バッファ。
-*/
-global string $nkCopyPosePromptPoseName;
-/*-
-@var <int[]> `layoutDialog`用の貼り付け設定バッファ。
-*/
-global int $nkCopyPosePromptPasteSettings[];
-if (`size $nkCopyPosePromptPasteSettings` == 0) {
-  $nkCopyPosePromptPasteSettings = {1, 1, 0};
+proc string[] divideString(string $regex, string $input) {
+  string $substrings[];
+  string $part1 = `match $regex $input`;
+  if (`size $part1`) {
+    string $part2 = `substitute $regex $input ""`;
+    $substrings = {$part1, $part2};
+  }
+  return $substrings;
 }
+
 /*-
-@var <string[]> `layoutDialog`用の選択設定バッファ。
+@param $procName <string>
+@returns <string>
 */
-global string $nkCopyPosePromptSelectSettings[];
-if (`size $nkCopyPosePromptSelectSettings` == 0) {
-  $nkCopyPosePromptSelectSettings = {"_L", "_R"};
-}
-/*-
-@var <int[]> `layoutDialog`用のミラー設定バッファ。
-*/
-global int $nkCopyPosePromptMirrorSettings[];
-if (`size $nkCopyPosePromptMirrorSettings` == 0) {
-  $nkCopyPosePromptMirrorSettings = {0, 0, 1, 0, 0};
+proc string getScriptDir(string $procName) {
+  string $scriptDir;
+  string $procParts[] = divideString(
+    "^Mel procedure found in: *",
+    `whatIs $procName`
+  );
+  if (`size $procParts` == 2 && `size $procParts[1]`) {
+    string $scriptPath = $procParts[1];
+    string $pathParts[] = divideString(
+      "/" + $procName + "\\.mel$",
+      $scriptPath
+    );
+    if (`size $pathParts` == 2 && `size $pathParts[1]`) {
+      $scriptDir = $pathParts[1];
+    }
+  }
+  return $scriptDir;
 }
 
 // -----------------------------------------------------------------------------
@@ -309,7 +316,7 @@ proc float[] quatFlip(float $q[], float $axis[]) {
 }
 
 // -----------------------------------------------------------------------------
-// ノード関連
+// ノード
 // -----------------------------------------------------------------------------
 /*-
 @returns <string[]>
@@ -330,59 +337,290 @@ proc string getParentNode(string $n) {
 }
 
 // -----------------------------------------------------------------------------
-// トランスフォーム関連
+// UIコントロール
 // -----------------------------------------------------------------------------
+/*-
+@var <string[]> UIコントロール配列。
+*/
+global string $nkUIControls[];
+
+/*-
+@param $control <string[]>
+@returns <>
+*/
+proc nkUIControlsAppend(string $controls[]) {
+  print("nkUIControlsAppend\n");
+  global string $nkUIControls[];
+  for ($control in $controls) {
+    $nkUIControls[`size $nkUIControls`] = $control;
+  }
+  print("  nkUIControls:{\n    " + stringArrayToString($nkUIControls, ",\n    ") + "\n  }\n");
+}
+
+/*-
+@param $root <string>
+@param $end <string> 同じウィンドウのコントロールを一括除去する場合は空文字列を指定する。
+@returns <>
+*/
+proc nkUIControlsRemove(string $root, string $end) {
+  print("nkUIControlsRemove\n");
+  global string $nkUIControls[];
+  string $paths[];
+  for ($control in $nkUIControls) {
+    string $buffer[];
+    int $depth = `tokenize $control "|" $buffer`;
+    string $first = ($depth > 0) ? $buffer[0] : "";
+    string $last = ($depth > 0) ? $buffer[$depth - 1] : "";
+    int $shouldRemove = (`size $end` == 0)
+        ? $first == $root
+        : $first == $root && $last == $end;
+    if ($shouldRemove) $paths[`size $paths`] = $control;
+  }
+  if (`size $paths` > 0) {
+    $nkUIControls = stringArrayRemove($paths, $nkUIControls);
+  }
+  print("  nkUIControls:{\n    " + stringArrayToString($nkUIControls, ",\n    ") + "\n  }\n");
+}
+
+/*-
+@param $root <string>
+@param $end <string> ウィンドウの場合は`$root`と同じ値を指定する。
+@returns <string>
+*/
+proc string nkUIControlsGet(string $root, string $end) {
+  global string $nkUIControls[];
+  string $path;
+  for ($control in $nkUIControls) {
+    string $buffer[];
+    int $depth = `tokenize $control "|" $buffer`;
+    string $first = ($depth > 0) ? $buffer[0] : "";
+    string $last = ($depth > 0) ? $buffer[$depth - 1] : "";
+    if ($first == $root && $last == $end) {
+      $path = $control;
+      break;
+    }
+  }
+  return $path;
+}
+
+/*-
+@param $item <string>
+@param $control <string>
+@returns <>
+*/
+proc textScrollListAppend(string $item, string $control) {
+  textScrollList -e -a $item $control;
+}
+
+/*-
+@param $control <string>
+@returns <>
+*/
+proc textScrollListRemoveAll(string $control) {
+  textScrollList -e -ra $control;
+}
+
+/*-
+@param $index <int>
+@param $control <string>
+@returns <>
+*/
+proc textScrollListSelectItem(int $index, string $control) {
+  textScrollList -e -sii $index $control;
+}
+
+/*-
+@param $control <string>
+@returns <int[]>
+*/
+proc int[] textScrollListGetSelectedIndices(string $control) {
+  return `textScrollList -q -sii $control`;
+}
+
+/*-
+@param $control <string>
+@returns <int>
+*/
+proc int textScrollListGetSelectedIndex(string $control) {
+  int $indices[] = textScrollListGetSelectedIndices($control);
+  return ((`size $indices` == 1) ? $indices[0] : 0);
+}
+
+/*-
+@param $control <string>
+@returns <int>
+*/
+proc int textFieldGrpGetInsertionPosition(string $control) {
+  return `textFieldGrp -q -ip $control`;
+}
+
+/*-
+@param $position <int>
+@param $control <string>
+@returns <>
+*/
+proc textFieldGrpSetInsertionPosition(int $position, string $control) {
+  textFieldGrp -e -ip $position $control;
+}
+
+/*-
+@param $control <string>
+@returns <string>
+*/
+proc string textFieldGrpGetText(string $control) {
+  return `textFieldGrp -q -tx $control`;
+}
+
+/*-
+@param $text <string>
+@param $control <string>
+@returns <>
+*/
+proc textFieldGrpSetText(string $text, string $control) {
+  textFieldGrp -e -tx $text $control;
+}
+
+/*-
+@param $control <string>
+@returns <int[]>
+*/
+proc int[] checkBoxGrpGetValues(string $control) {
+  return `checkBoxGrp -q -va3 $control`;
+}
+
+/*-
+@param $v1 <boolean>
+@param $v2 <boolean>
+@param $v3 <boolean>
+@param $control <string>
+@returns <>
+*/
+proc checkBoxGrpSetValues(int $v1, int $v2, int $v3, string $control) {
+  checkBoxGrp -e -va3 $v1 $v2 $v3 $control;
+}
+
+/*-
+@param $control <string>
+@returns <int>
+*/
+proc int radioButtonGrpGetSelect(string $control) {
+  return `radioButtonGrp -q -sl $control`;
+}
+
+/*-
+@param $index <int>
+@param $control <string>
+@returns <>
+*/
+proc radioButtonGrpSetSelect(int $index, string $control) {
+  radioButtonGrp -e -sl $index $control;
+}
+
+// /////////////////////////////////////////////////////////////////////////////
+// コアプロシージャ
+// /////////////////////////////////////////////////////////////////////////////
+/*-
+@var <string[]>
+```ebnf
+            pose = '"' , pose_name , "[" , pose_settings , "]" , pose_transforms , '"' ;
+       pose_name = { any_char - ( "[" | "]" ) } ;
+   pose_settings = paste_settings , ";" , select_settings , ";" , mirror_settings ;
+  paste_settings = bool , "," , bool , "," , bool ;
+ select_settings = node_name , "," , node_name ;
+ mirror_settings = axis , "," , axis , "," , axis , "," , bool , "," , bool ;
+            axis = ? 0-2 ? ;
+            bool = ? 0-1 ? ;
+ pose_transforms = { pose_transform }+ ;
+  pose_transform = transform_node , "=" , transform_values , ";" ;
+  transform_node = [ "|" ] , node_name , { "|" , node_name } ;
+       node_name = letter , { letter | digit | "_" } ;
+transform_values = t , "," , q , "," , s , "," , h ;
+               t = number , "," , number , "," , number ;
+               q = number , "," , number , "," , number , "," , number ;
+               s = number , "," , number , "," , number ;
+               h = number , "," , number , "," , number ;
+          number = [ "-" ] , ( integer | real ) ;
+           digit = ? 0-9 ? ;
+          letter = ? a-zA-Z ? ;
+        any_char = ? Any visible characters ? ;
+```
+*/
+global string $nkCopyPosePoses[];
+
+// -----------------------------------------------------------------------------
+// トランスフォーム
+// -----------------------------------------------------------------------------
+/*-
+@param $n <string>
+@returns <float[]>
+*/
+proc float[] makeTransformValues(string $n) {
+  print("makeTransformValues\n");
+  print("  n:" + $n + "\n");
+  float $values[] = {
+    0, 0, 0,
+    0, 0, 0, 1,
+    1, 1, 1,
+    0, 0, 0
+  };
+  string $type = `nodeType $n`;
+  if ($type == "transform" || $type == "joint") {
+    float $t[] = `getAttr ($n + ".translate")`;
+    float $r[] = `getAttr ($n + ".rotate")`;
+    float $s[] = `getAttr ($n + ".scale")`;
+    float $h[] = `getAttr ($n + ".shear")`;
+    print("  t :{" + floatArrayToString($t, ", ") + "}\n");
+    print("  r :{" + floatArrayToString($r, ", ") + "}\n");
+    print("  s :{" + floatArrayToString($s, ", ") + "}\n");
+    print("  h :{" + floatArrayToString($h, ", ") + "}\n");
+
+    int $o = `getAttr ($n + ".rotateOrder")`;
+    $o = reverseRotateOrder($o);
+    int $oXYZ = reverseRotateOrder(0);
+
+    float $rq[] = eulerToQuat($r, $o);
+
+    float $ra[] = `getAttr ($n + ".rotateAxis")`;
+    $ra = eulerToQuat($ra, $oXYZ);
+
+    float $jo[] = {0, 0, 0, 1};
+    if (`attributeQuery -n $n -ex "jointOrient"`) {
+      $jo = `getAttr ($n + ".jointOrient")`;
+      $jo = eulerToQuat($jo, $oXYZ);
+    }
+
+    float $q[] = quatMultiply($jo, quatMultiply($ra, $rq));
+
+    print("  o :" + $o + "\n");
+    print("  rq:{" + floatArrayToString($rq, ", ") + "}\n");
+    print("  ra:{" + floatArrayToString($ra, ", ") + "}\n");
+    print("  jo:{" + floatArrayToString($jo, ", ") + "}\n");
+    print("  q :{" + floatArrayToString($q, ", ") + "}\n");
+
+    $values = {
+      $t[0], $t[1], $t[2],
+      $q[0], $q[1], $q[2], $q[3],
+      $s[0], $s[1], $s[2],
+      $h[0], $h[1], $h[2]
+    };
+  }
+  return $values;
+}
+
 /*-
 @param $nodes <string[]>
 @returns <string[]>
 */
-proc string[] getTransformAttributes(string $nodes[]) {
-  print("getTransformAttributes\n");
+proc string[] generatePoseTransforms(string $nodes[]) {
+  print("generatePoseTransforms\n");
   print("  nodes:{\n    " + stringArrayToString($nodes, ",\n    ") + "\n  }\n");
-  string $matrices[];
+  string $poseTransforms[];
   for ($n in $nodes) {
-    string $type = `nodeType $n`;
-    if ($type == "transform" || $type == "joint") {
-      float $t[] = `getAttr ($n + ".translate")`;
-      float $r[] = `getAttr ($n + ".rotate")`;
-      float $s[] = `getAttr ($n + ".scale")`;
-      float $h[] = `getAttr ($n + ".shear")`;
-      print("  t :{" + floatArrayToString($t, ", ") + "}\n");
-      print("  r :{" + floatArrayToString($r, ", ") + "}\n");
-      print("  s :{" + floatArrayToString($s, ", ") + "}\n");
-      print("  h :{" + floatArrayToString($h, ", ") + "}\n");
-
-      int $o = `getAttr ($n + ".rotateOrder")`;
-      $o = reverseRotateOrder($o);
-      int $oXYZ = reverseRotateOrder(0);
-
-      float $rq[] = eulerToQuat($r, $o);
-
-      float $ra[] = `getAttr ($n + ".rotateAxis")`;
-      $ra = eulerToQuat($ra, $oXYZ);
-
-      float $jo[] = {0, 0, 0, 1};
-      if (`attributeQuery -n $n -ex "jointOrient"`) {
-        $jo = `getAttr ($n + ".jointOrient")`;
-        $jo = eulerToQuat($jo, $oXYZ);
-      }
-
-      float $q[] = quatMultiply($jo, quatMultiply($ra, $rq));
-
-      print("  o :" + $o + "\n");
-      print("  rq:{" + floatArrayToString($rq, ", ") + "}\n");
-      print("  ra:{" + floatArrayToString($ra, ", ") + "}\n");
-      print("  jo:{" + floatArrayToString($jo, ", ") + "}\n");
-      print("  q :{" + floatArrayToString($q, ", ") + "}\n");
-
-      int $i = `size $matrices`;
-      $matrices[$i] = floatArrayToString($t, ",");
-      $matrices[$i] = $matrices[$i] + "," + (floatArrayToString($q, ","));
-      $matrices[$i] = $matrices[$i] + "," + (floatArrayToString($s, ","));
-      $matrices[$i] = $matrices[$i] + "," + (floatArrayToString($h, ","));
-    }
+    string $values = floatArrayToString(makeTransformValues($n), ",");
+    print("  values:" + $values + "\n");
+    $poseTransforms[`size $poseTransforms`] = $n + "=" + $values + ";";
   }
-  return $matrices;
+  return $poseTransforms;
 }
 
 /*-
@@ -486,15 +724,15 @@ proc float[] asIsTransform(string $n, float $m[]) {
   print("  rq:{" + floatArrayToString($rq, ", ") + "}\n");
   print("  r :{" + floatArrayToString($r, ", ") + "}\n");
 
-  float $newMatrix[] = {
+  float $values[] = {
     $t[0], $t[1], $t[2],
     $r[0], $r[1], $r[2],
     $s[0], $s[1], $s[2],
     $h[0], $h[1], $h[2]
   };
-  print("  newMatrix:{" + floatArrayToString($newMatrix, ", ") + "}\n");
+  print("  values:{" + floatArrayToString($values, ", ") + "}\n");
 
-  return $newMatrix;
+  return $values;
 }
 
 /*-
@@ -634,15 +872,15 @@ proc float[] mirrorTransform(
   print("  cq:{" + floatArrayToString($cq, ", ") + "}\n");
   print("  r :{" + floatArrayToString($r, ", ") + "}\n");
 
-  float $newMatrix[] = {
+  float $values[] = {
     $t[0], $t[1], $t[2],
     $r[0], $r[1], $r[2],
     $s[0], $s[1], $s[2],
     $h[0], $h[1], $h[2]
   };
-  print("  newMatrix:{" + floatArrayToString($newMatrix, ", ") + "}\n");
+  print("  values:{" + floatArrayToString($values, ", ") + "}\n");
 
-  return $newMatrix;
+  return $values;
 }
 
 // -----------------------------------------------------------------------------
@@ -664,14 +902,13 @@ proc string buildPoseSettings(
   $poseSettings += ";" + intArrayToString($mirrorSettings, ",");
   return $poseSettings;
 }
+
 /*-
 @param $poseName <string>
-// @param $poseSettings <int[]>
 @param $pasteSettings <int[]>
 @param $selectSettings <string[]>
 @param $mirrorSettings <int[]>
-@param $nodes <string[]>
-@param $matrices <string[]>
+@param $poseTransforms <string[]>
 @returns <string>
 */
 proc string buildPose(
@@ -679,19 +916,14 @@ proc string buildPose(
   int $pasteSettings[],
   string $selectSettings[],
   int $mirrorSettings[],
-  string $nodes[],
-  string $matrices[]
+  string $poseTransforms[]
 ) {
   string $poseSettings = buildPoseSettings(
     $pasteSettings, $selectSettings, $mirrorSettings
   );
   string $pose = $poseName + "[" + $poseSettings + "]";
-  int $numNodes = `size $nodes`;
-  for ($i = 0; $i < $numNodes; $i++) {
-    $pose += $nodes[$i] + "=" + $matrices[$i];
-    if ($i < $numNodes - 1) {
-      $pose += ";";
-    }
+  for ($poseTransform in $poseTransforms) {
+    $pose += $poseTransform;
   }
   return $pose;
 }
@@ -786,52 +1018,57 @@ proc int[] extractMirrorSettings(string $pose) {
 @param $pose <string>
 @returns <string[]>
 */
-proc string[] extractPoseValues(string $pose) {
-  string $poseValues[];
+proc string[] extractPoseTransforms(string $pose) {
+  string $poseTransforms[];
   string $buffer1[];
   if (`tokenize $pose "]" $buffer1` == 2) {
     string $buffer2[];
     if (`tokenize $buffer1[1] ";" $buffer2` > 0) {
-      $poseValues = $buffer2;
+      $poseTransforms = $buffer2;
     }
   }
-  return $poseValues;
+  return $poseTransforms;
 }
 
 /*-
-@param $poseValue <string>
+@param $poseTransform <string>
 @returns <string>
 */
-proc string extractPoseNode(string $poseValue) {
-  string $poseNode;
+proc string extractTransformNode(string $poseTransform) {
+  string $node;
   string $buffer[];
-  if (`tokenize $poseValue "=" $buffer` == 2) {
-    $poseNode = $buffer[0];
+  if (`tokenize $poseTransform "=" $buffer` == 2) {
+    $node = $buffer[0];
   }
-  return $poseNode;
+  return $node;
 }
 
 /*-
-@param $poseValue <string>
+@param $poseTransform <string>
 @returns <float[]>
 */
-proc float[] extractPoseMatrix(string $poseValue) {
-  float $poseMatrix[];
-  int $numMatrix = 13;
+proc float[] extractTransformValues(string $poseTransform) {
+  float $values[] = {
+    0, 0, 0,
+    0, 0, 0, 1,
+    1, 1, 1,
+    0, 0, 0
+  };
+  int $numValues = `size $values`;
   string $buffer1[];
-  if (`tokenize $poseValue "=" $buffer1` == 2) {
+  if (`tokenize $poseTransform "=" $buffer1` == 2) {
     string $buffer2[];
-    if (`tokenize $buffer1[1] "," $buffer2` == $numMatrix) {
-      for ($i = 0; $i < $numMatrix; $i++) {
-        $poseMatrix[$i] = (float) $buffer2[$i];
+    if (`tokenize $buffer1[1] "," $buffer2` == $numValues) {
+      for ($i = 0; $i < $numValues; $i++) {
+        $values[$i] = (float) $buffer2[$i];
       }
     }
   }
-  return $poseMatrix;
+  return $values;
 }
 
 // -----------------------------------------------------------------------------
-// ポーズ関連
+// ポーズ
 // -----------------------------------------------------------------------------
 /*-
 @returns <>
@@ -842,30 +1079,24 @@ proc clearPoses() {
 }
 
 /*-
+@returns <int>
+*/
+proc int getNumPoses() {
+  global string $nkCopyPosePoses[];
+  return `size $nkCopyPosePoses`;
+}
+
+/*-
 @param $i <int>
 @returns <string>
 */
 proc string getPose(int $i) {
   global string $nkCopyPosePoses[];
   string $pose;
-  if ($i >= 0 && $i < `size $nkCopyPosePoses`) {
+  if ($i >= 0 && $i < (getNumPoses())) {
     $pose = $nkCopyPosePoses[$i];
   }
   return $pose;
-}
-
-/*-
-@returns <string>
-*/
-proc string getSelectedPose() {
-  global string $nkCopyPosePoses[];
-  string $selectedPose;
-  // int $selectedIndices[] = poseListGetSelectedIndices();
-  int $selectedIndices[] = {1};
-  if (`size $selectedIndices` == 1) {
-    $selectedPose = getPose($selectedIndices[0] - 1);
-  }
-  return $selectedPose;
 }
 
 /*-
@@ -881,114 +1112,236 @@ proc string[] getPoseNames() {
 }
 
 /*-
-@returns <string[]>
-*/
-proc string[] getPoseMirrorSettingLabels() {
-  global string $nkCopyPosePoses[];
-  string $axisLabels[] = {"X", "Y", "Z"};
-  string $invertLabels[] = {"+", "-"};
-  string $mirrorSettingLabels[];
-  for ($pose in $nkCopyPosePoses) {
-    int $ms[] = extractMirrorSettings($pose);
-    string $label = $axisLabels[$ms[0]];
-    $label += $invertLabels[$ms[3]] +$axisLabels[$ms[1]];
-    $label += $invertLabels[$ms[4]] +$axisLabels[$ms[2]];
-    $mirrorSettingLabels[`size $mirrorSettingLabels`] = $label;
-  }
-  return $mirrorSettingLabels;
-}
-
-/*-
-@param $n <string>
-@returns <string>
-*/
-proc string createUniquePoseName(string $n) {
-  string $buffer[];
-  tokenize $n "|" $buffer;
-  string $baseName = $buffer[`size $buffer` - 1] + "@" + `currentTime -q`;
-  string $poseNames[] = getPoseNames();
-  int $number = 1;
-  string $poseName = $baseName + "_" + $number;
-  int $index = stringArrayFind($poseName, 0, $poseNames);
-  while ($index >= 0) {
-    $number += 1;
-    $poseName = $baseName + "_" + $number;
-    $index = stringArrayFind($poseName, 0, $poseNames);
-  }
-  return $poseName;
-}
-
-/*-
+@param $nodes <string[]>
 @param $poseName <string>
-@returns <string>
+@param $pasteSettings <int[]>
+@param $selectSettings <string[]>
+@param $mirrorSettings <int[]>
+@returns <int> 追加後のポーズ数。
 */
-proc string sanitizePoseName(string $poseName) {
-  $poseName = substituteAllString($poseName, ",", "_");
-  $poseName = substituteAllString($poseName, ";", "_");
-  $poseName = substituteAllString($poseName, "[", "_");
-  $poseName = substituteAllString($poseName, "]", "_");
-  return $poseName;
-}
-
-/*-
-@returns <>
-*/
-proc addPose() {
+proc int addPose(
+  string $nodes[],
+  string $poseName,
+  int $pasteSettings[],
+  string $selectSettings[],
+  int $mirrorSettings[]
+) {
   print("addPose\n");
+  print("  nodes         :{\n    " + stringArrayToString($nodes, ",\n    ") + "\n  }\n");
+  print("  poseName      :" + $poseName + "\n");
+  print("  pasteSettings :{" + intArrayToString($pasteSettings, ", ") + "}\n");
+  print("  selectSettings:{" + stringArrayToString($selectSettings, ", ") + "}\n");
+  print("  mirrorSettings:{" + intArrayToString($mirrorSettings, ", ") + "}\n");
   global string $nkCopyPosePoses[];
-  // global string $nkCopyPosePromptControls[];
-  global string $nkCopyPosePromptPoseName;
-  global int $nkCopyPosePromptPasteSettings[];
-  global string $nkCopyPosePromptSelectSettings[];
-  global int $nkCopyPosePromptMirrorSettings[];
 
-  string $nodes[] = getSelectedNodes();
-  print("  nodes:{\n    " + (stringArrayToString($nodes, ",\n    ")) + "\n  }\n");
-  if (`size $nodes` == 0) return;
-
-  // clear $nkCopyPosePromptControls;
-  $nkCopyPosePromptPoseName = createUniquePoseName($nodes[0]);
-
-  // string $result = `layoutDialog
-  //     -p "nkCopyPoseWindow"
-  //     -t "Add Pose"
-  //     -ui "buildPromptWindow"`;
-
-  // print("  result:" + $result + "\n");
-  // print("    poseName                      :" + $nkCopyPosePromptPoseName + "\n");
-  // print("    nkCopyPosePromptPasteSettings :{" + intArrayToString($nkCopyPosePromptPasteSettings, ", ") + "}\n");
-  // print("    nkCopyPosePromptSelectSettings:{" + stringArrayToString($nkCopyPosePromptSelectSettings, ", ") + "}\n");
-  // print("    nkCopyPosePromptMirrorSettings:{" + intArrayToString($nkCopyPosePromptMirrorSettings, ", ") + "}\n");
-
-  // if ($result != "OK") return;
-
-  string $matrices[] = getTransformAttributes($nodes);
-  print("  matrices:{\n    " + (stringArrayToString($matrices, ",\n    ")) + "\n  }\n");
+  string $poseTransforms[] = generatePoseTransforms($nodes);
+  print("  poseTransforms:{\n    " + (stringArrayToString($poseTransforms, ",\n    ")) + "\n  }\n");
 
   string $pose = buildPose(
-    $nkCopyPosePromptPoseName,
-    $nkCopyPosePromptPasteSettings,
-    $nkCopyPosePromptSelectSettings,
-    $nkCopyPosePromptMirrorSettings,
-    $nodes,
-    $matrices
+    $poseName,
+    $pasteSettings,
+    $selectSettings,
+    $mirrorSettings,
+    $poseTransforms
   );
   print("  pose:" + $pose + "\n");
-
-  $nkCopyPosePoses[`size $nkCopyPosePoses`] = $pose;
-  // refreshPoseList();
-  // poseListSelectItem(`size $nkCopyPosePoses`);
+  $nkCopyPosePoses[(getNumPoses())] = $pose;
+  return (getNumPoses());
 }
 
 /*-
+@param $poseIndex <int>
+@returns <int> 削除後のポーズ数。
+*/
+proc int deletePose(int $poseIndex) {
+  print("deletePose\n");
+  print("  poseIndex:" + $poseIndex + "\n");
+  global string $nkCopyPosePoses[];
+  stringArrayRemoveAtIndex($poseIndex, $nkCopyPosePoses);
+  return (getNumPoses());
+}
+
+/*-
+@param $poseIndex <int>
+@param $nodes <string[]>
+@returns <>
+*/
+proc updatePose(int $poseIndex, string $nodes[]) {
+  print("updatePose\n");
+  print("  poseIndex:" + $poseIndex + "\n");
+  print("  nodes    :{\n    " + stringArrayToString($nodes, ",\n    ") + "\n  }\n");
+  global string $nkCopyPosePoses[];
+
+  string $pose = getPose($poseIndex);
+  if (`size $pose` == 0) return;
+
+  string $poseName = extractPoseName($pose);
+  int $pasteSettings[] = extractPasteSettings($pose);
+  string $selectSettings[] = extractSelectSettings($pose);
+  int $mirrorSettings[] = extractMirrorSettings($pose);
+  print("  poseName      :" + $poseName + "\n");
+  print("  pasteSettings :{" + intArrayToString($pasteSettings, ", ") + "}\n");
+  print("  selectSettings:{" + stringArrayToString($selectSettings, ", ") + "}\n");
+  print("  mirrorSettings:{" + intArrayToString($mirrorSettings, ", ") + "}\n");
+
+  string $poseTransforms[] = generatePoseTransforms($nodes);
+  print("  poseTransforms:{\n    " + (stringArrayToString($poseTransforms, ",\n    ")) + "\n  }\n");
+
+  string $newPose = buildPose(
+    $poseName,
+    $pasteSettings,
+    $selectSettings,
+    $mirrorSettings,
+    $poseTransforms
+  );
+  print("  newPose:" + $newPose + "\n");
+  $nkCopyPosePoses[$poseIndex] = $newPose;
+}
+
+/*-
+@param $poseIndex <int>
+@param $poseName <string>
+@param $pasteSettings <int[]>
+@param $selectSettings <string[]>
+@param $mirrorSettings <int[]>
+@returns <>
+*/
+proc editPose(
+  int $poseIndex,
+  string $poseName,
+  int $pasteSettings[],
+  string $selectSettings[],
+  int $mirrorSettings[]
+) {
+  print("editPose\n");
+  print("  poseIndex     :" + $poseIndex + "\n");
+  print("  poseName      :" + $poseName + "\n");
+  print("  pasteSettings :{" + intArrayToString($pasteSettings, ", ") + "}\n");
+  print("  selectSettings:{" + stringArrayToString($selectSettings, ", ") + "}\n");
+  print("  mirrorSettings:{" + intArrayToString($mirrorSettings, ", ") + "}\n");
+  global string $nkCopyPosePoses[];
+  string $pose = getPose($poseIndex);
+  if (`size $pose` == 0) return;
+  string $poseSettings = buildPoseSettings(
+    $pasteSettings,
+    $selectSettings,
+    $mirrorSettings
+  );
+  string $header = $poseName + "[" + $poseSettings + "]";
+  string $newPose = `substitute "^[^\]]+\]" $pose $header`;
+  print("  newPose:" + $newPose + "\n");
+  $nkCopyPosePoses[$poseIndex] = $newPose;
+}
+
+/*-
+@param $poseIndex <int>
+@returns <int> 移動後のポーズインデックス。
+*/
+proc int moveUpPose(int $poseIndex) {
+  print("moveUpPose\n");
+  print("  poseIndex:" + $poseIndex + "\n");
+  global string $nkCopyPosePoses[];
+  string $pose = getPose($poseIndex);
+  if (`size $pose` == 0) return $poseIndex;
+  int $newPoseIndex = $poseIndex - 1;
+  print("  newPoseIndex:" + $newPoseIndex + "\n");
+  stringArrayRemoveAtIndex($poseIndex, $nkCopyPosePoses);
+  stringArrayInsertAtIndex($newPoseIndex, $nkCopyPosePoses, $pose);
+  return $newPoseIndex;
+}
+
+/*-
+@param $poseIndex <int>
+@returns <int> 移動後のポーズインデックス。
+*/
+proc int moveDownPose(int $poseIndex) {
+  print("moveDownPose\n");
+  print("  poseIndex:" + $poseIndex + "\n");
+  global string $nkCopyPosePoses[];
+  string $pose = getPose($poseIndex);
+  if (`size $pose` == 0) return $poseIndex;
+  int $newPoseIndex = $poseIndex + 1;
+  print("  newPoseIndex:" + $newPoseIndex + "\n");
+  stringArrayRemoveAtIndex($poseIndex, $nkCopyPosePoses);
+  stringArrayInsertAtIndex($newPoseIndex, $nkCopyPosePoses, $pose);
+  return $newPoseIndex;
+}
+
+/*-
+@param $poseIndex <int>
 @param $isOpposite <boolean>
 @returns <>
 */
-proc pastePose(int $isOpposite) {
-  print("pastePose\n");
+proc selectNodes(int $poseIndex, int $isOpposite) {
+  print("selectNodes\n");
+  print("  poseIndex :" + $poseIndex + "\n");
   print("  isOpposite:" + $isOpposite + "\n");
 
-  string $pose = getSelectedPose();
+  string $pose = getPose($poseIndex);
+  print("  pose:" + $pose + "\n");
+  if (`size $pose` == 0) return;
+
+  string $selectSettings[] = extractSelectSettings($pose);
+  if (`size $selectSettings` != 2) return;
+  string $patternA = $selectSettings[0];
+  string $patternB = $selectSettings[1];
+  print("  patternA:" + $patternA + "\n");
+  print("  patternB:" + $patternB + "\n");
+
+  string $poseTransforms[] = extractPoseTransforms($pose);
+  print("  poseTransforms:{\n    " + stringArrayToString($poseTransforms, ",\n    ") + "\n  }\n");
+  if (`size $poseTransforms` == 0) return;
+
+  string $targetNodes[];
+  for ($poseTransform in $poseTransforms) {
+    string $targetNode = extractTransformNode($poseTransform);
+    if ($isOpposite) {
+      if (`gmatch $targetNode ("*" + $patternA + "*")`) {
+        $targetNode = substituteAllString($targetNode, $patternA, $patternB);
+      }
+      else if (`gmatch $targetNode ("*" + $patternB + "*")`) {
+        $targetNode = substituteAllString($targetNode, $patternB, $patternA);
+      }
+    }
+    if (`objExists $targetNode`) {
+      $targetNodes[`size $targetNodes`] = $targetNode;
+    }
+  }
+  print("  targetNodes:{\n    " + stringArrayToString($targetNodes, "\n    ") + "\n  }\n");
+  if (`size $targetNodes` == 0) return;
+
+  int $mods = `getModifiers`;
+  print("  mods:" + $mods + "\n");
+  switch ($mods) {
+    // Nothing
+    case 0: select -r $targetNodes; break;
+    // Shift
+    case 1: select -tgl $targetNodes; break;
+    // Ctrl
+    case 4: select -d $targetNodes; break;
+    // Shift + Ctrl
+    case 5: select -add $targetNodes; break;
+    default: break;
+  }
+}
+
+/*-
+@param $poseIndex <int>
+@param $isOpposite <boolean>
+@param $nodes <string[]>
+@returns <>
+*/
+proc pastePose(int $poseIndex, int $isOpposite, string $nodes[]) {
+  print("pastePose\n");
+  print("  poseIndex :" + $poseIndex + "\n");
+  print("  isOpposite:" + $isOpposite + "\n");
+  print("  nodes     :{\n    " + stringArrayToString($nodes, ",\n    ") + "\n  }\n");
+
+  int $numNodes = `size $nodes`;
+  if ($numNodes == 0) return;
+
+  string $pose = getPose($poseIndex);
+  print("  pose:" + $pose + "\n");
   if (`size $pose` == 0) return;
 
   int $pasteAttributes[] = extractPasteSettings($pose);
@@ -1004,31 +1357,26 @@ proc pastePose(int $isOpposite) {
   print("  secondaryAxis  :" + $secondaryAxis + "\n");
   print("  invertAxis     :{" + intArrayToString($invertAxis, ", ") + "}\n");
 
-  string $nodes[] = getSelectedNodes();
-  print("  nodes:{\n    " + (stringArrayToString($nodes, "\n    ")) + "\n  }\n");
-  int $numNodes = `size $nodes`;
-  if ($numNodes == 0) return;
+  string $poseTransforms[] = extractPoseTransforms($pose);
+  print("  poseTransforms:{\n    " + stringArrayToString($poseTransforms, ",\n    ") + "\n  }\n");
+  int $numPoseTransforms = `size $poseTransforms`;
+  if ($numPoseTransforms == 0) return;
 
-  string $poseValues[] = extractPoseValues($pose);
-  print("  poseValues:{\n    " + stringArrayToString($poseValues, ",\n    ") + "\n  }\n");
-  int $numPoseValues = `size $poseValues`;
-  if ($numPoseValues == 0) return;
-
-  int $numTargets = `min $numNodes $numPoseValues`;
+  int $numTargets = `min $numNodes $numPoseTransforms`;
   print("  numTargets:" + $numTargets + "\n");
 
   for ($i = 0; $i < $numTargets; $i++) {
-    string $poseValue = $poseValues[$i];
-    float $matrix[] = extractPoseMatrix($poseValue);
-    string $sourceNode = extractPoseNode($poseValue);
+    string $poseTransform = $poseTransforms[$i];
+    float $transformValues[] = extractTransformValues($poseTransform);
+    string $sourceNode = extractTransformNode($poseTransform);
     string $targetNode = $nodes[$i];
     if ($isOpposite) {
       string $sourceParent = getParentNode($sourceNode);
       string $targetParent = getParentNode($targetNode);
       int $isRoot = $sourceParent == $targetParent;
-      $matrix = mirrorTransform(
+      $transformValues = mirrorTransform(
         $targetNode,
-        $matrix,
+        $transformValues,
         $isRoot,
         $mirrorAxis,
         $primaryAxis,
@@ -1038,12 +1386,12 @@ proc pastePose(int $isOpposite) {
       );
     }
     else {
-      $matrix = asIsTransform($targetNode, $matrix);
+      $transformValues = asIsTransform($targetNode, $transformValues);
     }
 
     setTransformAttributes(
       $targetNode,
-      $matrix,
+      $transformValues,
       $pasteAttributes[0],
       $pasteAttributes[1],
       $pasteAttributes[2]
@@ -1084,23 +1432,24 @@ if (1) {
   int $rotateOrder = 0;
 
   int $isOpposite = 0;
-  // default:{1, 1, 0}
-  $nkCopyPosePromptPasteSettings = {1, 1, 0};
-  // default:{0, 0, 1, 0, 0}
-  $nkCopyPosePromptMirrorSettings = {0, 0, 1, 0, 0};
+  int $pasteSettings[] = {1, 1, 0};
+  string $selectSettings[] = {"_L", "_R"};
+  int $mirrorSettings[] = {0, 0, 1, 0, 0};
 
   for ($i = 0; $i < `size $axisFlags`; $i++) {
     int $axisIndex = $axisFlags[$i];
-    $nkCopyPosePromptMirrorSettings[0] = $mirrorAxes[$axisIndex];
+    $mirrorSettings[0] = $mirrorAxes[$axisIndex];
     for ($j = 0; $j < `size $planeFlags`; $j++) {
       int $planeIndex = $planeFlags[$j];
-      $nkCopyPosePromptMirrorSettings[1] = $primaryAxes[$planeIndex];
-      $nkCopyPosePromptMirrorSettings[2] = $secondaryAxes[$planeIndex];
+      $mirrorSettings[1] = $primaryAxes[$planeIndex];
+      $mirrorSettings[2] = $secondaryAxes[$planeIndex];
 
       string $baseName = "|" + $axisNames[$axisIndex] + "|ROOT";
       string $nL = $baseName;
       string $nR = $baseName;
       for ($k = 0; $k < `size $depthFlags`; $k++) {
+        clearPoses();
+
         int $depthIndex = $depthFlags[$k] + 1;
         $nL += "|" + $planeNames[$planeIndex] + "_L" + $depthIndex;
         $nR += "|" + $planeNames[$planeIndex] + "_R" + $depthIndex;
@@ -1111,12 +1460,11 @@ if (1) {
 
         setAttr ($nL + ".rotateOrder") $rotateOrder;
         select -r $nL;
-        clearPoses();
-        addPose();
+        addPose({$nL}, "a", $pasteSettings, $selectSettings, $mirrorSettings);
 
         setAttr ($nR + ".rotateOrder") $rotateOrder;
         select -r $nR;
-        pastePose($isOpposite);
+        pastePose(0, $isOpposite, {$nR});
       }
     }
   }
