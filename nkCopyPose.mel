@@ -577,62 +577,76 @@ proc string getParentNode(string $n) {
 // トランスフォーム関連
 // -----------------------------------------------------------------------------
 /*-
+@param $n <string>
+@returns <float[]>
+*/
+proc float[] makeTransformValues(string $n) {
+  print("makeTransformValues\n");
+  print("  n:" + $n + "\n");
+  float $values[] = {
+    0, 0, 0,
+    0, 0, 0, 1,
+    1, 1, 1,
+    0, 0, 0
+  };
+  string $type = `nodeType $n`;
+  if ($type == "transform" || $type == "joint") {
+    float $t[] = `getAttr ($n + ".translate")`;
+    float $r[] = `getAttr ($n + ".rotate")`;
+    float $s[] = `getAttr ($n + ".scale")`;
+    float $h[] = `getAttr ($n + ".shear")`;
+    print("  t :{" + floatArrayToString($t, ", ") + "}\n");
+    print("  r :{" + floatArrayToString($r, ", ") + "}\n");
+    print("  s :{" + floatArrayToString($s, ", ") + "}\n");
+    print("  h :{" + floatArrayToString($h, ", ") + "}\n");
+
+    int $o = `getAttr ($n + ".rotateOrder")`;
+    $o = reverseRotateOrder($o);
+    int $oXYZ = reverseRotateOrder(0);
+
+    float $rq[] = eulerToQuat($r, $o);
+
+    float $ra[] = `getAttr ($n + ".rotateAxis")`;
+    $ra = eulerToQuat($ra, $oXYZ);
+
+    float $jo[] = {0, 0, 0, 1};
+    if (`attributeQuery -n $n -ex "jointOrient"`) {
+      $jo = `getAttr ($n + ".jointOrient")`;
+      $jo = eulerToQuat($jo, $oXYZ);
+    }
+
+    float $q[] = quatMultiply($jo, quatMultiply($ra, $rq));
+
+    print("  o :" + $o + "\n");
+    print("  rq:{" + floatArrayToString($rq, ", ") + "}\n");
+    print("  ra:{" + floatArrayToString($ra, ", ") + "}\n");
+    print("  jo:{" + floatArrayToString($jo, ", ") + "}\n");
+    print("  q :{" + floatArrayToString($q, ", ") + "}\n");
+
+    $values = {
+      $t[0], $t[1], $t[2],
+      $q[0], $q[1], $q[2], $q[3],
+      $s[0], $s[1], $s[2],
+      $h[0], $h[1], $h[2]
+    };
+  }
+  return $values;
+}
+
+/*-
 @param $nodes <string[]>
 @returns <string[]>
 */
-proc string[] gatherTransformAttributes(string $nodes[]) {
-  print("gatherTransformAttributes\n");
+proc string[] generatePoseTransforms(string $nodes[]) {
+  print("generatePoseTransforms\n");
   print("  nodes:{\n    " + stringArrayToString($nodes, ",\n    ") + "\n  }\n");
-  string $valuesArray[];
+  string $poseTransforms[];
   for ($n in $nodes) {
-    print("  n:" + $n + "\n");
-    string $type = `nodeType $n`;
-    if ($type == "transform" || $type == "joint") {
-      float $t[] = `getAttr ($n + ".translate")`;
-      float $r[] = `getAttr ($n + ".rotate")`;
-      float $s[] = `getAttr ($n + ".scale")`;
-      float $h[] = `getAttr ($n + ".shear")`;
-      print("    t :{" + floatArrayToString($t, ", ") + "}\n");
-      print("    r :{" + floatArrayToString($r, ", ") + "}\n");
-      print("    s :{" + floatArrayToString($s, ", ") + "}\n");
-      print("    h :{" + floatArrayToString($h, ", ") + "}\n");
-
-      int $o = `getAttr ($n + ".rotateOrder")`;
-      $o = reverseRotateOrder($o);
-      int $oXYZ = reverseRotateOrder(0);
-
-      float $rq[] = eulerToQuat($r, $o);
-
-      float $ra[] = `getAttr ($n + ".rotateAxis")`;
-      $ra = eulerToQuat($ra, $oXYZ);
-
-      float $jo[] = {0, 0, 0, 1};
-      if (`attributeQuery -n $n -ex "jointOrient"`) {
-        $jo = `getAttr ($n + ".jointOrient")`;
-        $jo = eulerToQuat($jo, $oXYZ);
-      }
-
-      float $q[] = quatMultiply($jo, quatMultiply($ra, $rq));
-
-      print("    o :" + $o + "\n");
-      print("    rq:{" + floatArrayToString($rq, ", ") + "}\n");
-      print("    ra:{" + floatArrayToString($ra, ", ") + "}\n");
-      print("    jo:{" + floatArrayToString($jo, ", ") + "}\n");
-      print("    q :{" + floatArrayToString($q, ", ") + "}\n");
-
-      // int $i = `size $valuesArray`;
-      // $valuesArray[$i] = floatArrayToString($t, ",");
-      // $valuesArray[$i] = $valuesArray[$i] + "," + (floatArrayToString($q, ","));
-      // $valuesArray[$i] = $valuesArray[$i] + "," + (floatArrayToString($s, ","));
-      // $valuesArray[$i] = $valuesArray[$i] + "," + (floatArrayToString($h, ","));
-
-      $valuesArray[`size $valuesArray`] = floatArrayToString($t, ",")
-          + "," + (floatArrayToString($q, ","))
-          + "," + (floatArrayToString($s, ","))
-          + "," + (floatArrayToString($h, ","));
-    }
+    string $values = floatArrayToString(makeTransformValues($n), ",");
+    print("  values:" + $values + "\n");
+    $poseTransforms[`size $poseTransforms`] = $n + "=" + $values + ";";
   }
-  return $valuesArray;
+  return $poseTransforms;
 }
 
 /*-
@@ -917,12 +931,10 @@ proc string buildPoseSettings(
 
 /*-
 @param $poseName <string>
-// @param $poseSettings <int[]>
 @param $pasteSettings <int[]>
 @param $selectSettings <string[]>
 @param $mirrorSettings <int[]>
-@param $nodes <string[]>
-@param $valuesArray <string[]>
+@param $poseTransforms <string[]>
 @returns <string>
 */
 proc string buildPose(
@@ -930,19 +942,14 @@ proc string buildPose(
   int $pasteSettings[],
   string $selectSettings[],
   int $mirrorSettings[],
-  string $nodes[],
-  string $valuesArray[]
+  string $poseTransforms[]
 ) {
   string $poseSettings = buildPoseSettings(
     $pasteSettings, $selectSettings, $mirrorSettings
   );
   string $pose = $poseName + "[" + $poseSettings + "]";
-  int $numNodes = `size $nodes`;
-  for ($i = 0; $i < $numNodes; $i++) {
-    $pose += $nodes[$i] + "=" + $valuesArray[$i];
-    if ($i < $numNodes - 1) {
-      $pose += ";";
-    }
+  for ($poseTransform in $poseTransforms) {
+    $pose += $poseTransform;
   }
   return $pose;
 }
@@ -1231,16 +1238,15 @@ proc addPose() {
 
   if ($result != "OK") return;
 
-  string $valuesArray[] = gatherTransformAttributes($nodes);
-  print("  valuesArray:{\n    " + (stringArrayToString($valuesArray, ",\n    ")) + "\n  }\n");
+  string $poseTransforms[] = generatePoseTransforms($nodes);
+  print("  poseTransforms:{\n    " + (stringArrayToString($poseTransforms, ",\n    ")) + "\n  }\n");
 
   string $pose = buildPose(
     $nkCopyPosePromptPoseName,
     $nkCopyPosePromptPasteSettings,
     $nkCopyPosePromptSelectSettings,
     $nkCopyPosePromptMirrorSettings,
-    $nodes,
-    $valuesArray
+    $poseTransforms
   );
   print("  pose:" + $pose + "\n");
 
@@ -1294,16 +1300,15 @@ proc updatePose() {
   print("  nodes:{\n    " + (stringArrayToString($nodes, ",\n    ")) + "\n  }\n");
   if (`size $nodes` == 0) return;
 
-  string $valuesArray[] = gatherTransformAttributes($nodes);
-  print("  valuesArray:{\n    " + (stringArrayToString($valuesArray, ",\n    ")) + "\n  }\n");
+  string $poseTransforms[] = generatePoseTransforms($nodes);
+  print("  poseTransforms:{\n    " + (stringArrayToString($poseTransforms, ",\n    ")) + "\n  }\n");
 
   string $newPose = buildPose(
     $poseName,
     $pasteSettings,
     $selectSettings,
     $mirrorSettings,
-    $nodes,
-    $valuesArray
+    $poseTransforms
   );
   print("  newPose:" + $newPose + "\n");
 
@@ -2203,7 +2208,7 @@ global proc nkCopyPoseInvokeEvent(string $event, string $control) {
 @returns <string>
 */
 global proc string nkCopyPoseVersion() {
-  return "2.7.0";
+  return "2.8.0";
 }
 
 /*-
