@@ -7,9 +7,10 @@
 // 文字列
 // -----------------------------------------------------------------------------
 /*-
+入力文字列を正規表現パターンに一致する部分とそれ以外に分割する。
 @param $regex <string>
 @param $input <string>
-@returns <string[]>
+@returns <string[]> 一致する部分がなければ空の配列を返す。
 */
 proc string[] divideString(string $regex, string $input) {
   string $substrings[];
@@ -340,7 +341,7 @@ proc string getParentNode(string $n) {
 // UIコントロール
 // -----------------------------------------------------------------------------
 /*-
-@var <string[]> UIコントロール配列。
+@var <string[]> 共有のUIコントロール配列。
 */
 global string $nkUIControls[];
 
@@ -783,6 +784,7 @@ proc float[] mirrorTransform(
     if ($invertPrimaryAxis) $t[$primaryAxis] *= -1;
     if ($invertSecondaryAxis) $t[$secondaryAxis] *= -1;
     if ($invertPrimaryAxis == $invertSecondaryAxis) {
+      // 第三の軸を反転
       int $usedAxis[];
       $usedAxis[$primaryAxis] = 1;
       $usedAxis[$secondaryAxis] = 1;
@@ -841,7 +843,7 @@ proc float[] mirrorTransform(
     }
   }
 
-  // プライマリとセカンダリを対象化するための反転
+  // プライマリとセカンダリを対称化するための反転
   if ($mirrorAxis == $primaryAxis || $mirrorAxis == $secondaryAxis) {
     float $flipAxis[] = {0, 0, 0};
     if ($mirrorAxis == $primaryAxis) {
@@ -1235,7 +1237,7 @@ proc editPose(
 
 /*-
 @param $poseIndex <int>
-@returns <int> 移動後のポーズインデックス。
+@returns <int> 移動後のポーズインデックス。基数は`0`。
 */
 proc int moveUpPose(int $poseIndex) {
   print("moveUpPose\n");
@@ -1252,7 +1254,7 @@ proc int moveUpPose(int $poseIndex) {
 
 /*-
 @param $poseIndex <int>
-@returns <int> 移動後のポーズインデックス。
+@returns <int> 移動後のポーズインデックス。基数は`0`。
 */
 proc int moveDownPose(int $poseIndex) {
   print("moveDownPose\n");
