@@ -349,8 +349,8 @@ global string $nkUIControls[];
 @param $control <string[]>
 @returns <>
 */
-proc nkUIControlsAppend(string $controls[]) {
-  print("nkUIControlsAppend\n");
+proc nkUIAppendControls(string $controls[]) {
+  print("nkUIAppendControls\n");
   global string $nkUIControls[];
   for ($control in $controls) {
     $nkUIControls[`size $nkUIControls`] = $control;
@@ -363,8 +363,8 @@ proc nkUIControlsAppend(string $controls[]) {
 @param $end <string> 同じウィンドウのコントロールを一括除去する場合は空文字列を指定する。
 @returns <>
 */
-proc nkUIControlsRemove(string $root, string $end) {
-  print("nkUIControlsRemove\n");
+proc nkUIRemoveControls(string $root, string $end) {
+  print("nkUIRemoveControls\n");
   global string $nkUIControls[];
   string $paths[];
   for ($control in $nkUIControls) {
@@ -388,7 +388,7 @@ proc nkUIControlsRemove(string $root, string $end) {
 @param $end <string> ウィンドウの場合は`$root`と同じ値を指定する。
 @returns <string>
 */
-proc string nkUIControlsGet(string $root, string $end) {
+proc string nkUIGetControl(string $root, string $end) {
   global string $nkUIControls[];
   string $path;
   for ($control in $nkUIControls) {

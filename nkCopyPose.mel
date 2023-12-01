@@ -349,8 +349,8 @@ global string $nkUIControls[];
 @param $control <string[]>
 @returns <>
 */
-proc nkUIControlsAppend(string $controls[]) {
-  print("nkUIControlsAppend\n");
+proc nkUIAppendControls(string $controls[]) {
+  print("nkUIAppendControls\n");
   global string $nkUIControls[];
   for ($control in $controls) {
     $nkUIControls[`size $nkUIControls`] = $control;
@@ -363,8 +363,8 @@ proc nkUIControlsAppend(string $controls[]) {
 @param $end <string> 同じウィンドウのコントロールを一括除去する場合は空文字列を指定する。
 @returns <>
 */
-proc nkUIControlsRemove(string $root, string $end) {
-  print("nkUIControlsRemove\n");
+proc nkUIRemoveControls(string $root, string $end) {
+  print("nkUIRemoveControls\n");
   global string $nkUIControls[];
   string $paths[];
   for ($control in $nkUIControls) {
@@ -388,7 +388,7 @@ proc nkUIControlsRemove(string $root, string $end) {
 @param $end <string> ウィンドウの場合は`$root`と同じ値を指定する。
 @returns <string>
 */
-proc string nkUIControlsGet(string $root, string $end) {
+proc string nkUIGetControl(string $root, string $end) {
   global string $nkUIControls[];
   string $path;
   for ($control in $nkUIControls) {
@@ -1452,7 +1452,7 @@ proc string sanitizePoseName(string $poseName) {
 @returns <>
 */
 proc poseNameTextChanged() {
-  string $control = nkUIControlsGet("layoutDialog", "poseNameText");
+  string $control = nkUIGetControl("layoutDialog", "poseNameText");
   string $text = sanitizePoseName(textFieldGrpGetText($control));
   int $position = textFieldGrpGetInsertionPosition($control);
   if (`size $text` < $position) {
@@ -1466,7 +1466,7 @@ proc poseNameTextChanged() {
 @returns <>
 */
 proc selectPatternATextChanged() {
-  string $control = nkUIControlsGet("layoutDialog", "selectPatternAText");
+  string $control = nkUIGetControl("layoutDialog", "selectPatternAText");
   string $text = sanitizePoseName(textFieldGrpGetText($control));
   int $position = textFieldGrpGetInsertionPosition($control);
   if (`size $text` < $position) {
@@ -1480,7 +1480,7 @@ proc selectPatternATextChanged() {
 @returns <>
 */
 proc selectPatternBTextChanged() {
-  string $control = nkUIControlsGet("layoutDialog", "selectPatternBText");
+  string $control = nkUIGetControl("layoutDialog", "selectPatternBText");
   string $text = sanitizePoseName(textFieldGrpGetText($control));
   int $position = textFieldGrpGetInsertionPosition($control);
   if (`size $text` < $position) {
@@ -1494,8 +1494,8 @@ proc selectPatternBTextChanged() {
 @returns <>
 */
 proc primaryAxisRadioButtonChanged() {
-  string $paControl = nkUIControlsGet("layoutDialog", "primaryAxisRadioButton");
-  string $saControl = nkUIControlsGet("layoutDialog", "secondaryAxisRadioButton");
+  string $paControl = nkUIGetControl("layoutDialog", "primaryAxisRadioButton");
+  string $saControl = nkUIGetControl("layoutDialog", "secondaryAxisRadioButton");
   int $primaryAxisSelect = radioButtonGrpGetSelect($paControl);
   int $secondaryAxisSelect = radioButtonGrpGetSelect($saControl);
   if ($primaryAxisSelect == $secondaryAxisSelect) {
@@ -1511,8 +1511,8 @@ proc primaryAxisRadioButtonChanged() {
 @returns <>
 */
 proc secondaryAxisRadioButtonChanged() {
-  string $paControl = nkUIControlsGet("layoutDialog", "primaryAxisRadioButton");
-  string $saControl = nkUIControlsGet("layoutDialog", "secondaryAxisRadioButton");
+  string $paControl = nkUIGetControl("layoutDialog", "primaryAxisRadioButton");
+  string $saControl = nkUIGetControl("layoutDialog", "secondaryAxisRadioButton");
   int $primaryAxisSelect = radioButtonGrpGetSelect($paControl);
   int $secondaryAxisSelect = radioButtonGrpGetSelect($saControl);
   if ($primaryAxisSelect == $secondaryAxisSelect) {
@@ -1534,43 +1534,43 @@ proc okButtonPressed() {
   global int $nkCopyPosePromptMirrorSettings[];
 
   string $newPoseName = sanitizePoseName(
-    textFieldGrpGetText(nkUIControlsGet("layoutDialog", "poseNameText"))
+    textFieldGrpGetText(nkUIGetControl("layoutDialog", "poseNameText"))
   );
   if (`size $newPoseName`) {
     $nkCopyPosePromptPoseName = $newPoseName;
   }
 
   int $pasteAttributesValues[] = checkBoxGrpGetValues(
-    nkUIControlsGet("layoutDialog", "pasteAttributesCheckBoxGrp")
+    nkUIGetControl("layoutDialog", "pasteAttributesCheckBoxGrp")
   );
   $nkCopyPosePromptPasteSettings[0] = $pasteAttributesValues[0];
   $nkCopyPosePromptPasteSettings[1] = $pasteAttributesValues[1];
   $nkCopyPosePromptPasteSettings[2] = $pasteAttributesValues[2];
 
   string $newSelectPatternA = sanitizePoseName(
-    textFieldGrpGetText(nkUIControlsGet("layoutDialog", "selectPatternAText"))
+    textFieldGrpGetText(nkUIGetControl("layoutDialog", "selectPatternAText"))
   );
   if (`size $newSelectPatternA`) {
     $nkCopyPosePromptSelectSettings[0] = $newSelectPatternA;
   }
   string $newSelectPatternB = sanitizePoseName(
-    textFieldGrpGetText(nkUIControlsGet("layoutDialog", "selectPatternBText"))
+    textFieldGrpGetText(nkUIGetControl("layoutDialog", "selectPatternBText"))
   );
   if (`size $newSelectPatternB`) {
     $nkCopyPosePromptSelectSettings[1] = $newSelectPatternB;
   }
 
   int $mirrorAxisSelect = radioButtonGrpGetSelect(
-    nkUIControlsGet("layoutDialog", "mirrorAxisRadioButton")
+    nkUIGetControl("layoutDialog", "mirrorAxisRadioButton")
   );
   int $primaryAxisSelect = radioButtonGrpGetSelect(
-    nkUIControlsGet("layoutDialog", "primaryAxisRadioButton")
+    nkUIGetControl("layoutDialog", "primaryAxisRadioButton")
   );
   int $secondaryAxisSelect = radioButtonGrpGetSelect(
-    nkUIControlsGet("layoutDialog", "secondaryAxisRadioButton")
+    nkUIGetControl("layoutDialog", "secondaryAxisRadioButton")
   );
   int $invertAxisValues[] = checkBoxGrpGetValues(
-    nkUIControlsGet("layoutDialog", "invertAxisCheckBoxGrp")
+    nkUIGetControl("layoutDialog", "invertAxisCheckBoxGrp")
   );
 
   $nkCopyPosePromptMirrorSettings[0] = $mirrorAxisSelect - 1;
@@ -1592,7 +1592,7 @@ proc cancelButtonPressed() {
 @returns <>
 */
 proc refreshPoseList() {
-  string $poseList = nkUIControlsGet("nkCopyPoseWindow", "poseList");
+  string $poseList = nkUIGetControl("nkCopyPoseWindow", "poseList");
   int $selectedIndex = textScrollListGetSelectedIndex($poseList);
   textScrollListRemoveAll($poseList);
   string $poseNames[] = getPoseNames();
@@ -1660,7 +1660,7 @@ proc addPoseButtonPressed() {
   );
 
   refreshPoseList();
-  string $poseList = nkUIControlsGet("nkCopyPoseWindow", "poseList");
+  string $poseList = nkUIGetControl("nkCopyPoseWindow", "poseList");
   textScrollListSelectItem($numPoses, $poseList);
 }
 
@@ -1669,7 +1669,7 @@ proc addPoseButtonPressed() {
 */
 proc deletePoseButtonPressed() {
   print("deletePoseButtonPressed\n");
-  string $poseList = nkUIControlsGet("nkCopyPoseWindow", "poseList");
+  string $poseList = nkUIGetControl("nkCopyPoseWindow", "poseList");
   int $selectedIndex = textScrollListGetSelectedIndex($poseList);
   print("  selectedIndex:" + $selectedIndex + "\n");
   if ($selectedIndex == 0 || $selectedIndex > (getNumPoses())) return;
@@ -1682,7 +1682,7 @@ proc deletePoseButtonPressed() {
 */
 proc updatePoseButtonPressed() {
   print("updatePoseButtonPressed\n");
-  string $poseList = nkUIControlsGet("nkCopyPoseWindow", "poseList");
+  string $poseList = nkUIGetControl("nkCopyPoseWindow", "poseList");
   int $selectedIndex = textScrollListGetSelectedIndex($poseList);
   print("  selectedIndex:" + $selectedIndex + "\n");
   if ($selectedIndex == 0) return;
@@ -1704,7 +1704,7 @@ proc editPoseButtonPressed() {
   global string $nkCopyPosePromptSelectSettings[];
   global int $nkCopyPosePromptMirrorSettings[];
 
-  string $poseList = nkUIControlsGet("nkCopyPoseWindow", "poseList");
+  string $poseList = nkUIGetControl("nkCopyPoseWindow", "poseList");
   int $selectedIndex = textScrollListGetSelectedIndex($poseList);
   print("  selectedIndex:" + $selectedIndex + "\n");
   if ($selectedIndex == 0) return;
@@ -1749,7 +1749,7 @@ proc editPoseButtonPressed() {
 */
 proc moveUpPoseButtonPressed() {
   print("moveUpPoseButtonPressed\n");
-  string $poseList = nkUIControlsGet("nkCopyPoseWindow", "poseList");
+  string $poseList = nkUIGetControl("nkCopyPoseWindow", "poseList");
   int $selectedIndex = textScrollListGetSelectedIndex($poseList);
   print("  selectedIndex:" + $selectedIndex + "\n");
   if ($selectedIndex < 2 || $selectedIndex > (getNumPoses())) return;
@@ -1763,7 +1763,7 @@ proc moveUpPoseButtonPressed() {
 */
 proc moveDownPoseButtonPressed() {
   print("moveDownPoseButtonPressed\n");
-  string $poseList = nkUIControlsGet("nkCopyPoseWindow", "poseList");
+  string $poseList = nkUIGetControl("nkCopyPoseWindow", "poseList");
   int $selectedIndex = textScrollListGetSelectedIndex($poseList);
   print("  selectedIndex:" + $selectedIndex + "\n");
   if ($selectedIndex < 1 || $selectedIndex >= (getNumPoses())) return;
@@ -1779,7 +1779,7 @@ proc moveDownPoseButtonPressed() {
 proc selectButtonPressed(int $isOpposite) {
   print("selectButtonPressed\n");
   print("  isOpposite:" + $isOpposite + "\n");
-  string $poseList = nkUIControlsGet("nkCopyPoseWindow", "poseList");
+  string $poseList = nkUIGetControl("nkCopyPoseWindow", "poseList");
   int $selectedIndex = textScrollListGetSelectedIndex($poseList);
   print("  selectedIndex:" + $selectedIndex + "\n");
   if ($selectedIndex == 0) return;
@@ -1793,7 +1793,7 @@ proc selectButtonPressed(int $isOpposite) {
 proc pasteButtonPressed(int $isOpposite) {
   print("pasteButtonPressed\n");
   print("  isOpposite:" + $isOpposite + "\n");
-  string $poseList = nkUIControlsGet("nkCopyPoseWindow", "poseList");
+  string $poseList = nkUIGetControl("nkCopyPoseWindow", "poseList");
   int $selectedIndex = textScrollListGetSelectedIndex($poseList);
   print("  selectedIndex:" + $selectedIndex + "\n");
   if ($selectedIndex == 0) return;
@@ -1893,7 +1893,7 @@ global proc buildPromptWindow() {
   global string $nkCopyPosePromptSelectSettings[];
   global int $nkCopyPosePromptMirrorSettings[];
 
-  nkUIControlsRemove("layoutDialog", "");
+  nkUIRemoveControls("layoutDialog", "");
 
   string $outerForm = `setParent -q`;
     string $settingsColumn = `columnLayout
@@ -2070,7 +2070,7 @@ global proc buildPromptWindow() {
   print("// " + $okButton + "\n");
   print("// " + $cancelButton + "\n");
 
-  nkUIControlsAppend({
+  nkUIAppendControls({
     $poseNameText,
     $pasteAttributesCheckBoxGrp,
     $selectPatternAText,
@@ -2086,7 +2086,7 @@ global proc buildPromptWindow() {
 @returns <>
 */
 proc buildMainWindow() {
-  nkUIControlsRemove("nkCopyPoseWindow", "");
+  nkUIRemoveControls("nkCopyPoseWindow", "");
 
   if (`window -ex nkCopyPoseWindow` == true) {
     deleteUI nkCopyPoseWindow;
@@ -2302,7 +2302,7 @@ proc buildMainWindow() {
   print("// " + $pasteSourceButton + "\n");
   print("// " + $pasteOppositeButton + "\n");
 
-  nkUIControlsAppend({$poseList});
+  nkUIAppendControls({$poseList});
 
   refreshPoseList();
 
@@ -2334,7 +2334,7 @@ proc initialize() {
 @returns <string>
 */
 global proc string nkCopyPoseVersion() {
-  return "2.9.0";
+  return "2.9.1";
 }
 
 /*-
