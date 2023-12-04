@@ -28,10 +28,11 @@ proc string[] divideString(string $regex, string $input) {
 */
 proc string getScriptDir(string $procName) {
   string $scriptDir;
-  string $procParts[] = divideString(
-    "^Mel procedure found in: *",
-    `whatIs $procName`
-  );
+  string $thisIs = `whatIs $procName`;
+  string $procParts[] = divideString("^Mel procedure found in: *", $thisIs);
+  if (`size $procParts` != 2) {
+    string $procParts[] = divideString("^Script found in: *", $thisIs);
+  }
   if (`size $procParts` == 2 && `size $procParts[1]`) {
     string $scriptPath = $procParts[1];
     string $pathParts[] = divideString(
@@ -3052,7 +3053,7 @@ proc initialize() {
 @returns <string>
 */
 global proc string nkCopyPoseVersion() {
-  return "3.0.0";
+  return "3.0.1";
 }
 
 /*-
