@@ -1349,7 +1349,6 @@ proc updatePose(
 
   string $poseName = extractPoseName($pose);
   print("  poseName      :" + $poseName + "\n");
-
   string $poseTransforms[] = extractPoseTransforms($pose);
   print("  poseTransforms:{\n    " + stringArrayToString($poseTransforms, ",\n    ") + "\n  }\n");
   if (!`size $poseTransforms`) return;
@@ -1366,7 +1365,6 @@ proc updatePose(
     $nodes[$i] = $node;
     $poseSettings[$i] = $poseSetting;
   }
-
   string $newPoseTransforms[] = generatePoseTransforms($nodes, $poseSettings);
   print("  newPoseTransforms:{\n    " + (stringArrayToString($newPoseTransforms, ",\n    ")) + "\n  }\n");
 
@@ -1402,9 +1400,8 @@ proc editPose(
   print("  poseTransforms:{\n    " + stringArrayToString($poseTransforms, ",\n    ") + "\n  }\n");
   if (!`size $poseTransforms`) return;
 
-  int $numTransforms = minStringArrayCount($poseSettings, $poseTransforms);
-
   string $newPoseTransforms[];
+  int $numTransforms = minStringArrayCount($poseSettings, $poseTransforms);
   for ($i = 0; $i < $numTransforms; $i++) {
     string $poseTransform = $poseTransforms[$i];
     print("  poseTransform:" + $poseTransform + "\n");
@@ -1547,7 +1544,6 @@ proc pastePose(int $poseIndex, int $isOpposite, string $nodes[]) {
 
   int $numTargets = minStringArrayCount($nodes, $poseTransforms);
   print("  numTargets:" + $numTargets + "\n");
-
   for ($i = 0; $i < $numTargets; $i++) {
     string $poseTransform = $poseTransforms[$i];
     print("  poseTransform:" + $poseTransform + "\n");
