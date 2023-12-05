@@ -716,24 +716,37 @@ global string $nkPoseStackPoses[];
 @var <int[]>
 */
 global int $nkPoseStackInitPasteSetting[];
-if (!`size $nkPoseStackInitPasteSetting`) {
-  $nkPoseStackInitPasteSetting = {1, 1, 0};
-}
 
 /*-
 @var <string[]>
 */
 global string $nkPoseStackInitSelectSetting[];
-if (!`size $nkPoseStackInitSelectSetting`) {
-  $nkPoseStackInitSelectSetting = {"_L", "_R"};
-}
 
 /*-
 @var <int[]>
 */
 global int $nkPoseStackInitMirrorSetting[];
-if (!`size $nkPoseStackInitMirrorSetting`) {
-  $nkPoseStackInitMirrorSetting = {0, 0, 1, 0, 0};
+
+/*-
+@returns <>
+*/
+proc initializeInitSettingVariables() {
+  // print("initializeInitSettingVariables\n");
+  global int $nkPoseStackInitPasteSetting[];
+  global string $nkPoseStackInitSelectSetting[];
+  global int $nkPoseStackInitMirrorSetting[];
+  if (!`size $nkPoseStackInitPasteSetting`) {
+    $nkPoseStackInitPasteSetting = {1, 1, 0};
+    // print("  nkPoseStackInitPasteSetting :{" + intArrayToString($nkPoseStackInitPasteSetting, ", ") + "}\n");
+  }
+  if (!`size $nkPoseStackInitSelectSetting`) {
+    $nkPoseStackInitSelectSetting = {"_L", "_R"};
+    // print("  nkPoseStackInitSelectSetting:{" + stringArrayToString($nkPoseStackInitSelectSetting, ", ") + "}\n");
+  }
+  if (!`size $nkPoseStackInitMirrorSetting`) {
+    $nkPoseStackInitMirrorSetting = {0, 0, 1, 0, 0};
+    // print("  nkPoseStackInitMirrorSetting:{" + intArrayToString($nkPoseStackInitMirrorSetting, ", ") + "}\n");
+  }
 }
 
 // -----------------------------------------------------------------------------
@@ -3046,6 +3059,7 @@ proc buildMainWorkspaceControl() {
 @returns <>
 */
 proc initialize() {
+  initializeInitSettingVariables();
   buildMainWorkspaceControl();
   // registerScriptJob();
 }
@@ -3054,7 +3068,7 @@ proc initialize() {
 @returns <string>
 */
 global proc string nkPoseStackVersion() {
-  return "3.2.1";
+  return "3.2.2";
 }
 
 /*-
