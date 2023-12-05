@@ -7,43 +7,29 @@
 // 文字列
 // -----------------------------------------------------------------------------
 /*-
-入力文字列を正規表現パターンに一致する部分とそれ以外に分割する。
-@param $regex <string>
-@param $input <string>
-@returns <string[]> 一致する部分がなければ空の配列を返す。
+@param $procName <string>
+@returns <string>
 */
-proc string[] divideString(string $regex, string $input) {
-  string $substrings[];
-  string $part1 = `match $regex $input`;
-  if (`size $part1`) {
-    string $part2 = `substitute $regex $input ""`;
-    $substrings = {$part1, $part2};
+proc string getSourceFilename(string $procName) {
+  string $filename;
+  string $thisIs = `whatIs $procName`;
+  string $regex1 = "^Mel procedure found in: *";
+  string $regex2 = "^Script found in: *";
+  if (`match $regex1 $thisIs` != "") {
+    $filename = `substitute $regex1 $thisIs ""`;
   }
-  return $substrings;
+  else if (`match $regex2 $thisIs` != "") {
+    $filename = `substitute $regex2 $thisIs ""`;
+  }
+  return $filename;
 }
 
 /*-
 @param $procName <string>
 @returns <string>
 */
-proc string getScriptDir(string $procName) {
-  string $scriptDir;
-  string $thisIs = `whatIs $procName`;
-  string $procParts[] = divideString("^Mel procedure found in: *", $thisIs);
-  if (`size $procParts` != 2) {
-    string $procParts[] = divideString("^Script found in: *", $thisIs);
-  }
-  if (`size $procParts` == 2 && `size $procParts[1]`) {
-    string $scriptPath = $procParts[1];
-    string $pathParts[] = divideString(
-      "/" + $procName + "\\.mel$",
-      $scriptPath
-    );
-    if (`size $pathParts` == 2 && `size $pathParts[1]`) {
-      $scriptDir = $pathParts[1];
-    }
-  }
-  return $scriptDir;
+proc string getSourceDirname(string $procName) {
+  return dirname(getSourceFilename($procName));
 }
 
 // -----------------------------------------------------------------------------
