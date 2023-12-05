@@ -1,33 +1,39 @@
-# nkCopyPose
+# nkPoseStack
 
-[![GitHub release (latest by date)](https://img.shields.io/github/v/release/imaoki/nkCopyPose)](https://github.com/imaoki/nkCopyPose/releases/latest)
-[![GitHub](https://img.shields.io/github/license/imaoki/nkCopyPose)](https://github.com/imaoki/nkCopyPose/blob/main/LICENSE)
+[![GitHub release (latest by date)](https://img.shields.io/github/v/release/imaoki/nkPoseStack)](https://github.com/imaoki/nkPoseStack/releases/latest)
+[![GitHub](https://img.shields.io/github/license/imaoki/nkPoseStack)](https://github.com/imaoki/nkPoseStack/blob/main/LICENSE)
 
-ポーズをコピーする。
+ポーズをコピペするツール。
 
 ## 特徴
 
-![gui](resource/gui.png "gui")
+![window-main](resource/window-main.png "window-main")
 
 * 複数のポーズを登録可能。
 
-* 登録したポーズは削除/更新/リネーム/並べ替えが可能。
-
-* 反対側のノードの選択。
+* 置き換え文字を使用した反対側ノードの選択。
 
 * ポーズのミラーリング。
 
-  * 親座標系で処理。
+  * 対称化するプライマリ軸とセカンダリ軸を個別に指定可能。
 
-  * 変換行列のプライマリ軸とセカンダリ軸を個別に指定可能。
+  * プライマリ軸とセカンダリ軸をそれぞれ反転可能。
 
-  * プライマリ軸とセカンダリ軸の反転に対応。
+  * 全てのロールオーダーに対応。
 
-  * どのような軸の向きでもミラーリングが行えるはず…
+* 貼り付け先のアトリビュートやミラーリングの設定はノード毎に設定可能。
+
+  ![window-prompt](resource/window-prompt.png "window-prompt")
+
+* 作成済みポーズのトランスフォームを後から更新可能。
+
+* メインウィンドウはドッキング可能。
+
+  ![window-docking](resource/window-docking.png "window-docking")
 
 ## ライセンス
 
-[MIT License](https://github.com/imaoki/nkAxisOrientation/blob/main/LICENSE)
+[MIT License](https://github.com/imaoki/nkPoseStack/blob/main/LICENSE)
 
 <!-- ## 要件 -->
 
@@ -35,11 +41,11 @@
 
 ## 開発環境
 
-`Maya 2022.5`
+Maya 2022.5 / Windows 10
 
 ## インストール
 
-01. `nkCopyPose.mel`をコピーする。
+01. `nkPoseStackIcons`ディレクトリと`nkPoseStack.mel`をスクリプトディレクトリにコピー
 
     英語版
     : `%MAYA_APP_DIR%\<version>\scripts`
@@ -47,22 +53,33 @@
     日本語版
     : `%MAYA_APP_DIR%\<version>\ja_JP\scripts`
 
-    複数バージョン
-    : `%MAYA_APP_DIR%\scripts`
-
 02. Mayaを再起動
 
-## 使い方
+## 起動方法
 
 ```mel
-nkCopyPose();
+nkPoseStack;
 ```
+
+## 使用上の注意点
+
+* ポーズ名は重複可能です。
+
+* いずれの入力欄でも以下の文字は使用できません。
+
+  ```
+  = ; [ ] / ,
+  ```
+
+* ポーズのコピーと貼り付けはノードの選択順に行われます。
+  ノード名等は見ておらず選択順序のみが重要になります。
+  `Select Source`、`Select Opposite`、手動選択等を適宜使い分けてください。
+
+<!-- ## 使い方 -->
 
 ## 制限
 
-* 現在のところミラー設定等の状態は保存されません。
-
-* ポーズはMayaの起動中しか保持されません。
+* 現在のところ作成したポーズはMayaの起動中しか保持されません。
 
 <!-- ## 既知の問題 -->
 
