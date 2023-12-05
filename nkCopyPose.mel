@@ -1348,47 +1348,6 @@ proc int deletePose(int $poseIndex) {
 
 /*-
 @param $poseIndex <int> 基数`0`の整数。
-@returns <>
-*/
-proc updatePose(int $poseIndex) {
-  print("updatePose\n");
-  print("  poseIndex:" + $poseIndex + "\n");
-  global string $nkCopyPosePoses[];
-
-  string $pose = getPose($poseIndex);
-  if (!`size $pose`) return;
-
-  string $poseName = extractPoseName($pose);
-  print("  poseName      :" + $poseName + "\n");
-  string $poseTransforms[] = extractPoseTransforms($pose);
-  print("  poseTransforms:{\n    " + stringArrayToString($poseTransforms, ",\n    ") + "\n  }\n");
-  if (!`size $poseTransforms`) return;
-
-  string $nodes[];
-  string $poseSettings[];
-  for ($i = 0; $i < `size $poseTransforms`; $i++) {
-    string $poseTransform = $poseTransforms[$i];
-    print("  poseTransform:" + $poseTransform + "\n");
-    string $node = extractTransformNode($poseTransform);
-    print("    node       :" + $node + "\n");
-    string $poseSetting = extractPoseSetting($poseTransform);
-    print("    poseSetting:" + $poseSetting + "\n");
-    $nodes[$i] = $node;
-    $poseSettings[$i] = $poseSetting;
-  }
-  string $newPoseTransforms[] = generatePoseTransforms($nodes, $poseSettings);
-  print("  newPoseTransforms:{\n    " + (stringArrayToString($newPoseTransforms, ",\n    ")) + "\n  }\n");
-
-  string $newPose = buildPose(
-    $poseName,
-    $newPoseTransforms
-  );
-  print("  newPose:" + $newPose + "\n");
-  $nkCopyPosePoses[$poseIndex] = $newPose;
-}
-
-/*-
-@param $poseIndex <int> 基数`0`の整数。
 @param $poseName <string>
 @param $poseSettings <string[]>
 @returns <>
@@ -1430,6 +1389,23 @@ proc editPose(int $poseIndex, string $poseName, string $poseSettings[]) {
   );
   print("  newPose:" + $newPose + "\n");
   $nkCopyPosePoses[$poseIndex] = $newPose;
+}
+
+/*-
+@param $poseIndex <int> 基数`0`の整数。
+@returns <int> 複製先のポーズインデックス。基数は`0`。
+*/
+proc int duplicatePose(int $poseIndex) {
+  print("duplicatePose\n");
+  print("  poseIndex:" + $poseIndex + "\n");
+  global string $nkCopyPosePoses[];
+  if (!betweenInt($poseIndex, 0, getNumPoses() - 1)) return $poseIndex;
+  string $pose = getPose($poseIndex);
+  if (!`size $pose`) return $poseIndex;
+  int $newPoseIndex = $poseIndex + 1;
+  print("  newPoseIndex:" + $newPoseIndex + "\n");
+  stringArrayInsertAtIndex($newPoseIndex, $nkCopyPosePoses, $pose);
+  return $newPoseIndex;
 }
 
 /*-
@@ -1532,16 +1508,16 @@ proc selectNodes(int $poseIndex, int $isOpposite) {
 /*-
 @param $poseIndex <int> 基数`0`の整数。
 @param $isOpposite <boolean>
-@param $nodes <string[]>
+@param $targetNodes <string[]>
 @returns <>
 */
-proc pastePose(int $poseIndex, int $isOpposite, string $nodes[]) {
+proc pastePose(int $poseIndex, int $isOpposite, string $targetNodes[]) {
   print("pastePose\n");
-  print("  poseIndex :" + $poseIndex + "\n");
-  print("  isOpposite:" + $isOpposite + "\n");
-  print("  nodes     :{\n    " + stringArrayToString($nodes, ",\n    ") + "\n  }\n");
+  print("  poseIndex  :" + $poseIndex + "\n");
+  print("  isOpposite :" + $isOpposite + "\n");
+  print("  targetNodes:{\n    " + stringArrayToString($targetNodes, ",\n    ") + "\n  }\n");
 
-  if (!`size $nodes`) return;
+  if (!`size $targetNodes`) return;
 
   string $pose = getPose($poseIndex);
   print("  pose:" + $pose + "\n");
@@ -1551,14 +1527,14 @@ proc pastePose(int $poseIndex, int $isOpposite, string $nodes[]) {
   print("  poseTransforms:{\n    " + stringArrayToString($poseTransforms, ",\n    ") + "\n  }\n");
   if (!`size $poseTransforms`) return;
 
-  int $numTargets = minStringArrayCount($nodes, $poseTransforms);
+  int $numTargets = minStringArrayCount($targetNodes, $poseTransforms);
   print("  numTargets:" + $numTargets + "\n");
   for ($i = 0; $i < $numTargets; $i++) {
     string $poseTransform = $poseTransforms[$i];
     print("  poseTransform:" + $poseTransform + "\n");
     string $sourceNode = extractTransformNode($poseTransform);
     print("    sourceNode     :" + $sourceNode + "\n");
-    string $targetNode = $nodes[$i];
+    string $targetNode = $targetNodes[$i];
     print("    targetNode     :" + $targetNode + "\n");
 
     float $transformValues[] = extractTransformValues($poseTransform);
@@ -1599,6 +1575,47 @@ proc pastePose(int $poseIndex, int $isOpposite, string $nodes[]) {
       $pasteSetting[2]
     );
   }
+}
+
+/*-
+@param $poseIndex <int> 基数`0`の整数。
+@returns <>
+*/
+proc updatePose(int $poseIndex) {
+  print("updatePose\n");
+  print("  poseIndex:" + $poseIndex + "\n");
+  global string $nkCopyPosePoses[];
+
+  string $pose = getPose($poseIndex);
+  if (!`size $pose`) return;
+
+  string $poseName = extractPoseName($pose);
+  print("  poseName      :" + $poseName + "\n");
+  string $poseTransforms[] = extractPoseTransforms($pose);
+  print("  poseTransforms:{\n    " + stringArrayToString($poseTransforms, ",\n    ") + "\n  }\n");
+  if (!`size $poseTransforms`) return;
+
+  string $nodes[];
+  string $poseSettings[];
+  for ($i = 0; $i < `size $poseTransforms`; $i++) {
+    string $poseTransform = $poseTransforms[$i];
+    print("  poseTransform:" + $poseTransform + "\n");
+    string $node = extractTransformNode($poseTransform);
+    print("    node       :" + $node + "\n");
+    string $poseSetting = extractPoseSetting($poseTransform);
+    print("    poseSetting:" + $poseSetting + "\n");
+    $nodes[$i] = $node;
+    $poseSettings[$i] = $poseSetting;
+  }
+  string $newPoseTransforms[] = generatePoseTransforms($nodes, $poseSettings);
+  print("  newPoseTransforms:{\n    " + (stringArrayToString($newPoseTransforms, ",\n    ")) + "\n  }\n");
+
+  string $newPose = buildPose(
+    $poseName,
+    $newPoseTransforms
+  );
+  print("  newPose:" + $newPose + "\n");
+  $nkCopyPosePoses[$poseIndex] = $newPose;
 }
 
 // /////////////////////////////////////////////////////////////////////////////
@@ -2216,18 +2233,6 @@ proc deletePoseButtonPressed() {
 /*-
 @returns <>
 */
-proc updatePoseButtonPressed() {
-  print("updatePoseButtonPressed\n");
-  string $poseList = nkUIGetControl("nkCopyPoseWindow", "poseList");
-  int $poseIndex = textScrollListGetSelectIndexedItem($poseList);
-  print("  poseIndex:" + $poseIndex + "\n");
-  if ($poseIndex == -1) return;
-  updatePose($poseIndex);
-}
-
-/*-
-@returns <>
-*/
 proc editPoseButtonPressed() {
   print("editPoseButtonPressed\n");
   global int $nkCopyPoseInitPasteSetting[];
@@ -2298,12 +2303,26 @@ proc editPoseButtonPressed() {
 /*-
 @returns <>
 */
+proc duplicatePoseButtonPressed() {
+  print("duplicatePoseButtonPressed\n");
+  string $poseList = nkUIGetControl("nkCopyPoseWindow", "poseList");
+  int $poseIndex = textScrollListGetSelectIndexedItem($poseList);
+  print("  poseIndex:" + $poseIndex + "\n");
+  if ($poseIndex == -1) return;
+  int $newPoseIndex = duplicatePose($poseIndex);
+  if ($poseIndex == $newPoseIndex) return;
+  updatePoseList();
+  textScrollListSetSelectIndexedItem($newPoseIndex, $poseList);
+}
+
+/*-
+@returns <>
+*/
 proc moveUpPoseButtonPressed() {
   print("moveUpPoseButtonPressed\n");
   string $poseList = nkUIGetControl("nkCopyPoseWindow", "poseList");
   int $poseIndex = textScrollListGetSelectIndexedItem($poseList);
   print("  poseIndex:" + $poseIndex + "\n");
-  // if ($poseIndex < 2 || $poseIndex > (getNumPoses())) return;
   if ($poseIndex == -1) return;
   int $newPoseIndex = moveUpPose($poseIndex);
   if ($poseIndex == $newPoseIndex) return;
@@ -2319,12 +2338,19 @@ proc moveDownPoseButtonPressed() {
   string $poseList = nkUIGetControl("nkCopyPoseWindow", "poseList");
   int $poseIndex = textScrollListGetSelectIndexedItem($poseList);
   print("  poseIndex:" + $poseIndex + "\n");
-  // if ($poseIndex < 1 || $poseIndex >= (getNumPoses())) return;
   if ($poseIndex == -1) return;
   int $newPoseIndex = moveDownPose($poseIndex);
   if ($poseIndex == $newPoseIndex) return;
   updatePoseList();
   textScrollListSetSelectIndexedItem($newPoseIndex, $poseList);
+}
+
+/*-
+@returns <>
+*/
+proc poseListDoubleClicked() {
+  print("poseListDoubleClicked\n");
+  editPoseButtonPressed();
 }
 
 /*-
@@ -2361,9 +2387,13 @@ proc pasteButtonPressed(int $isOpposite) {
 /*-
 @returns <>
 */
-proc poseListDoubleClicked() {
-  print("poseListDoubleClicked\n");
-  editPoseButtonPressed();
+proc updatePoseButtonPressed() {
+  print("updatePoseButtonPressed\n");
+  string $poseList = nkUIGetControl("nkCopyPoseWindow", "poseList");
+  int $poseIndex = textScrollListGetSelectIndexedItem($poseList);
+  print("  poseIndex:" + $poseIndex + "\n");
+  if ($poseIndex == -1) return;
+  updatePose($poseIndex);
 }
 
 /*-
@@ -2438,14 +2468,15 @@ global proc nkCopyPoseInvokeEvent(
           switch ($control) {
             case "addPoseButton": addPoseButtonPressed(); break;
             case "deletePoseButton": deletePoseButtonPressed(); break;
-            case "updatePoseButton": updatePoseButtonPressed(); break;
             case "editPoseButton": editPoseButtonPressed(); break;
+            case "duplicatePoseButton": duplicatePoseButtonPressed(); break;
             case "moveUpPoseButton": moveUpPoseButtonPressed(); break;
             case "moveDownPoseButton": moveDownPoseButtonPressed(); break;
             case "selectSourceButton": selectButtonPressed(false); break;
             case "selectOppositeButton": selectButtonPressed(true); break;
             case "pasteSourceButton": pasteButtonPressed(false); break;
             case "pasteOppositeButton": pasteButtonPressed(true); break;
+            case "updatePoseButton": updatePoseButtonPressed(); break;
             default: break;
           }
           break;
@@ -2694,24 +2725,26 @@ proc buildMainWindow() {
   string $iconDir = `size $sourceDirname` ? $sourceDirname + "/icons/" : "";
   string $addIcon = $iconDir + "addPose.png";
   string $deleteIcon = $iconDir + "deletePose.png";
-  string $updateIcon = $iconDir + "updatePose.png";
   string $editIcon = $iconDir + "editPose.png";
+  string $duplicateIcon = $iconDir + "duplicatePose.png";
   string $moveUpIcon = $iconDir + "moveUpPose.png";
   string $moveDownIcon = $iconDir + "moveDownPose.png";
   string $selectSourceIcon = $iconDir + "selectSource.png";
   string $selectOppositeIcon = $iconDir + "selectOpposite.png";
   string $pasteSourceIcon = $iconDir + "pasteSource.png";
   string $pasteOppositeIcon = $iconDir + "pasteOpposite.png";
+  string $updateIcon = $iconDir + "updatePose.png";
   // print("addIcon           :" + $addIcon + "\n");
   // print("deleteIcon        :" + $deleteIcon + "\n");
-  // print("updateIcon        :" + $updateIcon + "\n");
   // print("editIcon          :" + $editIcon + "\n");
+  // print("duplicateIcon     :" + $duplicateIcon + "\n");
   // print("moveUpIcon        :" + $moveUpIcon + "\n");
   // print("moveDownIcon      :" + $moveDownIcon + "\n");
   // print("selectSourceIcon  :" + $selectSourceIcon + "\n");
   // print("selectOppositeIcon:" + $selectOppositeIcon + "\n");
   // print("pasteSourceIcon   :" + $pasteSourceIcon + "\n");
   // print("pasteOppositeIcon :" + $pasteOppositeIcon + "\n");
+  // print("updateIcon        :" + $updateIcon + "\n");
 
   string $nkCopyPoseWindow = `window -t ("nkCopyPose " + (nkCopyPoseVersion()))
       -mxb false
@@ -2722,9 +2755,8 @@ proc buildMainWindow() {
       string $poseManipRow = `rowLayout
           // -bgc 0.5 0.25 0.25
           -nc 7
-          -adj 1
+          -adj 5
           poseManipRow`;
-        separator -st "none" -vis false;
         string $addPoseButton = `iconTextButton
             -ann "Add"
             // -bgc 0.25 0.5 0.5
@@ -2737,18 +2769,19 @@ proc buildMainWindow() {
             -i $deleteIcon
             -w 23
             deletePoseButton`;
-        string $updatePoseButton = `iconTextButton
-            -ann "Update"
-            // -bgc 0.25 0.5 0.5
-            -i $updateIcon
-            -w 23
-            updatePoseButton`;
         string $editPoseButton = `iconTextButton
             -ann "Edit"
             // -bgc 0.25 0.5 0.5
             -i $editIcon
             -w 23
             editPoseButton`;
+        string $duplicatePoseButton = `iconTextButton
+            -ann "Duplicate"
+            // -bgc 0.25 0.5 0.5
+            -i $duplicateIcon
+            -w 23
+            duplicatePoseButton`;
+        separator -st "none" -vis false;
         string $moveUpPoseButton = `iconTextButton
             -ann "Move Up"
             // -bgc 0.25 0.5 0.5
@@ -2768,9 +2801,8 @@ proc buildMainWindow() {
       string $nodeManipRow = `rowLayout
           // -bgc 0.5 0.25 0.25
           -nc 6
-          -adj 1
+          -adj 5
           nodeManipRow`;
-        separator -st "none" -vis false;
         string $selectSourceButton = `iconTextButton
             -ann "Select Source"
             // -bgc 0.25 0.5 0.5
@@ -2783,7 +2815,6 @@ proc buildMainWindow() {
             -i $selectOppositeIcon
             -w 23
             selectOppositeButton`;
-        separator -st "none" -vis false -w 23;
         string $pasteSourceButton = `iconTextButton
             -ann "As Is Paste"
             // -bgc 0.25 0.5 0.5
@@ -2796,18 +2827,25 @@ proc buildMainWindow() {
             -i $pasteOppositeIcon
             -w 23
             pasteOppositeButton`;
+        separator -st "none" -vis false;
+        string $updatePoseButton = `iconTextButton
+            -ann "Update"
+            // -bgc 0.25 0.5 0.5
+            -i $updateIcon
+            -w 23
+            updatePoseButton`;
       setParent ..;
     setParent ..;
 
   formLayout -e
       -af $poseManipRow "top" 5
-      -af $poseManipRow "left" 3
+      -af $poseManipRow "left" 5
       -af $poseManipRow "right" 5
       -ac $poseList "top" 5 $poseManipRow
       -af $poseList "left" 5
       -af $poseList "right" 5
       -ac $poseList "bottom" 5 $nodeManipRow
-      -af $nodeManipRow "left" 3
+      -af $nodeManipRow "left" 5
       -af $nodeManipRow "right" 5
       -af $nodeManipRow "bottom" 5
       $outerForm;
@@ -2815,8 +2853,8 @@ proc buildMainWindow() {
   window -e -cc "nkCopyPoseInvokeEvent(\"nkCopyPoseWindow\", \"cc\", \"nkCopyPoseWindow\");" $nkCopyPoseWindow;
   iconTextButton -e -c "nkCopyPoseInvokeEvent(\"nkCopyPoseWindow\", \"c\", \"addPoseButton\");" $addPoseButton;
   iconTextButton -e -c "nkCopyPoseInvokeEvent(\"nkCopyPoseWindow\", \"c\", \"deletePoseButton\");" $deletePoseButton;
-  iconTextButton -e -c "nkCopyPoseInvokeEvent(\"nkCopyPoseWindow\", \"c\", \"updatePoseButton\");" $updatePoseButton;
   iconTextButton -e -c "nkCopyPoseInvokeEvent(\"nkCopyPoseWindow\", \"c\", \"editPoseButton\");" $editPoseButton;
+  iconTextButton -e -c "nkCopyPoseInvokeEvent(\"nkCopyPoseWindow\", \"c\", \"duplicatePoseButton\");" $duplicatePoseButton;
   iconTextButton -e -c "nkCopyPoseInvokeEvent(\"nkCopyPoseWindow\", \"c\", \"moveUpPoseButton\");" $moveUpPoseButton;
   iconTextButton -e -c "nkCopyPoseInvokeEvent(\"nkCopyPoseWindow\", \"c\", \"moveDownPoseButton\");" $moveDownPoseButton;
   textScrollList -e -dcc "nkCopyPoseInvokeEvent(\"nkCopyPoseWindow\", \"dcc\", \"poseList\");" $poseList;
@@ -2824,14 +2862,15 @@ proc buildMainWindow() {
   iconTextButton -e -c "nkCopyPoseInvokeEvent(\"nkCopyPoseWindow\", \"c\", \"selectOppositeButton\");" $selectOppositeButton;
   iconTextButton -e -c "nkCopyPoseInvokeEvent(\"nkCopyPoseWindow\", \"c\", \"pasteSourceButton\");" $pasteSourceButton;
   iconTextButton -e -c "nkCopyPoseInvokeEvent(\"nkCopyPoseWindow\", \"c\", \"pasteOppositeButton\");" $pasteOppositeButton;
+  iconTextButton -e -c "nkCopyPoseInvokeEvent(\"nkCopyPoseWindow\", \"c\", \"updatePoseButton\");" $updatePoseButton;
 
   // print("// " + $nkCopyPoseWindow + "\n");
   // print("// " + $outerForm + "\n");
   // print("// " + $poseManipRow + "\n");
   // print("// " + $addPoseButton + "\n");
   // print("// " + $deletePoseButton + "\n");
-  // print("// " + $updatePoseButton + "\n");
   // print("// " + $editPoseButton + "\n");
+  // print("// " + $duplicatePoseButton + "\n");
   // print("// " + $moveUpPoseButton + "\n");
   // print("// " + $moveDownPoseButton + "\n");
   // print("// " + $poseList + "\n");
@@ -2840,6 +2879,7 @@ proc buildMainWindow() {
   // print("// " + $selectOppositeButton + "\n");
   // print("// " + $pasteSourceButton + "\n");
   // print("// " + $pasteOppositeButton + "\n");
+  // print("// " + $updatePoseButton + "\n");
 
   nkUIAppendControls({$poseList});
 
@@ -2873,7 +2913,7 @@ proc initialize() {
 @returns <string>
 */
 global proc string nkCopyPoseVersion() {
-  return "3.0.3";
+  return "3.1.0";
 }
 
 /*-
