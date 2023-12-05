@@ -4,6 +4,29 @@
 // 汎用プロシージャ
 // /////////////////////////////////////////////////////////////////////////////
 // -----------------------------------------------------------------------------
+// 数値
+// -----------------------------------------------------------------------------
+/*-
+@param $value <float>
+@param $min <float>
+@param $max <float>
+@returns <int>
+*/
+proc int betweenFloat(float $value, float $min, float $max) {
+  return ($min <= $value && $value <= $max);
+}
+
+/*-
+@param $value <int>
+@param $min <int>
+@param $max <int>
+@returns <int>
+*/
+proc int betweenInt(int $value, int $min, int $max) {
+  return ($min <= $value && $value <= $max);
+}
+
+// -----------------------------------------------------------------------------
 // 文字列
 // -----------------------------------------------------------------------------
 /*-
@@ -491,19 +514,19 @@ proc radioButtonGrpSetEnable(int $enable, string $control) {
 
 /*-
 @param $control <string>
-@returns <int>
+@returns <int> 基数を`0`に補正した値。
 */
 proc int radioButtonGrpGetSelect(string $control) {
-  return `radioButtonGrp -q -sl $control`;
+  return (`radioButtonGrp -q -sl $control` - 1);
 }
 
 /*-
-@param $index <int>
+@param $index <int> 基数`0`の整数。
 @param $control <string>
 @returns <>
 */
 proc radioButtonGrpSetSelect(int $index, string $control) {
-  radioButtonGrp -e -sl $index $control;
+  radioButtonGrp -e -sl ($index + 1) $control;
 }
 
 /*-
@@ -525,19 +548,19 @@ proc textFieldGrpSetEnable(int $enable, string $control) {
 
 /*-
 @param $control <string>
-@returns <int>
+@returns <int> 基数を`0`に補正した値。
 */
 proc int textFieldGrpGetInsertionPosition(string $control) {
-  return `textFieldGrp -q -ip $control`;
+  return (`textFieldGrp -q -ip $control` - 1);
 }
 
 /*-
-@param $position <int>
+@param $position <int> 基数`0`の整数。`-1`を指定すると末尾にセットされる。
 @param $control <string>
 @returns <>
 */
 proc textFieldGrpSetInsertionPosition(int $position, string $control) {
-  textFieldGrp -e -ip $position $control;
+  textFieldGrp -e -ip ($position + 1) $control;
 }
 
 /*-
@@ -567,13 +590,13 @@ proc textScrollListAppend(string $label, string $control) {
 }
 
 /*-
-@param $index <int>
+@param $index <int> 基数`0`の整数。
 @param $label <string>
 @param $control <string>
 @returns <>
 */
 proc textScrollListAppendPosition(int $index, string $label, string $control) {
-  textScrollList -e -ap $index $label $control;
+  textScrollList -e -ap ($index + 1) $label $control;
 }
 
 /*-
@@ -585,49 +608,51 @@ proc textScrollListRemoveAll(string $control) {
 }
 
 /*-
-@param $index <int>
+@param $index <int> 基数`0`の整数。
 @param $control <string>
 @returns <>
 */
 proc textScrollListRemoveIndexedItem(int $index, string $control) {
-  textScrollList -e -rii $index $control;
+  textScrollList -e -rii ($index + 1) $control;
 }
 
 /*-
-@param $index <int>
+@param $index <int> 基数`0`の整数。
 @param $control <string>
 @returns <>
 */
 proc textScrollListSetSelectIndexedItem(int $index, string $control) {
-  textScrollList -e -sii $index $control;
+  textScrollList -e -sii ($index + 1) $control;
 }
 
 /*-
-@param $indices <int[]>
+@param $indices <int[]> 基数`0`の整数配列。
 @param $control <string>
 @returns <>
 */
 proc textScrollListSetSelectIndexedItems(int $indices[], string $control) {
   for ($i in $indices) {
-    textScrollList -e -sii $i $control;
+    textScrollList -e -sii ($i + 1) $control;
   }
 }
 
 /*-
 @param $control <string>
-@returns <int[]>
+@returns <int[]> 基数を`0`に補正した値。
 */
 proc int[] textScrollListGetSelectIndexedItems(string $control) {
-  return `textScrollList -q -sii $control`;
+  int $indices[] = `textScrollList -q -sii $control`;
+  for ($i = 0; $i < `size $indices`; $i++) $indices[$i] -= 1;
+  return $indices;
 }
 
 /*-
 @param $control <string>
-@returns <int>
+@returns <int> 基数を`0`に補正した値。未選択の場合は`-1`を返す。
 */
 proc int textScrollListGetSelectIndexedItem(string $control) {
   int $indices[] = textScrollListGetSelectIndexedItems($control);
-  return ((`size $indices`) ? $indices[0] : 0);
+  return ((`size $indices`) ? $indices[0] : -1);
 }
 
 // /////////////////////////////////////////////////////////////////////////////
@@ -1256,14 +1281,14 @@ proc int getNumPoses() {
 }
 
 /*-
-@param $i <int>
+@param $poseIndex <int> 基数`0`の整数。
 @returns <string>
 */
-proc string getPose(int $i) {
+proc string getPose(int $poseIndex) {
   global string $nkCopyPosePoses[];
   string $pose;
-  if ($i >= 0 && $i < (getNumPoses())) {
-    $pose = $nkCopyPosePoses[$i];
+  if (betweenInt($poseIndex, 0, getNumPoses() - 1)) {
+    $pose = $nkCopyPosePoses[$poseIndex];
   }
   return $pose;
 }
@@ -1308,24 +1333,24 @@ proc int addPose(
 }
 
 /*-
-@param $poseIndex <int>
+@param $poseIndex <int> 基数`0`の整数。
 @returns <int> 削除後のポーズ数。
 */
 proc int deletePose(int $poseIndex) {
   print("deletePose\n");
   print("  poseIndex:" + $poseIndex + "\n");
   global string $nkCopyPosePoses[];
-  stringArrayRemoveAtIndex($poseIndex, $nkCopyPosePoses);
+  if (betweenInt($poseIndex, 0, getNumPoses() - 1)) {
+    stringArrayRemoveAtIndex($poseIndex, $nkCopyPosePoses);
+  }
   return (getNumPoses());
 }
 
 /*-
-@param $poseIndex <int>
+@param $poseIndex <int> 基数`0`の整数。
 @returns <>
 */
-proc updatePose(
-  int $poseIndex
-) {
+proc updatePose(int $poseIndex) {
   print("updatePose\n");
   print("  poseIndex:" + $poseIndex + "\n");
   global string $nkCopyPosePoses[];
@@ -1363,16 +1388,12 @@ proc updatePose(
 }
 
 /*-
-@param $poseIndex <int>
+@param $poseIndex <int> 基数`0`の整数。
 @param $poseName <string>
 @param $poseSettings <string[]>
 @returns <>
 */
-proc editPose(
-  int $poseIndex,
-  string $poseName,
-  string $poseSettings[]
-) {
+proc editPose(int $poseIndex, string $poseName, string $poseSettings[]) {
   print("editPose\n");
   print("  poseIndex   :" + $poseIndex + "\n");
   print("  poseName    :" + $poseName + "\n");
@@ -1412,13 +1433,14 @@ proc editPose(
 }
 
 /*-
-@param $poseIndex <int>
+@param $poseIndex <int> 基数`0`の整数。
 @returns <int> 移動後のポーズインデックス。基数は`0`。
 */
 proc int moveUpPose(int $poseIndex) {
   print("moveUpPose\n");
   print("  poseIndex:" + $poseIndex + "\n");
   global string $nkCopyPosePoses[];
+  if (!betweenInt($poseIndex, 1, getNumPoses() - 1)) return $poseIndex;
   string $pose = getPose($poseIndex);
   if (!`size $pose`) return $poseIndex;
   int $newPoseIndex = $poseIndex - 1;
@@ -1429,13 +1451,14 @@ proc int moveUpPose(int $poseIndex) {
 }
 
 /*-
-@param $poseIndex <int>
+@param $poseIndex <int> 基数`0`の整数。
 @returns <int> 移動後のポーズインデックス。基数は`0`。
 */
 proc int moveDownPose(int $poseIndex) {
   print("moveDownPose\n");
   print("  poseIndex:" + $poseIndex + "\n");
   global string $nkCopyPosePoses[];
+  if (!betweenInt($poseIndex, 0, getNumPoses() - 2)) return $poseIndex;
   string $pose = getPose($poseIndex);
   if (!`size $pose`) return $poseIndex;
   int $newPoseIndex = $poseIndex + 1;
@@ -1446,7 +1469,7 @@ proc int moveDownPose(int $poseIndex) {
 }
 
 /*-
-@param $poseIndex <int>
+@param $poseIndex <int> 基数`0`の整数。
 @param $isOpposite <boolean>
 @returns <>
 */
@@ -1507,7 +1530,7 @@ proc selectNodes(int $poseIndex, int $isOpposite) {
 }
 
 /*-
-@param $poseIndex <int>
+@param $poseIndex <int> 基数`0`の整数。
 @param $isOpposite <boolean>
 @param $nodes <string[]>
 @returns <>
@@ -1640,7 +1663,7 @@ proc string sanitizeText(string $input) {
 }
 
 /*-
-@param $index <int>
+@param $index <int> 基数`0`の整数。
 @returns <string>
 */
 proc string generateNodeListLabel(int $index) {
@@ -1661,16 +1684,16 @@ proc updateNodeList(int $partial) {
   global string $nkCopyPosePromptNodes[];
   global string $nkCopyPosePromptPoseSettings[];
   string $nodeList = nkUIGetControl("layoutDialog", "nodeList");
-  int $selectedIndices[] = textScrollListGetSelectIndexedItems($nodeList);
-  print("  selectedIndices:{" + intArrayToString($selectedIndices, ", ") + "}\n");
+  int $nodeIndices[] = textScrollListGetSelectIndexedItems($nodeList);
+  print("  nodeIndices:{" + intArrayToString($nodeIndices, ", ") + "}\n");
   int $numTransforms = minStringArrayCount(
     $nkCopyPosePromptNodes,
     $nkCopyPosePromptPoseSettings
   );
   if ($partial) {
-    for ($i = `size $selectedIndices` - 1; $i >= 0; $i--) {
-      int $index = $selectedIndices[$i];
-      $label = generateNodeListLabel($index - 1);
+    for ($i = `size $nodeIndices`; $i > 0; $i--) {
+      int $index = $nodeIndices[$i - 1];
+      $label = generateNodeListLabel($index);
       textScrollListRemoveIndexedItem($index, $nodeList);
       textScrollListAppendPosition($index, $label, $nodeList);
     }
@@ -1682,7 +1705,7 @@ proc updateNodeList(int $partial) {
       textScrollListAppend($label, $nodeList);
     }
   }
-  textScrollListSetSelectIndexedItems($selectedIndices, $nodeList);
+  textScrollListSetSelectIndexedItems($nodeIndices, $nodeList);
 }
 
 /*-
@@ -1716,9 +1739,9 @@ proc updatePoseSettings(int $id) {
   };
   int $invertAxisValues[] = checkBoxGrpGetValues(2, $invertAxisCheckBoxGrp);
   int $mirrorSetting[] = {
-    radioButtonGrpGetSelect($mirrorAxisRadioButton) - 1,
-    radioButtonGrpGetSelect($primaryAxisRadioButton) - 1,
-    radioButtonGrpGetSelect($secondaryAxisRadioButton) - 1,
+    radioButtonGrpGetSelect($mirrorAxisRadioButton),
+    radioButtonGrpGetSelect($primaryAxisRadioButton),
+    radioButtonGrpGetSelect($secondaryAxisRadioButton),
     $invertAxisValues[0],
     $invertAxisValues[1]
   };
@@ -1726,12 +1749,10 @@ proc updatePoseSettings(int $id) {
   print("  selectSetting:{" + stringArrayToString($selectSetting, ", ") + "}\n");
   print("  mirrorSetting:{" + intArrayToString($mirrorSetting, ", ") + "}\n");
 
-  int $selectedIndices[] = textScrollListGetSelectIndexedItems($nodeList);
-  print("  selectedIndices:{" + intArrayToString($selectedIndices, ", ") + "}\n");
-  for ($selectedIndex in $selectedIndices) {
-    int $i = $selectedIndex - 1;
-
-    string $newPoseSetting = $nkCopyPosePromptPoseSettings[$i];
+  int $nodeIndices[] = textScrollListGetSelectIndexedItems($nodeList);
+  print("  nodeIndices:{" + intArrayToString($nodeIndices, ", ") + "}\n");
+  for ($nodeIndex in $nodeIndices) {
+    string $newPoseSetting = $nkCopyPosePromptPoseSettings[$nodeIndex];
     print("    newPoseSetting:" + $newPoseSetting + "\n");
     int $newPasteSetting[] = extractPasteSetting($newPoseSetting);
     string $newSelectSetting[] = extractSelectSetting($newPoseSetting);
@@ -1754,7 +1775,7 @@ proc updatePoseSettings(int $id) {
       default: break;
     }
 
-    $nkCopyPosePromptPoseSettings[$i] = buildPoseSetting(
+    $nkCopyPosePromptPoseSettings[$nodeIndex] = buildPoseSetting(
       $newPasteSetting, $newSelectSetting, $newMirrorSetting
     );
   }
@@ -1820,9 +1841,9 @@ proc updateMirrorSettingUI(int $mirrorSetting[]) {
   radioButtonGrpSetEnable($isSelected, $secondaryAxisRadioButton);
   checkBoxGrpSetEnable($isSelected, $invertAxisCheckBoxGrp);
   if ($isSelected) {
-    radioButtonGrpSetSelect($mirrorSetting[0] + 1, $mirrorAxisRadioButton);
-    radioButtonGrpSetSelect($mirrorSetting[1] + 1, $primaryAxisRadioButton);
-    radioButtonGrpSetSelect($mirrorSetting[2] + 1, $secondaryAxisRadioButton);
+    radioButtonGrpSetSelect($mirrorSetting[0], $mirrorAxisRadioButton);
+    radioButtonGrpSetSelect($mirrorSetting[1], $primaryAxisRadioButton);
+    radioButtonGrpSetSelect($mirrorSetting[2], $secondaryAxisRadioButton);
     checkBoxGrpSetValues(
       {$mirrorSetting[3], $mirrorSetting[4]},
       $invertAxisCheckBoxGrp
@@ -1841,20 +1862,19 @@ proc poseNameTextChanged() {
   global string $nkCopyPosePromptPoseName;
   string $poseNameText = nkUIGetControl("layoutDialog", "poseNameText");
   string $currentText = textFieldGrpGetText($poseNameText);
-  string $sanitizedText = sanitizeText($currentText);
-  if ($sanitizedText != $currentText) {
+  string $newText = sanitizeText($currentText);
+  int $numNewText = `size $newText`;
+  if ($newText != $currentText || !$numNewText) {
     int $position = textFieldGrpGetInsertionPosition($poseNameText);
-    if (!`size $sanitizedText`) {
-      $sanitizedText = "_";
-      $position = 0;
+    print("  position:" + $position + "\n");
+    if (!$numNewText) {
+      $newText = "_";
+      $position = -1;
     }
-    if (`size $sanitizedText` < $position) {
-      $position = 0;
-    }
-    textFieldGrpSetText($sanitizedText, $poseNameText);
+    textFieldGrpSetText($newText, $poseNameText);
     textFieldGrpSetInsertionPosition($position, $poseNameText);
   }
-  $nkCopyPosePromptPoseName = $sanitizedText;
+  $nkCopyPosePromptPoseName = $newText;
 }
 
 /*-
@@ -1866,13 +1886,13 @@ proc nodeListSelected() {
   global int $nkCopyPosePromptIsUIUpdating;
 
   string $nodeList = nkUIGetControl("layoutDialog", "nodeList");
-  int $selectedIndices[] = textScrollListGetSelectIndexedItems($nodeList);
-  print("  selectedIndices:{" + intArrayToString($selectedIndices, ", ") + "}\n");
+  int $nodeIndices[] = textScrollListGetSelectIndexedItems($nodeList);
+  print("  nodeIndices:{" + intArrayToString($nodeIndices, ", ") + "}\n");
   int $pasteSetting[];
   string $selectSetting[];
   int $mirrorSetting[];
-  if (`size $selectedIndices`) {
-    string $poseSetting = $nkCopyPosePromptPoseSettings[$selectedIndices[0] - 1];
+  if (`size $nodeIndices`) {
+    string $poseSetting = $nkCopyPosePromptPoseSettings[$nodeIndices[0]];
     $pasteSetting = extractPasteSetting($poseSetting);
     $selectSetting = extractSelectSetting($poseSetting);
     $mirrorSetting = extractMirrorSetting($poseSetting);
@@ -1919,17 +1939,16 @@ proc selectPatternATextChanged() {
   print("selectPatternATextChanged\n");
   string $selectPatternAText = nkUIGetControl("layoutDialog", "selectPatternAText");
   string $currentText = textFieldGrpGetText($selectPatternAText);
-  string $sanitizedText = sanitizeText($currentText);
-  if ($sanitizedText != $currentText) {
+  string $newText = sanitizeText($currentText);
+  int $numNewText = `size $newText`;
+  if ($newText != $currentText || !$numNewText) {
     int $position = textFieldGrpGetInsertionPosition($selectPatternAText);
-    if (!`size $sanitizedText`) {
-      $sanitizedText = "_";
-      $position = 0;
+    print("  position:" + $position + "\n");
+    if (!$numNewText) {
+      $newText = "_";
+      $position = -1;
     }
-    if (`size $sanitizedText` < $position) {
-      $position = 0;
-    }
-    textFieldGrpSetText($sanitizedText, $selectPatternAText);
+    textFieldGrpSetText($newText, $selectPatternAText);
     textFieldGrpSetInsertionPosition($position, $selectPatternAText);
   }
   updatePoseSettings(3);
@@ -1942,17 +1961,16 @@ proc selectPatternBTextChanged() {
   print("selectPatternBTextChanged\n");
   string $selectPatternBText = nkUIGetControl("layoutDialog", "selectPatternBText");
   string $currentText = textFieldGrpGetText($selectPatternBText);
-  string $sanitizedText = sanitizeText($currentText);
-  if ($sanitizedText != $currentText) {
+  string $newText = sanitizeText($currentText);
+  int $numNewText = `size $newText`;
+  if ($newText != $currentText || !$numNewText) {
     int $position = textFieldGrpGetInsertionPosition($selectPatternBText);
-    if (!`size $sanitizedText`) {
-      $sanitizedText = "_";
-      $position = 0;
+    print("  position:" + $position + "\n");
+    if (!$numNewText) {
+      $newText = "_";
+      $position = -1;
     }
-    if (`size $sanitizedText` < $position) {
-      $position = 0;
-    }
-    textFieldGrpSetText($sanitizedText, $selectPatternBText);
+    textFieldGrpSetText($newText, $selectPatternBText);
     textFieldGrpSetInsertionPosition($position, $selectPatternBText);
   }
   updatePoseSettings(4);
@@ -1978,8 +1996,8 @@ proc primaryAxisRadioButtonOn() {
   updatePoseSettings(6);
   if ($primaryAxisSelect == $secondaryAxisSelect) {
     $secondaryAxisSelect = $primaryAxisSelect + 1;
-    if ($secondaryAxisSelect > 3) {
-      $secondaryAxisSelect = 1;
+    if ($secondaryAxisSelect > 2) {
+      $secondaryAxisSelect = 0;
     }
     radioButtonGrpSetSelect($secondaryAxisSelect, $secondaryAxisRadioButton);
     // ラジオボタンはコマンド操作でイベントが発生しないのでこちら側で更新する
@@ -1999,8 +2017,8 @@ proc secondaryAxisRadioButtonOn() {
   updatePoseSettings(7);
   if ($primaryAxisSelect == $secondaryAxisSelect) {
     $primaryAxisSelect = $secondaryAxisSelect - 1;
-    if ($primaryAxisSelect < 1) {
-      $primaryAxisSelect = 3;
+    if ($primaryAxisSelect < 0) {
+      $primaryAxisSelect = 2;
     }
     radioButtonGrpSetSelect($primaryAxisSelect, $primaryAxisRadioButton);
     // ラジオボタンはコマンド操作でイベントが発生しないのでこちら側で更新する
@@ -2058,9 +2076,9 @@ proc okButtonPressed() {
     string $invertAxisCheckBoxGrp = nkUIGetControl("layoutDialog", "invertAxisCheckBoxGrp");
     int $invertAxisValues[] = checkBoxGrpGetValues(2, $invertAxisCheckBoxGrp);
     $nkCopyPoseInitMirrorSetting = {
-      radioButtonGrpGetSelect($mirrorAxisRadioButton) - 1,
-      radioButtonGrpGetSelect($primaryAxisRadioButton) - 1,
-      radioButtonGrpGetSelect($secondaryAxisRadioButton) - 1,
+      radioButtonGrpGetSelect($mirrorAxisRadioButton),
+      radioButtonGrpGetSelect($primaryAxisRadioButton),
+      radioButtonGrpGetSelect($secondaryAxisRadioButton),
       $invertAxisValues[0],
       $invertAxisValues[1]
     };
@@ -2083,19 +2101,13 @@ proc cancelButtonPressed() {
 proc updatePoseList() {
   print("updatePoseList\n");
   string $poseList = nkUIGetControl("nkCopyPoseWindow", "poseList");
-  int $selectedIndex = textScrollListGetSelectIndexedItem($poseList);
-  print("  selectedIndex:" + $selectedIndex + "\n");
+  int $poseIndex = textScrollListGetSelectIndexedItem($poseList);
+  print("  poseIndex:" + $poseIndex + "\n");
   string $poseNames[] = getPoseNames();
   int $numPoseNames = `size $poseNames`;
   textScrollListRemoveAll($poseList);
   for ($poseName in $poseNames) {
     textScrollListAppend($poseName, $poseList);
-  }
-  if ($numPoseNames > 0 && $selectedIndex > 0) {
-    if ($selectedIndex > $numPoseNames) {
-      $selectedIndex = $numPoseNames;
-    }
-    textScrollListSetSelectIndexedItem($selectedIndex, $poseList);
   }
 }
 
@@ -2181,7 +2193,7 @@ proc addPoseButtonPressed() {
 
   updatePoseList();
   string $poseList = nkUIGetControl("nkCopyPoseWindow", "poseList");
-  textScrollListSetSelectIndexedItem($numPoses, $poseList);
+  textScrollListSetSelectIndexedItem($numPoses - 1, $poseList);
 }
 
 /*-
@@ -2190,11 +2202,15 @@ proc addPoseButtonPressed() {
 proc deletePoseButtonPressed() {
   print("deletePoseButtonPressed\n");
   string $poseList = nkUIGetControl("nkCopyPoseWindow", "poseList");
-  int $selectedIndex = textScrollListGetSelectIndexedItem($poseList);
-  print("  selectedIndex:" + $selectedIndex + "\n");
-  if (!$selectedIndex || $selectedIndex > (getNumPoses())) return;
-  deletePose($selectedIndex - 1);
+  int $poseIndex = textScrollListGetSelectIndexedItem($poseList);
+  print("  poseIndex:" + $poseIndex + "\n");
+  if ($poseIndex == -1) return;
+  int $numPoses = deletePose($poseIndex);
   updatePoseList();
+  if ($numPoses) {
+    if ($poseIndex > $numPoses - 1) $poseIndex = $numPoses - 1;
+    textScrollListSetSelectIndexedItem($poseIndex, $poseList);
+  }
 }
 
 /*-
@@ -2203,10 +2219,10 @@ proc deletePoseButtonPressed() {
 proc updatePoseButtonPressed() {
   print("updatePoseButtonPressed\n");
   string $poseList = nkUIGetControl("nkCopyPoseWindow", "poseList");
-  int $selectedIndex = textScrollListGetSelectIndexedItem($poseList);
-  print("  selectedIndex:" + $selectedIndex + "\n");
-  if (!$selectedIndex) return;
-  updatePose($selectedIndex - 1);
+  int $poseIndex = textScrollListGetSelectIndexedItem($poseList);
+  print("  poseIndex:" + $poseIndex + "\n");
+  if ($poseIndex == -1) return;
+  updatePose($poseIndex);
 }
 
 /*-
@@ -2227,11 +2243,7 @@ proc editPoseButtonPressed() {
   initializePromptVariables();
 
   string $poseList = nkUIGetControl("nkCopyPoseWindow", "poseList");
-  int $selectedIndex = textScrollListGetSelectIndexedItem($poseList);
-  print("  selectedIndex:" + $selectedIndex + "\n");
-  if (!$selectedIndex) return;
-
-  int $poseIndex = $selectedIndex - 1;
+  int $poseIndex = textScrollListGetSelectIndexedItem($poseList);
   print("  poseIndex:" + $poseIndex + "\n");
   string $pose = getPose($poseIndex);
   if (!`size $pose`) return;
@@ -2280,7 +2292,7 @@ proc editPoseButtonPressed() {
   );
 
   updatePoseList();
-  textScrollListSetSelectIndexedItem($selectedIndex, $poseList);
+  textScrollListSetSelectIndexedItem($poseIndex, $poseList);
 }
 
 /*-
@@ -2289,12 +2301,14 @@ proc editPoseButtonPressed() {
 proc moveUpPoseButtonPressed() {
   print("moveUpPoseButtonPressed\n");
   string $poseList = nkUIGetControl("nkCopyPoseWindow", "poseList");
-  int $selectedIndex = textScrollListGetSelectIndexedItem($poseList);
-  print("  selectedIndex:" + $selectedIndex + "\n");
-  if ($selectedIndex < 2 || $selectedIndex > (getNumPoses())) return;
-  int $newPoseIndex = moveUpPose($selectedIndex - 1);
+  int $poseIndex = textScrollListGetSelectIndexedItem($poseList);
+  print("  poseIndex:" + $poseIndex + "\n");
+  // if ($poseIndex < 2 || $poseIndex > (getNumPoses())) return;
+  if ($poseIndex == -1) return;
+  int $newPoseIndex = moveUpPose($poseIndex);
+  if ($poseIndex == $newPoseIndex) return;
   updatePoseList();
-  textScrollListSetSelectIndexedItem($newPoseIndex + 1, $poseList);
+  textScrollListSetSelectIndexedItem($newPoseIndex, $poseList);
 }
 
 /*-
@@ -2303,12 +2317,14 @@ proc moveUpPoseButtonPressed() {
 proc moveDownPoseButtonPressed() {
   print("moveDownPoseButtonPressed\n");
   string $poseList = nkUIGetControl("nkCopyPoseWindow", "poseList");
-  int $selectedIndex = textScrollListGetSelectIndexedItem($poseList);
-  print("  selectedIndex:" + $selectedIndex + "\n");
-  if ($selectedIndex < 1 || $selectedIndex >= (getNumPoses())) return;
-  int $newPoseIndex = moveDownPose($selectedIndex - 1);
+  int $poseIndex = textScrollListGetSelectIndexedItem($poseList);
+  print("  poseIndex:" + $poseIndex + "\n");
+  // if ($poseIndex < 1 || $poseIndex >= (getNumPoses())) return;
+  if ($poseIndex == -1) return;
+  int $newPoseIndex = moveDownPose($poseIndex);
+  if ($poseIndex == $newPoseIndex) return;
   updatePoseList();
-  textScrollListSetSelectIndexedItem($newPoseIndex + 1, $poseList);
+  textScrollListSetSelectIndexedItem($newPoseIndex, $poseList);
 }
 
 /*-
@@ -2319,10 +2335,10 @@ proc selectButtonPressed(int $isOpposite) {
   print("selectButtonPressed\n");
   print("  isOpposite:" + $isOpposite + "\n");
   string $poseList = nkUIGetControl("nkCopyPoseWindow", "poseList");
-  int $selectedIndex = textScrollListGetSelectIndexedItem($poseList);
-  print("  selectedIndex:" + $selectedIndex + "\n");
-  if (!$selectedIndex) return;
-  selectNodes($selectedIndex - 1, $isOpposite);
+  int $poseIndex = textScrollListGetSelectIndexedItem($poseList);
+  print("  poseIndex:" + $poseIndex + "\n");
+  if ($poseIndex == -1) return;
+  selectNodes($poseIndex, $isOpposite);
 }
 
 /*-
@@ -2333,15 +2349,13 @@ proc pasteButtonPressed(int $isOpposite) {
   print("pasteButtonPressed\n");
   print("  isOpposite:" + $isOpposite + "\n");
   string $poseList = nkUIGetControl("nkCopyPoseWindow", "poseList");
-  int $selectedIndex = textScrollListGetSelectIndexedItem($poseList);
-  print("  selectedIndex:" + $selectedIndex + "\n");
-  if (!$selectedIndex) return;
-
+  int $poseIndex = textScrollListGetSelectIndexedItem($poseList);
+  print("  poseIndex:" + $poseIndex + "\n");
+  if ($poseIndex == -1) return;
   string $nodes[] = getSelectedNodes();
   print("  nodes:{\n    " + (stringArrayToString($nodes, ",\n    ")) + "\n  }\n");
   if (!`size $nodes`) return;
-
-  pastePose($selectedIndex - 1, $isOpposite, $nodes);
+  pastePose($poseIndex, $isOpposite, $nodes);
 }
 
 /*-
@@ -2859,7 +2873,7 @@ proc initialize() {
 @returns <string>
 */
 global proc string nkCopyPoseVersion() {
-  return "3.0.2";
+  return "3.0.3";
 }
 
 /*-

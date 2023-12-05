@@ -4,6 +4,29 @@
 // 汎用プロシージャ
 // /////////////////////////////////////////////////////////////////////////////
 // -----------------------------------------------------------------------------
+// 数値
+// -----------------------------------------------------------------------------
+/*-
+@param $value <float>
+@param $min <float>
+@param $max <float>
+@returns <int>
+*/
+proc int betweenFloat(float $value, float $min, float $max) {
+  return ($min <= $value && $value <= $max);
+}
+
+/*-
+@param $value <int>
+@param $min <int>
+@param $max <int>
+@returns <int>
+*/
+proc int betweenInt(int $value, int $min, int $max) {
+  return ($min <= $value && $value <= $max);
+}
+
+// -----------------------------------------------------------------------------
 // 文字列
 // -----------------------------------------------------------------------------
 /*-
@@ -491,19 +514,19 @@ proc radioButtonGrpSetEnable(int $enable, string $control) {
 
 /*-
 @param $control <string>
-@returns <int>
+@returns <int> 基数を`0`に補正した値。
 */
 proc int radioButtonGrpGetSelect(string $control) {
-  return `radioButtonGrp -q -sl $control`;
+  return (`radioButtonGrp -q -sl $control` - 1);
 }
 
 /*-
-@param $index <int>
+@param $index <int> 基数`0`の整数。
 @param $control <string>
 @returns <>
 */
 proc radioButtonGrpSetSelect(int $index, string $control) {
-  radioButtonGrp -e -sl $index $control;
+  radioButtonGrp -e -sl ($index + 1) $control;
 }
 
 /*-
@@ -525,19 +548,19 @@ proc textFieldGrpSetEnable(int $enable, string $control) {
 
 /*-
 @param $control <string>
-@returns <int>
+@returns <int> 基数を`0`に補正した値。
 */
 proc int textFieldGrpGetInsertionPosition(string $control) {
-  return `textFieldGrp -q -ip $control`;
+  return (`textFieldGrp -q -ip $control` - 1);
 }
 
 /*-
-@param $position <int>
+@param $position <int> 基数`0`の整数。`-1`を指定すると末尾にセットされる。
 @param $control <string>
 @returns <>
 */
 proc textFieldGrpSetInsertionPosition(int $position, string $control) {
-  textFieldGrp -e -ip $position $control;
+  textFieldGrp -e -ip ($position + 1) $control;
 }
 
 /*-
@@ -567,13 +590,13 @@ proc textScrollListAppend(string $label, string $control) {
 }
 
 /*-
-@param $index <int>
+@param $index <int> 基数`0`の整数。
 @param $label <string>
 @param $control <string>
 @returns <>
 */
 proc textScrollListAppendPosition(int $index, string $label, string $control) {
-  textScrollList -e -ap $index $label $control;
+  textScrollList -e -ap ($index + 1) $label $control;
 }
 
 /*-
@@ -585,49 +608,51 @@ proc textScrollListRemoveAll(string $control) {
 }
 
 /*-
-@param $index <int>
+@param $index <int> 基数`0`の整数。
 @param $control <string>
 @returns <>
 */
 proc textScrollListRemoveIndexedItem(int $index, string $control) {
-  textScrollList -e -rii $index $control;
+  textScrollList -e -rii ($index + 1) $control;
 }
 
 /*-
-@param $index <int>
+@param $index <int> 基数`0`の整数。
 @param $control <string>
 @returns <>
 */
 proc textScrollListSetSelectIndexedItem(int $index, string $control) {
-  textScrollList -e -sii $index $control;
+  textScrollList -e -sii ($index + 1) $control;
 }
 
 /*-
-@param $indices <int[]>
+@param $indices <int[]> 基数`0`の整数配列。
 @param $control <string>
 @returns <>
 */
 proc textScrollListSetSelectIndexedItems(int $indices[], string $control) {
   for ($i in $indices) {
-    textScrollList -e -sii $i $control;
+    textScrollList -e -sii ($i + 1) $control;
   }
 }
 
 /*-
 @param $control <string>
-@returns <int[]>
+@returns <int[]> 基数を`0`に補正した値。
 */
 proc int[] textScrollListGetSelectIndexedItems(string $control) {
-  return `textScrollList -q -sii $control`;
+  int $indices[] = `textScrollList -q -sii $control`;
+  for ($i = 0; $i < `size $indices`; $i++) $indices[$i] -= 1;
+  return $indices;
 }
 
 /*-
 @param $control <string>
-@returns <int>
+@returns <int> 基数を`0`に補正した値。未選択の場合は`-1`を返す。
 */
 proc int textScrollListGetSelectIndexedItem(string $control) {
   int $indices[] = textScrollListGetSelectIndexedItems($control);
-  return ((`size $indices`) ? $indices[0] : 0);
+  return ((`size $indices`) ? $indices[0] : -1);
 }
 
 // /////////////////////////////////////////////////////////////////////////////
@@ -1256,14 +1281,14 @@ proc int getNumPoses() {
 }
 
 /*-
-@param $i <int>
+@param $poseIndex <int> 基数`0`の整数。
 @returns <string>
 */
-proc string getPose(int $i) {
+proc string getPose(int $poseIndex) {
   global string $nkCopyPosePoses[];
   string $pose;
-  if ($i >= 0 && $i < (getNumPoses())) {
-    $pose = $nkCopyPosePoses[$i];
+  if (betweenInt($poseIndex, 0, getNumPoses() - 1)) {
+    $pose = $nkCopyPosePoses[$poseIndex];
   }
   return $pose;
 }
@@ -1308,24 +1333,24 @@ proc int addPose(
 }
 
 /*-
-@param $poseIndex <int>
+@param $poseIndex <int> 基数`0`の整数。
 @returns <int> 削除後のポーズ数。
 */
 proc int deletePose(int $poseIndex) {
   print("deletePose\n");
   print("  poseIndex:" + $poseIndex + "\n");
   global string $nkCopyPosePoses[];
-  stringArrayRemoveAtIndex($poseIndex, $nkCopyPosePoses);
+  if (betweenInt($poseIndex, 0, getNumPoses() - 1)) {
+    stringArrayRemoveAtIndex($poseIndex, $nkCopyPosePoses);
+  }
   return (getNumPoses());
 }
 
 /*-
-@param $poseIndex <int>
+@param $poseIndex <int> 基数`0`の整数。
 @returns <>
 */
-proc updatePose(
-  int $poseIndex
-) {
+proc updatePose(int $poseIndex) {
   print("updatePose\n");
   print("  poseIndex:" + $poseIndex + "\n");
   global string $nkCopyPosePoses[];
@@ -1363,16 +1388,12 @@ proc updatePose(
 }
 
 /*-
-@param $poseIndex <int>
+@param $poseIndex <int> 基数`0`の整数。
 @param $poseName <string>
 @param $poseSettings <string[]>
 @returns <>
 */
-proc editPose(
-  int $poseIndex,
-  string $poseName,
-  string $poseSettings[]
-) {
+proc editPose(int $poseIndex, string $poseName, string $poseSettings[]) {
   print("editPose\n");
   print("  poseIndex   :" + $poseIndex + "\n");
   print("  poseName    :" + $poseName + "\n");
@@ -1412,13 +1433,14 @@ proc editPose(
 }
 
 /*-
-@param $poseIndex <int>
+@param $poseIndex <int> 基数`0`の整数。
 @returns <int> 移動後のポーズインデックス。基数は`0`。
 */
 proc int moveUpPose(int $poseIndex) {
   print("moveUpPose\n");
   print("  poseIndex:" + $poseIndex + "\n");
   global string $nkCopyPosePoses[];
+  if (!betweenInt($poseIndex, 1, getNumPoses() - 1)) return $poseIndex;
   string $pose = getPose($poseIndex);
   if (!`size $pose`) return $poseIndex;
   int $newPoseIndex = $poseIndex - 1;
@@ -1429,13 +1451,14 @@ proc int moveUpPose(int $poseIndex) {
 }
 
 /*-
-@param $poseIndex <int>
+@param $poseIndex <int> 基数`0`の整数。
 @returns <int> 移動後のポーズインデックス。基数は`0`。
 */
 proc int moveDownPose(int $poseIndex) {
   print("moveDownPose\n");
   print("  poseIndex:" + $poseIndex + "\n");
   global string $nkCopyPosePoses[];
+  if (!betweenInt($poseIndex, 0, getNumPoses() - 2)) return $poseIndex;
   string $pose = getPose($poseIndex);
   if (!`size $pose`) return $poseIndex;
   int $newPoseIndex = $poseIndex + 1;
@@ -1446,7 +1469,7 @@ proc int moveDownPose(int $poseIndex) {
 }
 
 /*-
-@param $poseIndex <int>
+@param $poseIndex <int> 基数`0`の整数。
 @param $isOpposite <boolean>
 @returns <>
 */
@@ -1507,7 +1530,7 @@ proc selectNodes(int $poseIndex, int $isOpposite) {
 }
 
 /*-
-@param $poseIndex <int>
+@param $poseIndex <int> 基数`0`の整数。
 @param $isOpposite <boolean>
 @param $nodes <string[]>
 @returns <>
