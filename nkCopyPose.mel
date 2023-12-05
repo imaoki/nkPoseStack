@@ -396,12 +396,12 @@ global string $nkUIControls[];
 @returns <>
 */
 proc nkUIAppendControls(string $controls[]) {
-  print("nkUIAppendControls\n");
+  // print("nkUIAppendControls\n");
   global string $nkUIControls[];
   for ($control in $controls) {
     $nkUIControls[`size $nkUIControls`] = $control;
   }
-  print("  nkUIControls:{\n    " + stringArrayToString($nkUIControls, ",\n    ") + "\n  }\n");
+  // print("  nkUIControls:{\n    " + stringArrayToString($nkUIControls, ",\n    ") + "\n  }\n");
 }
 
 /*-
@@ -410,7 +410,7 @@ proc nkUIAppendControls(string $controls[]) {
 @returns <>
 */
 proc nkUIRemoveControls(string $root, string $end) {
-  print("nkUIRemoveControls\n");
+  // print("nkUIRemoveControls\n");
   global string $nkUIControls[];
   string $paths[];
   for ($control in $nkUIControls) {
@@ -426,7 +426,7 @@ proc nkUIRemoveControls(string $root, string $end) {
   if (`size $paths` > 0) {
     $nkUIControls = stringArrayRemove($paths, $nkUIControls);
   }
-  print("  nkUIControls:{\n    " + stringArrayToString($nkUIControls, ",\n    ") + "\n  }\n");
+  // print("  nkUIControls:{\n    " + stringArrayToString($nkUIControls, ",\n    ") + "\n  }\n");
 }
 
 /*-
@@ -655,6 +655,30 @@ proc int textScrollListGetSelectIndexedItem(string $control) {
   return ((`size $indices`) ? $indices[0] : -1);
 }
 
+/*-
+@param $control <string>
+@returns <>
+*/
+proc workspaceControlClose(string $control) {
+  workspaceControl -e -cl $control;
+}
+
+/*-
+@param $control <string>
+@returns <int>
+*/
+proc int workspaceControlGetExists(string $control) {
+  return `workspaceControl -q -ex $control`;
+}
+
+/*-
+@param $control <string>
+@returns <int>
+*/
+proc int workspaceControlGetVisible(string $control) {
+  return `workspaceControl -q -vis $control`;
+}
+
 // /////////////////////////////////////////////////////////////////////////////
 // コアプロシージャ
 // /////////////////////////////////////////////////////////////////////////////
@@ -729,8 +753,8 @@ proc string makeTransformHeader(string $n, string $poseSetting) {
 @returns <float[]>
 */
 proc float[] makeTransformValues(string $n) {
-  print("makeTransformValues\n");
-  print("  n:" + $n + "\n");
+  // print("makeTransformValues\n");
+  // print("  n:" + $n + "\n");
   float $values[] = {
     0, 0, 0,
     0, 0, 0, 1,
@@ -743,10 +767,10 @@ proc float[] makeTransformValues(string $n) {
     float $r[] = `getAttr ($n + ".rotate")`;
     float $s[] = `getAttr ($n + ".scale")`;
     float $h[] = `getAttr ($n + ".shear")`;
-    print("  t :{" + floatArrayToString($t, ", ") + "}\n");
-    print("  r :{" + floatArrayToString($r, ", ") + "}\n");
-    print("  s :{" + floatArrayToString($s, ", ") + "}\n");
-    print("  h :{" + floatArrayToString($h, ", ") + "}\n");
+    // print("  t :{" + floatArrayToString($t, ", ") + "}\n");
+    // print("  r :{" + floatArrayToString($r, ", ") + "}\n");
+    // print("  s :{" + floatArrayToString($s, ", ") + "}\n");
+    // print("  h :{" + floatArrayToString($h, ", ") + "}\n");
 
     int $o = `getAttr ($n + ".rotateOrder")`;
     $o = reverseRotateOrder($o);
@@ -765,11 +789,11 @@ proc float[] makeTransformValues(string $n) {
 
     float $q[] = quatMultiply($jo, quatMultiply($ra, $rq));
 
-    print("  o :" + $o + "\n");
-    print("  rq:{" + floatArrayToString($rq, ", ") + "}\n");
-    print("  ra:{" + floatArrayToString($ra, ", ") + "}\n");
-    print("  jo:{" + floatArrayToString($jo, ", ") + "}\n");
-    print("  q :{" + floatArrayToString($q, ", ") + "}\n");
+    // print("  o :" + $o + "\n");
+    // print("  rq:{" + floatArrayToString($rq, ", ") + "}\n");
+    // print("  ra:{" + floatArrayToString($ra, ", ") + "}\n");
+    // print("  jo:{" + floatArrayToString($jo, ", ") + "}\n");
+    // print("  q :{" + floatArrayToString($q, ", ") + "}\n");
 
     $values = {
       $t[0], $t[1], $t[2],
@@ -796,18 +820,18 @@ proc string makePoseTransform(string $header, float $values[]) {
 @returns <string[]>
 */
 proc string[] generatePoseTransforms(string $nodes[], string $poseSettings[]) {
-  print("generatePoseTransforms\n");
-  print("  nodes       :{\n    " + stringArrayToString($nodes, ",\n    ") + "\n  }\n");
-  print("  poseSettings:{\n    " + stringArrayToString($poseSettings, ",\n    ") + "\n  }\n");
+  // print("generatePoseTransforms\n");
+  // print("  nodes       :{\n    " + stringArrayToString($nodes, ",\n    ") + "\n  }\n");
+  // print("  poseSettings:{\n    " + stringArrayToString($poseSettings, ",\n    ") + "\n  }\n");
   string $poseTransforms[];
   int $numTransforms = minStringArrayCount($nodes, $poseSettings);
   for ($i = 0; $i < $numTransforms; $i++) {
     string $n = $nodes[$i];
-    print("  n:" + $n + "\n");
+    // print("  n:" + $n + "\n");
     string $header = makeTransformHeader($n, $poseSettings[$i]);
     float $values[] = makeTransformValues($n);
     string $poseTransform = makePoseTransform($header, $values);
-    print("    poseTransform:" + $poseTransform + "\n");
+    // print("    poseTransform:" + $poseTransform + "\n");
     $poseTransforms[$i] = $poseTransform;
   }
   return $poseTransforms;
@@ -828,21 +852,21 @@ proc setTransformAttributes(
   int $shouldApplyR,
   int $shouldApplyS
 ) {
-  print("setTransformAttributes\n");
-  print("  n           :" + $n + "\n");
-  print("  m           :{" + floatArrayToString($m, ", ") + "}\n");
-  print("  shouldApplyT:" + $shouldApplyT + "\n");
-  print("  shouldApplyR:" + $shouldApplyR + "\n");
-  print("  shouldApplyS:" + $shouldApplyS + "\n");
+  // print("setTransformAttributes\n");
+  // print("  n           :" + $n + "\n");
+  // print("  m           :{" + floatArrayToString($m, ", ") + "}\n");
+  // print("  shouldApplyT:" + $shouldApplyT + "\n");
+  // print("  shouldApplyR:" + $shouldApplyR + "\n");
+  // print("  shouldApplyS:" + $shouldApplyS + "\n");
   if (`objExists $n` && `size $m` == 12) {
     float $t[] = {$m[0], $m[1], $m[2]};
     float $r[] = {$m[3], $m[4], $m[5]};
     float $s[] = {$m[6], $m[7], $m[8]};
     float $h[] = {$m[9], $m[10], $m[11]};
-    print("  t:{" + floatArrayToString($t, ", ") + "}\n");
-    print("  r:{" + floatArrayToString($r, ", ") + "}\n");
-    print("  s:{" + floatArrayToString($s, ", ") + "}\n");
-    print("  h:{" + floatArrayToString($h, ", ") + "}\n");
+    // print("  t:{" + floatArrayToString($t, ", ") + "}\n");
+    // print("  r:{" + floatArrayToString($r, ", ") + "}\n");
+    // print("  s:{" + floatArrayToString($s, ", ") + "}\n");
+    // print("  h:{" + floatArrayToString($h, ", ") + "}\n");
 
     string $tx = $n + ".tx";
     string $ty = $n + ".ty";
@@ -878,18 +902,18 @@ proc setTransformAttributes(
 @returns <float[]>
 */
 proc float[] asIsTransform(string $n, float $m[]) {
-  print("asIsTransform\n");
-  print("  n :" + $n + "\n");
-  print("  m :{" + floatArrayToString($m, ", ") + "}\n");
+  // print("asIsTransform\n");
+  // print("  n :" + $n + "\n");
+  // print("  m :{" + floatArrayToString($m, ", ") + "}\n");
 
   float $t[] = {$m[0], $m[1], $m[2]};
   float $q[] = {$m[3], $m[4], $m[5], $m[6]};
   float $s[] = {$m[7], $m[8], $m[9]};
   float $h[] = {$m[10], $m[11], $m[12]};
-  print("  t :{" + floatArrayToString($t, ", ") + "}\n");
-  print("  q :{" + floatArrayToString($q, ", ") + "}\n");
-  print("  s :{" + floatArrayToString($s, ", ") + "}\n");
-  print("  h :{" + floatArrayToString($h, ", ") + "}\n");
+  // print("  t :{" + floatArrayToString($t, ", ") + "}\n");
+  // print("  q :{" + floatArrayToString($q, ", ") + "}\n");
+  // print("  s :{" + floatArrayToString($s, ", ") + "}\n");
+  // print("  h :{" + floatArrayToString($h, ", ") + "}\n");
 
   int $o = `getAttr ($n + ".rotateOrder")`;
   $o = reverseRotateOrder($o);
@@ -907,12 +931,12 @@ proc float[] asIsTransform(string $n, float $m[]) {
   float $rq[] = quatMultiply($jo, quatMultiply($ra, $q));
   float $r[] = quatToEuler($rq, $o);
 
-  print("  o :" + $o + "\n");
-  print("  q :{" + floatArrayToString($q, ", ") + "}\n");
-  print("  ra:{" + floatArrayToString($ra, ", ") + "}\n");
-  print("  jo:{" + floatArrayToString($jo, ", ") + "}\n");
-  print("  rq:{" + floatArrayToString($rq, ", ") + "}\n");
-  print("  r :{" + floatArrayToString($r, ", ") + "}\n");
+  // print("  o :" + $o + "\n");
+  // print("  q :{" + floatArrayToString($q, ", ") + "}\n");
+  // print("  ra:{" + floatArrayToString($ra, ", ") + "}\n");
+  // print("  jo:{" + floatArrayToString($jo, ", ") + "}\n");
+  // print("  rq:{" + floatArrayToString($rq, ", ") + "}\n");
+  // print("  r :{" + floatArrayToString($r, ", ") + "}\n");
 
   float $values[] = {
     $t[0], $t[1], $t[2],
@@ -920,7 +944,7 @@ proc float[] asIsTransform(string $n, float $m[]) {
     $s[0], $s[1], $s[2],
     $h[0], $h[1], $h[2]
   };
-  print("  values:{" + floatArrayToString($values, ", ") + "}\n");
+  // print("  values:{" + floatArrayToString($values, ", ") + "}\n");
 
   return $values;
 }
@@ -946,24 +970,24 @@ proc float[] mirrorTransform(
   int $invertPrimaryAxis,
   int $invertSecondaryAxis
 ) {
-  print("mirrorTransform\n");
-  print("  n                  :" + $n + "\n");
-  print("  m                  :{" + floatArrayToString($m, ", ") + "}\n");
-  print("  hasCommonParent    :" + $hasCommonParent + "\n");
-  print("  mirrorAxis         :" + $mirrorAxis + "\n");
-  print("  primaryAxis        :" + $primaryAxis + "\n");
-  print("  secondaryAxis      :" + $secondaryAxis + "\n");
-  print("  invertPrimaryAxis  :" + $invertPrimaryAxis + "\n");
-  print("  invertSecondaryAxis:" + $invertSecondaryAxis + "\n");
+  // print("mirrorTransform\n");
+  // print("  n                  :" + $n + "\n");
+  // print("  m                  :{" + floatArrayToString($m, ", ") + "}\n");
+  // print("  hasCommonParent    :" + $hasCommonParent + "\n");
+  // print("  mirrorAxis         :" + $mirrorAxis + "\n");
+  // print("  primaryAxis        :" + $primaryAxis + "\n");
+  // print("  secondaryAxis      :" + $secondaryAxis + "\n");
+  // print("  invertPrimaryAxis  :" + $invertPrimaryAxis + "\n");
+  // print("  invertSecondaryAxis:" + $invertSecondaryAxis + "\n");
 
   float $t[] = {$m[0], $m[1], $m[2]};
   float $q[] = {$m[3], $m[4], $m[5], $m[6]};
   float $s[] = {$m[7], $m[8], $m[9]};
   float $h[] = {$m[10], $m[11], $m[12]};
-  print("  t :{" + floatArrayToString($t, ", ") + "}\n");
-  print("  q :{" + floatArrayToString($q, ", ") + "}\n");
-  print("  s :{" + floatArrayToString($s, ", ") + "}\n");
-  print("  h :{" + floatArrayToString($h, ", ") + "}\n");
+  // print("  t :{" + floatArrayToString($t, ", ") + "}\n");
+  // print("  q :{" + floatArrayToString($q, ", ") + "}\n");
+  // print("  s :{" + floatArrayToString($s, ", ") + "}\n");
+  // print("  h :{" + floatArrayToString($h, ", ") + "}\n");
 
   // 位置のミラーリング
   if ($hasCommonParent) {
@@ -1002,11 +1026,11 @@ proc float[] mirrorTransform(
   $mq[3] *= -1;
   float $cq[] = quatMultiply($jo, quatMultiply($ra, $mq));
 
-  print("  o :" + $o + "\n");
-  print("  q :{" + floatArrayToString($q, ", ") + "}\n");
-  print("  ra:{" + floatArrayToString($ra, ", ") + "}\n");
-  print("  jo:{" + floatArrayToString($jo, ", ") + "}\n");
-  print("  mq:{" + floatArrayToString($mq, ", ") + "}\n");
+  // print("  o :" + $o + "\n");
+  // print("  q :{" + floatArrayToString($q, ", ") + "}\n");
+  // print("  ra:{" + floatArrayToString($ra, ", ") + "}\n");
+  // print("  jo:{" + floatArrayToString($jo, ", ") + "}\n");
+  // print("  mq:{" + floatArrayToString($mq, ", ") + "}\n");
 
   // ソースとターゲットの親が異なる場合は親ノードの反転をリセットしておく
   if (!$hasCommonParent) {
@@ -1060,8 +1084,8 @@ proc float[] mirrorTransform(
   }
 
   float $r[] = quatToEuler($cq, $o);
-  print("  cq:{" + floatArrayToString($cq, ", ") + "}\n");
-  print("  r :{" + floatArrayToString($r, ", ") + "}\n");
+  // print("  cq:{" + floatArrayToString($cq, ", ") + "}\n");
+  // print("  r :{" + floatArrayToString($r, ", ") + "}\n");
 
   float $values[] = {
     $t[0], $t[1], $t[2],
@@ -1069,7 +1093,7 @@ proc float[] mirrorTransform(
     $s[0], $s[1], $s[2],
     $h[0], $h[1], $h[2]
   };
-  print("  values:{" + floatArrayToString($values, ", ") + "}\n");
+  // print("  values:{" + floatArrayToString($values, ", ") + "}\n");
 
   return $values;
 }
@@ -1316,18 +1340,18 @@ proc int addPose(
   string $nodes[],
   string $poseSettings[]
 ) {
-  print("addPose\n");
-  print("  poseName    :" + $poseName + "\n");
-  print("  nodes       :{\n    " + stringArrayToString($nodes, ",\n    ") + "\n  }\n");
-  print("  poseSettings:{\n    " + stringArrayToString($poseSettings, ",\n    ") + "\n  }\n");
+  // print("addPose\n");
+  // print("  poseName    :" + $poseName + "\n");
+  // print("  nodes       :{\n    " + stringArrayToString($nodes, ",\n    ") + "\n  }\n");
+  // print("  poseSettings:{\n    " + stringArrayToString($poseSettings, ",\n    ") + "\n  }\n");
   global string $nkCopyPosePoses[];
   string $poseTransforms[] = generatePoseTransforms($nodes, $poseSettings);
-  print("  poseTransforms:{\n    " + (stringArrayToString($poseTransforms, ",\n    ")) + "\n  }\n");
+  // print("  poseTransforms:{\n    " + (stringArrayToString($poseTransforms, ",\n    ")) + "\n  }\n");
   string $pose = buildPose(
     $poseName,
     $poseTransforms
   );
-  print("  pose:" + $pose + "\n");
+  // print("  pose:" + $pose + "\n");
   $nkCopyPosePoses[(getNumPoses())] = $pose;
   return (getNumPoses());
 }
@@ -1337,8 +1361,8 @@ proc int addPose(
 @returns <int> 削除後のポーズ数。
 */
 proc int deletePose(int $poseIndex) {
-  print("deletePose\n");
-  print("  poseIndex:" + $poseIndex + "\n");
+  // print("deletePose\n");
+  // print("  poseIndex:" + $poseIndex + "\n");
   global string $nkCopyPosePoses[];
   if (betweenInt($poseIndex, 0, getNumPoses() - 1)) {
     stringArrayRemoveAtIndex($poseIndex, $nkCopyPosePoses);
@@ -1353,41 +1377,41 @@ proc int deletePose(int $poseIndex) {
 @returns <>
 */
 proc editPose(int $poseIndex, string $poseName, string $poseSettings[]) {
-  print("editPose\n");
-  print("  poseIndex   :" + $poseIndex + "\n");
-  print("  poseName    :" + $poseName + "\n");
-  print("  poseSettings:{\n    " + stringArrayToString($poseSettings, ",\n    ") + "\n  }\n");
+  // print("editPose\n");
+  // print("  poseIndex   :" + $poseIndex + "\n");
+  // print("  poseName    :" + $poseName + "\n");
+  // print("  poseSettings:{\n    " + stringArrayToString($poseSettings, ",\n    ") + "\n  }\n");
   global string $nkCopyPosePoses[];
 
   string $pose = getPose($poseIndex);
   if (!`size $pose`) return;
 
   string $poseTransforms[] = extractPoseTransforms($pose);
-  print("  poseTransforms:{\n    " + stringArrayToString($poseTransforms, ",\n    ") + "\n  }\n");
+  // print("  poseTransforms:{\n    " + stringArrayToString($poseTransforms, ",\n    ") + "\n  }\n");
   if (!`size $poseTransforms`) return;
 
   string $newPoseTransforms[];
   int $numTransforms = minStringArrayCount($poseSettings, $poseTransforms);
   for ($i = 0; $i < $numTransforms; $i++) {
     string $poseTransform = $poseTransforms[$i];
-    print("  poseTransform:" + $poseTransform + "\n");
+    // print("  poseTransform:" + $poseTransform + "\n");
     string $n = extractTransformNode($poseTransform);
-    print("    n               :" + $n + "\n");
+    // print("    n               :" + $n + "\n");
     string $header = makeTransformHeader($n, $poseSettings[$i]);
-    print("    header          :" + $header + "\n");
+    // print("    header          :" + $header + "\n");
     float $values[] = extractTransformValues($poseTransform);
-    print("    values          :{" + floatArrayToString($values, ", ") + "}\n");
+    // print("    values          :{" + floatArrayToString($values, ", ") + "}\n");
     string $newPoseTransform = makePoseTransform($header, $values);
-    print("    newPoseTransform:" + $newPoseTransform + "\n");
+    // print("    newPoseTransform:" + $newPoseTransform + "\n");
     $newPoseTransforms[$i] = $newPoseTransform;
   }
-  print("  newPoseTransforms:{\n    " + (stringArrayToString($newPoseTransforms, ",\n    ")) + "\n  }\n");
+  // print("  newPoseTransforms:{\n    " + (stringArrayToString($newPoseTransforms, ",\n    ")) + "\n  }\n");
 
   string $newPose = buildPose(
     $poseName,
     $newPoseTransforms
   );
-  print("  newPose:" + $newPose + "\n");
+  // print("  newPose:" + $newPose + "\n");
   $nkCopyPosePoses[$poseIndex] = $newPose;
 }
 
@@ -1396,14 +1420,14 @@ proc editPose(int $poseIndex, string $poseName, string $poseSettings[]) {
 @returns <int> 複製先のポーズインデックス。基数は`0`。
 */
 proc int duplicatePose(int $poseIndex) {
-  print("duplicatePose\n");
-  print("  poseIndex:" + $poseIndex + "\n");
+  // print("duplicatePose\n");
+  // print("  poseIndex:" + $poseIndex + "\n");
   global string $nkCopyPosePoses[];
   if (!betweenInt($poseIndex, 0, getNumPoses() - 1)) return $poseIndex;
   string $pose = getPose($poseIndex);
   if (!`size $pose`) return $poseIndex;
   int $newPoseIndex = $poseIndex + 1;
-  print("  newPoseIndex:" + $newPoseIndex + "\n");
+  // print("  newPoseIndex:" + $newPoseIndex + "\n");
   stringArrayInsertAtIndex($newPoseIndex, $nkCopyPosePoses, $pose);
   return $newPoseIndex;
 }
@@ -1413,14 +1437,14 @@ proc int duplicatePose(int $poseIndex) {
 @returns <int> 移動後のポーズインデックス。基数は`0`。
 */
 proc int moveUpPose(int $poseIndex) {
-  print("moveUpPose\n");
-  print("  poseIndex:" + $poseIndex + "\n");
+  // print("moveUpPose\n");
+  // print("  poseIndex:" + $poseIndex + "\n");
   global string $nkCopyPosePoses[];
   if (!betweenInt($poseIndex, 1, getNumPoses() - 1)) return $poseIndex;
   string $pose = getPose($poseIndex);
   if (!`size $pose`) return $poseIndex;
   int $newPoseIndex = $poseIndex - 1;
-  print("  newPoseIndex:" + $newPoseIndex + "\n");
+  // print("  newPoseIndex:" + $newPoseIndex + "\n");
   stringArrayRemoveAtIndex($poseIndex, $nkCopyPosePoses);
   stringArrayInsertAtIndex($newPoseIndex, $nkCopyPosePoses, $pose);
   return $newPoseIndex;
@@ -1431,17 +1455,58 @@ proc int moveUpPose(int $poseIndex) {
 @returns <int> 移動後のポーズインデックス。基数は`0`。
 */
 proc int moveDownPose(int $poseIndex) {
-  print("moveDownPose\n");
-  print("  poseIndex:" + $poseIndex + "\n");
+  // print("moveDownPose\n");
+  // print("  poseIndex:" + $poseIndex + "\n");
   global string $nkCopyPosePoses[];
   if (!betweenInt($poseIndex, 0, getNumPoses() - 2)) return $poseIndex;
   string $pose = getPose($poseIndex);
   if (!`size $pose`) return $poseIndex;
   int $newPoseIndex = $poseIndex + 1;
-  print("  newPoseIndex:" + $newPoseIndex + "\n");
+  // print("  newPoseIndex:" + $newPoseIndex + "\n");
   stringArrayRemoveAtIndex($poseIndex, $nkCopyPosePoses);
   stringArrayInsertAtIndex($newPoseIndex, $nkCopyPosePoses, $pose);
   return $newPoseIndex;
+}
+
+/*-
+@param $poseIndex <int> 基数`0`の整数。
+@returns <>
+*/
+proc updatePose(int $poseIndex) {
+  // print("updatePose\n");
+  // print("  poseIndex:" + $poseIndex + "\n");
+  global string $nkCopyPosePoses[];
+
+  string $pose = getPose($poseIndex);
+  if (!`size $pose`) return;
+
+  string $poseName = extractPoseName($pose);
+  // print("  poseName      :" + $poseName + "\n");
+  string $poseTransforms[] = extractPoseTransforms($pose);
+  // print("  poseTransforms:{\n    " + stringArrayToString($poseTransforms, ",\n    ") + "\n  }\n");
+  if (!`size $poseTransforms`) return;
+
+  string $nodes[];
+  string $poseSettings[];
+  for ($i = 0; $i < `size $poseTransforms`; $i++) {
+    string $poseTransform = $poseTransforms[$i];
+    // print("  poseTransform:" + $poseTransform + "\n");
+    string $node = extractTransformNode($poseTransform);
+    // print("    node       :" + $node + "\n");
+    string $poseSetting = extractPoseSetting($poseTransform);
+    // print("    poseSetting:" + $poseSetting + "\n");
+    $nodes[$i] = $node;
+    $poseSettings[$i] = $poseSetting;
+  }
+  string $newPoseTransforms[] = generatePoseTransforms($nodes, $poseSettings);
+  // print("  newPoseTransforms:{\n    " + (stringArrayToString($newPoseTransforms, ",\n    ")) + "\n  }\n");
+
+  string $newPose = buildPose(
+    $poseName,
+    $newPoseTransforms
+  );
+  // print("  newPose:" + $newPose + "\n");
+  $nkCopyPosePoses[$poseIndex] = $newPose;
 }
 
 /*-
@@ -1450,31 +1515,31 @@ proc int moveDownPose(int $poseIndex) {
 @returns <>
 */
 proc selectNodes(int $poseIndex, int $isOpposite) {
-  print("selectNodes\n");
-  print("  poseIndex :" + $poseIndex + "\n");
-  print("  isOpposite:" + $isOpposite + "\n");
+  // print("selectNodes\n");
+  // print("  poseIndex :" + $poseIndex + "\n");
+  // print("  isOpposite:" + $isOpposite + "\n");
 
   string $pose = getPose($poseIndex);
-  print("  pose:" + $pose + "\n");
+  // print("  pose:" + $pose + "\n");
   if (!`size $pose`) return;
 
   string $poseTransforms[] = extractPoseTransforms($pose);
-  print("  poseTransforms:{\n    " + stringArrayToString($poseTransforms, ",\n    ") + "\n  }\n");
+  // print("  poseTransforms:{\n    " + stringArrayToString($poseTransforms, ",\n    ") + "\n  }\n");
   if (!`size $poseTransforms`) return;
 
   string $targetNodes[];
   for ($poseTransform in $poseTransforms) {
-    print("  poseTransform:" + $poseTransform + "\n");
+    // print("  poseTransform:" + $poseTransform + "\n");
     string $targetNode = extractTransformNode($poseTransform);
-    print("    targetNode   :" + $targetNode + "\n");
+    // print("    targetNode   :" + $targetNode + "\n");
     string $poseSetting = extractPoseSetting($poseTransform);
-    print("    poseSetting  :" + $poseSetting + "\n");
+    // print("    poseSetting  :" + $poseSetting + "\n");
     string $selectSetting[] = extractSelectSetting($poseSetting);
-    print("    selectSetting:{" + stringArrayToString($selectSetting, ", ") + "}\n");
+    // print("    selectSetting:{" + stringArrayToString($selectSetting, ", ") + "}\n");
     string $patternA = $selectSetting[0];
     string $patternB = $selectSetting[1];
-    print("    patternA     :" + $patternA + "\n");
-    print("    patternB     :" + $patternB + "\n");
+    // print("    patternA     :" + $patternA + "\n");
+    // print("    patternB     :" + $patternB + "\n");
     if ($isOpposite) {
       if (`gmatch $targetNode ("*" + $patternA + "*")`) {
         $targetNode = substituteAllString($targetNode, $patternA, $patternB);
@@ -1487,11 +1552,11 @@ proc selectNodes(int $poseIndex, int $isOpposite) {
       $targetNodes[`size $targetNodes`] = $targetNode;
     }
   }
-  print("  targetNodes:{\n    " + stringArrayToString($targetNodes, "\n    ") + "\n  }\n");
+  // print("  targetNodes:{\n    " + stringArrayToString($targetNodes, "\n    ") + "\n  }\n");
   if (!`size $targetNodes`) return;
 
   int $mods = `getModifiers`;
-  print("  mods:" + $mods + "\n");
+  // print("  mods:" + $mods + "\n");
   switch ($mods) {
     // Nothing
     case 0: select -r $targetNodes; break;
@@ -1512,46 +1577,46 @@ proc selectNodes(int $poseIndex, int $isOpposite) {
 @returns <>
 */
 proc pastePose(int $poseIndex, int $isOpposite, string $targetNodes[]) {
-  print("pastePose\n");
-  print("  poseIndex  :" + $poseIndex + "\n");
-  print("  isOpposite :" + $isOpposite + "\n");
-  print("  targetNodes:{\n    " + stringArrayToString($targetNodes, ",\n    ") + "\n  }\n");
+  // print("pastePose\n");
+  // print("  poseIndex  :" + $poseIndex + "\n");
+  // print("  isOpposite :" + $isOpposite + "\n");
+  // print("  targetNodes:{\n    " + stringArrayToString($targetNodes, ",\n    ") + "\n  }\n");
 
   if (!`size $targetNodes`) return;
 
   string $pose = getPose($poseIndex);
-  print("  pose:" + $pose + "\n");
+  // print("  pose:" + $pose + "\n");
   if (!`size $pose`) return;
 
   string $poseTransforms[] = extractPoseTransforms($pose);
-  print("  poseTransforms:{\n    " + stringArrayToString($poseTransforms, ",\n    ") + "\n  }\n");
+  // print("  poseTransforms:{\n    " + stringArrayToString($poseTransforms, ",\n    ") + "\n  }\n");
   if (!`size $poseTransforms`) return;
 
   int $numTargets = minStringArrayCount($targetNodes, $poseTransforms);
-  print("  numTargets:" + $numTargets + "\n");
+  // print("  numTargets:" + $numTargets + "\n");
   for ($i = 0; $i < $numTargets; $i++) {
     string $poseTransform = $poseTransforms[$i];
-    print("  poseTransform:" + $poseTransform + "\n");
+    // print("  poseTransform:" + $poseTransform + "\n");
     string $sourceNode = extractTransformNode($poseTransform);
-    print("    sourceNode     :" + $sourceNode + "\n");
+    // print("    sourceNode     :" + $sourceNode + "\n");
     string $targetNode = $targetNodes[$i];
-    print("    targetNode     :" + $targetNode + "\n");
+    // print("    targetNode     :" + $targetNode + "\n");
 
     float $transformValues[] = extractTransformValues($poseTransform);
-    print("    transformValues:{" + floatArrayToString($transformValues, ", ") + "}\n");
+    // print("    transformValues:{" + floatArrayToString($transformValues, ", ") + "}\n");
 
     string $poseSetting = extractPoseSetting($poseTransform);
-    print("    poseSetting    :" + $poseSetting + "\n");
+    // print("    poseSetting    :" + $poseSetting + "\n");
     int $pasteSetting[] = extractPasteSetting($poseSetting);
-    print("    pasteSetting   :{" + intArrayToString($pasteSetting, ", ") + "}\n");
+    // print("    pasteSetting   :{" + intArrayToString($pasteSetting, ", ") + "}\n");
 
     if ($isOpposite) {
       int $mirrorSetting[] = extractMirrorSetting($poseSetting);
-      print("    mirrorSetting  :{" + intArrayToString($mirrorSetting, ", ") + "}\n");
+      // print("    mirrorSetting  :{" + intArrayToString($mirrorSetting, ", ") + "}\n");
       string $sourceParent = getParentNode($sourceNode);
       string $targetParent = getParentNode($targetNode);
       int $hasCommonParent = $sourceParent == $targetParent;
-      print("    hasCommonParent:" + $hasCommonParent + "\n");
+      // print("    hasCommonParent:" + $hasCommonParent + "\n");
       $transformValues = mirrorTransform(
         $targetNode,
         $transformValues,
@@ -1575,47 +1640,6 @@ proc pastePose(int $poseIndex, int $isOpposite, string $targetNodes[]) {
       $pasteSetting[2]
     );
   }
-}
-
-/*-
-@param $poseIndex <int> 基数`0`の整数。
-@returns <>
-*/
-proc updatePose(int $poseIndex) {
-  print("updatePose\n");
-  print("  poseIndex:" + $poseIndex + "\n");
-  global string $nkCopyPosePoses[];
-
-  string $pose = getPose($poseIndex);
-  if (!`size $pose`) return;
-
-  string $poseName = extractPoseName($pose);
-  print("  poseName      :" + $poseName + "\n");
-  string $poseTransforms[] = extractPoseTransforms($pose);
-  print("  poseTransforms:{\n    " + stringArrayToString($poseTransforms, ",\n    ") + "\n  }\n");
-  if (!`size $poseTransforms`) return;
-
-  string $nodes[];
-  string $poseSettings[];
-  for ($i = 0; $i < `size $poseTransforms`; $i++) {
-    string $poseTransform = $poseTransforms[$i];
-    print("  poseTransform:" + $poseTransform + "\n");
-    string $node = extractTransformNode($poseTransform);
-    print("    node       :" + $node + "\n");
-    string $poseSetting = extractPoseSetting($poseTransform);
-    print("    poseSetting:" + $poseSetting + "\n");
-    $nodes[$i] = $node;
-    $poseSettings[$i] = $poseSetting;
-  }
-  string $newPoseTransforms[] = generatePoseTransforms($nodes, $poseSettings);
-  print("  newPoseTransforms:{\n    " + (stringArrayToString($newPoseTransforms, ",\n    ")) + "\n  }\n");
-
-  string $newPose = buildPose(
-    $poseName,
-    $newPoseTransforms
-  );
-  print("  newPose:" + $newPose + "\n");
-  $nkCopyPosePoses[$poseIndex] = $newPose;
 }
 
 // /////////////////////////////////////////////////////////////////////////////
@@ -1696,13 +1720,13 @@ proc string generateNodeListLabel(int $index) {
 @returns <>
 */
 proc updateNodeList(int $partial) {
-  print("updateNodeList\n");
-  print("  partial:" + $partial + "\n");
+  // print("updateNodeList\n");
+  // print("  partial:" + $partial + "\n");
   global string $nkCopyPosePromptNodes[];
   global string $nkCopyPosePromptPoseSettings[];
   string $nodeList = nkUIGetControl("layoutDialog", "nodeList");
   int $nodeIndices[] = textScrollListGetSelectIndexedItems($nodeList);
-  print("  nodeIndices:{" + intArrayToString($nodeIndices, ", ") + "}\n");
+  // print("  nodeIndices:{" + intArrayToString($nodeIndices, ", ") + "}\n");
   int $numTransforms = minStringArrayCount(
     $nkCopyPosePromptNodes,
     $nkCopyPosePromptPoseSettings
@@ -1730,14 +1754,14 @@ proc updateNodeList(int $partial) {
 @returns <>
 */
 proc updatePoseSettings(int $id) {
-  print("updatePoseSettings\n");
-  print("  id:" + $id + "\n");
+  // print("updatePoseSettings\n");
+  // print("  id:" + $id + "\n");
   global string $nkCopyPosePromptNodes[];
   global string $nkCopyPosePromptPoseSettings[];
   global int $nkCopyPosePromptIsUIUpdating;
 
   // 設定UIの更新中はポーズ設定を更新しない
-  print("  nkCopyPosePromptIsUIUpdating:" + $nkCopyPosePromptIsUIUpdating + "\n");
+  // print("  nkCopyPosePromptIsUIUpdating:" + $nkCopyPosePromptIsUIUpdating + "\n");
   if ($nkCopyPosePromptIsUIUpdating) return;
 
   string $nodeList = nkUIGetControl("layoutDialog", "nodeList");
@@ -1762,21 +1786,21 @@ proc updatePoseSettings(int $id) {
     $invertAxisValues[0],
     $invertAxisValues[1]
   };
-  print("  pasteSetting :{" + intArrayToString($pasteSetting, ", ") + "}\n");
-  print("  selectSetting:{" + stringArrayToString($selectSetting, ", ") + "}\n");
-  print("  mirrorSetting:{" + intArrayToString($mirrorSetting, ", ") + "}\n");
+  // print("  pasteSetting :{" + intArrayToString($pasteSetting, ", ") + "}\n");
+  // print("  selectSetting:{" + stringArrayToString($selectSetting, ", ") + "}\n");
+  // print("  mirrorSetting:{" + intArrayToString($mirrorSetting, ", ") + "}\n");
 
   int $nodeIndices[] = textScrollListGetSelectIndexedItems($nodeList);
-  print("  nodeIndices:{" + intArrayToString($nodeIndices, ", ") + "}\n");
+  // print("  nodeIndices:{" + intArrayToString($nodeIndices, ", ") + "}\n");
   for ($nodeIndex in $nodeIndices) {
     string $newPoseSetting = $nkCopyPosePromptPoseSettings[$nodeIndex];
-    print("    newPoseSetting:" + $newPoseSetting + "\n");
+    // print("    newPoseSetting:" + $newPoseSetting + "\n");
     int $newPasteSetting[] = extractPasteSetting($newPoseSetting);
     string $newSelectSetting[] = extractSelectSetting($newPoseSetting);
     int $newMirrorSetting[] = extractMirrorSetting($newPoseSetting);
-    print("  newPasteSetting :{" + intArrayToString($newPasteSetting, ", ") + "}\n");
-    print("  newSelectSetting:{" + stringArrayToString($newSelectSetting, ", ") + "}\n");
-    print("  newMirrorSetting:{" + intArrayToString($newMirrorSetting, ", ") + "}\n");
+    // print("  newPasteSetting :{" + intArrayToString($newPasteSetting, ", ") + "}\n");
+    // print("  newSelectSetting:{" + stringArrayToString($newSelectSetting, ", ") + "}\n");
+    // print("  newMirrorSetting:{" + intArrayToString($newMirrorSetting, ", ") + "}\n");
 
     switch ($id) {
       case 0: $newPasteSetting[0] = $pasteSetting[0]; break;
@@ -1804,8 +1828,8 @@ proc updatePoseSettings(int $id) {
 @returns <>
 */
 proc updatePasteSettingUI(int $pasteSetting[]) {
-  print("updatePasteSettingUI\n");
-  print("  pasteSetting:{" + intArrayToString($pasteSetting, ", ") + "}\n");
+  // print("updatePasteSettingUI\n");
+  // print("  pasteSetting:{" + intArrayToString($pasteSetting, ", ") + "}\n");
   global int $nkCopyPosePromptNeedUpdateInitSetting[];
   string $pasteAttributesCheckBoxGrp = nkUIGetControl("layoutDialog", "pasteAttributesCheckBoxGrp");
   int $isSelected = `size $pasteSetting`;
@@ -1823,8 +1847,8 @@ proc updatePasteSettingUI(int $pasteSetting[]) {
 @returns <>
 */
 proc updateSelectSettingUI(string $selectSetting[]) {
-  print("updateSelectSettingUI\n");
-  print("  selectSetting:{" + stringArrayToString($selectSetting, ", ") + "}\n");
+  // print("updateSelectSettingUI\n");
+  // print("  selectSetting:{" + stringArrayToString($selectSetting, ", ") + "}\n");
   global int $nkCopyPosePromptNeedUpdateInitSetting[];
   string $selectPatternAText = nkUIGetControl("layoutDialog", "selectPatternAText");
   string $selectPatternBText = nkUIGetControl("layoutDialog", "selectPatternBText");
@@ -1845,8 +1869,8 @@ proc updateSelectSettingUI(string $selectSetting[]) {
 @returns <>
 */
 proc updateMirrorSettingUI(int $mirrorSetting[]) {
-  print("updateMirrorSettingUI\n");
-  print("  mirrorSetting:{" + intArrayToString($mirrorSetting, ", ") + "}\n");
+  // print("updateMirrorSettingUI\n");
+  // print("  mirrorSetting:{" + intArrayToString($mirrorSetting, ", ") + "}\n");
   global int $nkCopyPosePromptNeedUpdateInitSetting[];
   string $mirrorAxisRadioButton = nkUIGetControl("layoutDialog", "mirrorAxisRadioButton");
   string $primaryAxisRadioButton = nkUIGetControl("layoutDialog", "primaryAxisRadioButton");
@@ -1875,7 +1899,7 @@ proc updateMirrorSettingUI(int $mirrorSetting[]) {
 @returns <>
 */
 proc poseNameTextChanged() {
-  print("poseNameTextChanged\n");
+  // print("poseNameTextChanged\n");
   global string $nkCopyPosePromptPoseName;
   string $poseNameText = nkUIGetControl("layoutDialog", "poseNameText");
   string $currentText = textFieldGrpGetText($poseNameText);
@@ -1883,7 +1907,7 @@ proc poseNameTextChanged() {
   int $numNewText = `size $newText`;
   if ($newText != $currentText || !$numNewText) {
     int $position = textFieldGrpGetInsertionPosition($poseNameText);
-    print("  position:" + $position + "\n");
+    // print("  position:" + $position + "\n");
     if (!$numNewText) {
       $newText = "_";
       $position = -1;
@@ -1898,13 +1922,13 @@ proc poseNameTextChanged() {
 @returns <>
 */
 proc nodeListSelected() {
-  print("nodeListSelected\n");
+  // print("nodeListSelected\n");
   global string $nkCopyPosePromptPoseSettings[];
   global int $nkCopyPosePromptIsUIUpdating;
 
   string $nodeList = nkUIGetControl("layoutDialog", "nodeList");
   int $nodeIndices[] = textScrollListGetSelectIndexedItems($nodeList);
-  print("  nodeIndices:{" + intArrayToString($nodeIndices, ", ") + "}\n");
+  // print("  nodeIndices:{" + intArrayToString($nodeIndices, ", ") + "}\n");
   int $pasteSetting[];
   string $selectSetting[];
   int $mirrorSetting[];
@@ -1914,9 +1938,9 @@ proc nodeListSelected() {
     $selectSetting = extractSelectSetting($poseSetting);
     $mirrorSetting = extractMirrorSetting($poseSetting);
   }
-  print("  pasteSetting :{" + intArrayToString($pasteSetting, ", ") + "}\n");
-  print("  selectSetting:{" + stringArrayToString($selectSetting, ", ") + "}\n");
-  print("  mirrorSetting:{" + intArrayToString($mirrorSetting, ", ") + "}\n");
+  // print("  pasteSetting :{" + intArrayToString($pasteSetting, ", ") + "}\n");
+  // print("  selectSetting:{" + stringArrayToString($selectSetting, ", ") + "}\n");
+  // print("  mirrorSetting:{" + intArrayToString($mirrorSetting, ", ") + "}\n");
 
   $nkCopyPosePromptIsUIUpdating = true;
   updatePasteSettingUI($pasteSetting);
@@ -1929,7 +1953,7 @@ proc nodeListSelected() {
 @returns <>
 */
 proc pasteAttributesCheckBoxGrp1Changed() {
-  print("pasteAttributesCheckBoxGrp1Changed\n");
+  // print("pasteAttributesCheckBoxGrp1Changed\n");
   updatePoseSettings(0);
 }
 
@@ -1937,7 +1961,7 @@ proc pasteAttributesCheckBoxGrp1Changed() {
 @returns <>
 */
 proc pasteAttributesCheckBoxGrp2Changed() {
-  print("pasteAttributesCheckBoxGrp2Changed\n");
+  // print("pasteAttributesCheckBoxGrp2Changed\n");
   updatePoseSettings(1);
 }
 
@@ -1945,7 +1969,7 @@ proc pasteAttributesCheckBoxGrp2Changed() {
 @returns <>
 */
 proc pasteAttributesCheckBoxGrp3Changed() {
-  print("pasteAttributesCheckBoxGrp3Changed\n");
+  // print("pasteAttributesCheckBoxGrp3Changed\n");
   updatePoseSettings(2);
 }
 
@@ -1953,14 +1977,14 @@ proc pasteAttributesCheckBoxGrp3Changed() {
 @returns <>
 */
 proc selectPatternATextChanged() {
-  print("selectPatternATextChanged\n");
+  // print("selectPatternATextChanged\n");
   string $selectPatternAText = nkUIGetControl("layoutDialog", "selectPatternAText");
   string $currentText = textFieldGrpGetText($selectPatternAText);
   string $newText = sanitizeText($currentText);
   int $numNewText = `size $newText`;
   if ($newText != $currentText || !$numNewText) {
     int $position = textFieldGrpGetInsertionPosition($selectPatternAText);
-    print("  position:" + $position + "\n");
+    // print("  position:" + $position + "\n");
     if (!$numNewText) {
       $newText = "_";
       $position = -1;
@@ -1975,14 +1999,14 @@ proc selectPatternATextChanged() {
 @returns <>
 */
 proc selectPatternBTextChanged() {
-  print("selectPatternBTextChanged\n");
+  // print("selectPatternBTextChanged\n");
   string $selectPatternBText = nkUIGetControl("layoutDialog", "selectPatternBText");
   string $currentText = textFieldGrpGetText($selectPatternBText);
   string $newText = sanitizeText($currentText);
   int $numNewText = `size $newText`;
   if ($newText != $currentText || !$numNewText) {
     int $position = textFieldGrpGetInsertionPosition($selectPatternBText);
-    print("  position:" + $position + "\n");
+    // print("  position:" + $position + "\n");
     if (!$numNewText) {
       $newText = "_";
       $position = -1;
@@ -1997,7 +2021,7 @@ proc selectPatternBTextChanged() {
 @returns <>
 */
 proc mirrorAxisRadioButtonOn() {
-  print("mirrorAxisRadioButtonOn\n");
+  // print("mirrorAxisRadioButtonOn\n");
   updatePoseSettings(5);
 }
 
@@ -2005,7 +2029,7 @@ proc mirrorAxisRadioButtonOn() {
 @returns <>
 */
 proc primaryAxisRadioButtonOn() {
-  print("primaryAxisRadioButtonOn\n");
+  // print("primaryAxisRadioButtonOn\n");
   string $primaryAxisRadioButton = nkUIGetControl("layoutDialog", "primaryAxisRadioButton");
   string $secondaryAxisRadioButton = nkUIGetControl("layoutDialog", "secondaryAxisRadioButton");
   int $primaryAxisSelect = radioButtonGrpGetSelect($primaryAxisRadioButton);
@@ -2026,7 +2050,7 @@ proc primaryAxisRadioButtonOn() {
 @returns <>
 */
 proc secondaryAxisRadioButtonOn() {
-  print("secondaryAxisRadioButtonOn\n");
+  // print("secondaryAxisRadioButtonOn\n");
   string $primaryAxisRadioButton = nkUIGetControl("layoutDialog", "primaryAxisRadioButton");
   string $secondaryAxisRadioButton = nkUIGetControl("layoutDialog", "secondaryAxisRadioButton");
   int $primaryAxisSelect = radioButtonGrpGetSelect($primaryAxisRadioButton);
@@ -2047,7 +2071,7 @@ proc secondaryAxisRadioButtonOn() {
 @returns <>
 */
 proc invertAxisCheckBoxGrp1Changed() {
-  print("invertAxisCheckBoxGrp1Changed\n");
+  // print("invertAxisCheckBoxGrp1Changed\n");
   updatePoseSettings(8);
 }
 
@@ -2055,7 +2079,7 @@ proc invertAxisCheckBoxGrp1Changed() {
 @returns <>
 */
 proc invertAxisCheckBoxGrp2Changed() {
-  print("invertAxisCheckBoxGrp2Changed\n");
+  // print("invertAxisCheckBoxGrp2Changed\n");
   updatePoseSettings(9);
 }
 
@@ -2063,12 +2087,12 @@ proc invertAxisCheckBoxGrp2Changed() {
 @returns <>
 */
 proc okButtonPressed() {
-  print("okButtonPressed\n");
+  // print("okButtonPressed\n");
   global int $nkCopyPoseInitPasteSetting[];
   global string $nkCopyPoseInitSelectSetting[];
   global int $nkCopyPoseInitMirrorSetting[];
   global int $nkCopyPosePromptNeedUpdateInitSetting[];
-  print("  nkCopyPosePromptNeedUpdateInitSetting:{" + intArrayToString($nkCopyPosePromptNeedUpdateInitSetting, ", ") + "}\n");
+  // print("  nkCopyPosePromptNeedUpdateInitSetting:{" + intArrayToString($nkCopyPosePromptNeedUpdateInitSetting, ", ") + "}\n");
 
   if ($nkCopyPosePromptNeedUpdateInitSetting[0]) {
     string $pasteAttributesCheckBoxGrp = nkUIGetControl("layoutDialog", "pasteAttributesCheckBoxGrp");
@@ -2108,7 +2132,7 @@ proc okButtonPressed() {
 @returns <>
 */
 proc cancelButtonPressed() {
-  print("cancelButtonPressed\n");
+  // print("cancelButtonPressed\n");
   layoutDialog -dis "Cancel";
 }
 
@@ -2116,10 +2140,10 @@ proc cancelButtonPressed() {
 @returns <>
 */
 proc updatePoseList() {
-  print("updatePoseList\n");
+  // print("updatePoseList\n");
   string $poseList = nkUIGetControl("nkCopyPoseWindow", "poseList");
   int $poseIndex = textScrollListGetSelectIndexedItem($poseList);
-  print("  poseIndex:" + $poseIndex + "\n");
+  // print("  poseIndex:" + $poseIndex + "\n");
   string $poseNames[] = getPoseNames();
   int $numPoseNames = `size $poseNames`;
   textScrollListRemoveAll($poseList);
@@ -2146,21 +2170,73 @@ proc string makePoseName(string $n) {
 @returns <>
 */
 proc nkCopyPoseWindowClosed() {
-  print("nkCopyPoseWindowClosed\n");
+  // print("nkCopyPoseWindowClosed\n");
   nkUIRemoveControls("nkCopyPoseWindow", "");
 }
 
 /*-
 @returns <>
 */
+proc openMenuItemSelected() {
+  print("openMenuItemSelected\n");
+}
+
+/*-
+@returns <>
+*/
+proc importMenuItemSelected() {
+  print("importMenuItemSelected\n");
+}
+
+/*-
+@returns <>
+*/
+proc saveAsMenuItemSelected() {
+  print("saveAsMenuItemSelected\n");
+}
+
+/*-
+@returns <>
+*/
+proc quitMenuItemSelected() {
+  // print("quitMenuItemSelected\n");
+  string $nkCopyPoseWindow = nkUIGetControl("nkCopyPoseWindow", "nkCopyPoseWindow");
+  // print("  nkCopyPoseWindow:" + $nkCopyPoseWindow + "\n");
+  int $exists = workspaceControlGetExists($nkCopyPoseWindow);
+  // print("    exists   :" + $exists + "\n");
+  if (!$exists) return;
+  int $isVisible = workspaceControlGetVisible($nkCopyPoseWindow);
+  // print("    isVisible:" + $isVisible + "\n");
+  if (!$isVisible) return;
+  workspaceControlClose($nkCopyPoseWindow);
+}
+
+/*-
+@returns <>
+*/
+proc aboutMenuItemSelected() {
+  // print("aboutMenuItemSelected\n");
+  confirmDialog
+      -b "OK"
+      -db "OK"
+      -m (
+        "nkCopyPose " + (nkCopyPoseVersion())
+        + "\n\n(c) 2023 imaoki | MIT License | https://github.com/imaoki"
+      )
+      -t "About nkCopyPose";
+}
+
+/*-
+@returns <>
+*/
 proc addPoseButtonPressed() {
-  print("addPoseButtonPressed\n");
+  // print("addPoseButtonPressed\n");
   global int $nkCopyPoseInitPasteSetting[];
   global string $nkCopyPoseInitSelectSetting[];
   global int $nkCopyPoseInitMirrorSetting[];
-  print("  nkCopyPoseInitPasteSetting :{" + intArrayToString($nkCopyPoseInitPasteSetting, ", ") + "}\n");
-  print("  nkCopyPoseInitSelectSetting:{" + stringArrayToString($nkCopyPoseInitSelectSetting, ", ") + "}\n");
-  print("  nkCopyPoseInitMirrorSetting:{" + intArrayToString($nkCopyPoseInitMirrorSetting, ", ") + "}\n");
+  // print("  nkCopyPoseInitPasteSetting :{" + intArrayToString($nkCopyPoseInitPasteSetting, ", ") + "}\n");
+  // print("  nkCopyPoseInitSelectSetting:{" + stringArrayToString($nkCopyPoseInitSelectSetting, ", ") + "}\n");
+  // print("  nkCopyPoseInitMirrorSetting:{" + intArrayToString($nkCopyPoseInitMirrorSetting, ", ") + "}\n");
 
   global string $nkCopyPosePromptPoseName;
   global string $nkCopyPosePromptNodes[];
@@ -2168,7 +2244,7 @@ proc addPoseButtonPressed() {
   initializePromptVariables();
 
   string $nodes[] = getSelectedNodes();
-  print("  nodes:{\n    " + (stringArrayToString($nodes, ",\n    ")) + "\n  }\n");
+  // print("  nodes:{\n    " + (stringArrayToString($nodes, ",\n    ")) + "\n  }\n");
   int $numNodes = `size $nodes`;
   if (!$numNodes) return;
 
@@ -2181,9 +2257,9 @@ proc addPoseButtonPressed() {
       $nkCopyPoseInitMirrorSetting
     );
   }
-  print("  nkCopyPosePromptPoseName    :" + $nkCopyPosePromptPoseName + "\n");
-  print("  nkCopyPosePromptNodes       :{\n    " + stringArrayToString($nkCopyPosePromptNodes, ",\n    ") + "\n  }\n");
-  print("  nkCopyPosePromptPoseSettings:{\n    " + stringArrayToString($nkCopyPosePromptPoseSettings, ",\n    ") + "\n  }\n");
+  // print("  nkCopyPosePromptPoseName    :" + $nkCopyPosePromptPoseName + "\n");
+  // print("  nkCopyPosePromptNodes       :{\n    " + stringArrayToString($nkCopyPosePromptNodes, ",\n    ") + "\n  }\n");
+  // print("  nkCopyPosePromptPoseSettings:{\n    " + stringArrayToString($nkCopyPosePromptPoseSettings, ",\n    ") + "\n  }\n");
 
   string $result = `layoutDialog
       -p "nkCopyPoseWindow"
@@ -2192,13 +2268,13 @@ proc addPoseButtonPressed() {
 
   nkUIRemoveControls("layoutDialog", "");
 
-  print("  result:" + $result + "\n");
-  print("    nkCopyPoseInitPasteSetting  :{" + intArrayToString($nkCopyPoseInitPasteSetting, ", ") + "}\n");
-  print("    nkCopyPoseInitSelectSetting :{" + stringArrayToString($nkCopyPoseInitSelectSetting, ", ") + "}\n");
-  print("    nkCopyPoseInitMirrorSetting :{" + intArrayToString($nkCopyPoseInitMirrorSetting, ", ") + "}\n");
-  print("    nkCopyPosePromptPoseName    :" + $nkCopyPosePromptPoseName + "\n");
-  print("    nkCopyPosePromptNodes       :{\n      " + stringArrayToString($nkCopyPosePromptNodes, ",\n      ") + "\n    }\n");
-  print("    nkCopyPosePromptPoseSettings:{\n      " + stringArrayToString($nkCopyPosePromptPoseSettings, ",\n      ") + "\n    }\n");
+  // print("  result:" + $result + "\n");
+  // print("    nkCopyPoseInitPasteSetting  :{" + intArrayToString($nkCopyPoseInitPasteSetting, ", ") + "}\n");
+  // print("    nkCopyPoseInitSelectSetting :{" + stringArrayToString($nkCopyPoseInitSelectSetting, ", ") + "}\n");
+  // print("    nkCopyPoseInitMirrorSetting :{" + intArrayToString($nkCopyPoseInitMirrorSetting, ", ") + "}\n");
+  // print("    nkCopyPosePromptPoseName    :" + $nkCopyPosePromptPoseName + "\n");
+  // print("    nkCopyPosePromptNodes       :{\n      " + stringArrayToString($nkCopyPosePromptNodes, ",\n      ") + "\n    }\n");
+  // print("    nkCopyPosePromptPoseSettings:{\n      " + stringArrayToString($nkCopyPosePromptPoseSettings, ",\n      ") + "\n    }\n");
 
   if ($result != "OK") return;
 
@@ -2217,10 +2293,10 @@ proc addPoseButtonPressed() {
 @returns <>
 */
 proc deletePoseButtonPressed() {
-  print("deletePoseButtonPressed\n");
+  // print("deletePoseButtonPressed\n");
   string $poseList = nkUIGetControl("nkCopyPoseWindow", "poseList");
   int $poseIndex = textScrollListGetSelectIndexedItem($poseList);
-  print("  poseIndex:" + $poseIndex + "\n");
+  // print("  poseIndex:" + $poseIndex + "\n");
   if ($poseIndex == -1) return;
   int $numPoses = deletePose($poseIndex);
   updatePoseList();
@@ -2234,13 +2310,13 @@ proc deletePoseButtonPressed() {
 @returns <>
 */
 proc editPoseButtonPressed() {
-  print("editPoseButtonPressed\n");
+  // print("editPoseButtonPressed\n");
   global int $nkCopyPoseInitPasteSetting[];
   global string $nkCopyPoseInitSelectSetting[];
   global int $nkCopyPoseInitMirrorSetting[];
-  print("  nkCopyPoseInitPasteSetting :{" + intArrayToString($nkCopyPoseInitPasteSetting, ", ") + "}\n");
-  print("  nkCopyPoseInitSelectSetting:{" + stringArrayToString($nkCopyPoseInitSelectSetting, ", ") + "}\n");
-  print("  nkCopyPoseInitMirrorSetting:{" + intArrayToString($nkCopyPoseInitMirrorSetting, ", ") + "}\n");
+  // print("  nkCopyPoseInitPasteSetting :{" + intArrayToString($nkCopyPoseInitPasteSetting, ", ") + "}\n");
+  // print("  nkCopyPoseInitSelectSetting:{" + stringArrayToString($nkCopyPoseInitSelectSetting, ", ") + "}\n");
+  // print("  nkCopyPoseInitMirrorSetting:{" + intArrayToString($nkCopyPoseInitMirrorSetting, ", ") + "}\n");
 
   global string $nkCopyPosePromptPoseName;
   global string $nkCopyPosePromptNodes[];
@@ -2249,29 +2325,29 @@ proc editPoseButtonPressed() {
 
   string $poseList = nkUIGetControl("nkCopyPoseWindow", "poseList");
   int $poseIndex = textScrollListGetSelectIndexedItem($poseList);
-  print("  poseIndex:" + $poseIndex + "\n");
+  // print("  poseIndex:" + $poseIndex + "\n");
   string $pose = getPose($poseIndex);
   if (!`size $pose`) return;
 
   $nkCopyPosePromptPoseName = extractPoseName($pose);
 
   string $poseTransforms[] = extractPoseTransforms($pose);
-  print("  poseTransforms:{\n    " + stringArrayToString($poseTransforms, ",\n    ") + "\n  }\n");
+  // print("  poseTransforms:{\n    " + stringArrayToString($poseTransforms, ",\n    ") + "\n  }\n");
   if (!`size $poseTransforms`) return;
 
   for ($i = 0; $i < `size $poseTransforms`; $i++) {
     string $poseTransform = $poseTransforms[$i];
-    print("  poseTransform:" + $poseTransform + "\n");
+    // print("  poseTransform:" + $poseTransform + "\n");
     string $node = extractTransformNode($poseTransform);
-    print("    node       :" + $node + "\n");
+    // print("    node       :" + $node + "\n");
     string $poseSetting = extractPoseSetting($poseTransform);
-    print("    poseSetting:" + $poseSetting + "\n");
+    // print("    poseSetting:" + $poseSetting + "\n");
     $nkCopyPosePromptNodes[$i] = $node;
     $nkCopyPosePromptPoseSettings[$i] = $poseSetting;
   }
-  print("  nkCopyPosePromptPoseName    :" + $nkCopyPosePromptPoseName + "\n");
-  print("  nkCopyPosePromptNodes       :{\n    " + stringArrayToString($nkCopyPosePromptNodes, ",\n    ") + "\n  }\n");
-  print("  nkCopyPosePromptPoseSettings:{\n    " + stringArrayToString($nkCopyPosePromptPoseSettings, ",\n    ") + "\n  }\n");
+  // print("  nkCopyPosePromptPoseName    :" + $nkCopyPosePromptPoseName + "\n");
+  // print("  nkCopyPosePromptNodes       :{\n    " + stringArrayToString($nkCopyPosePromptNodes, ",\n    ") + "\n  }\n");
+  // print("  nkCopyPosePromptPoseSettings:{\n    " + stringArrayToString($nkCopyPosePromptPoseSettings, ",\n    ") + "\n  }\n");
 
   string $result = `layoutDialog
       -p "nkCopyPoseWindow"
@@ -2280,13 +2356,13 @@ proc editPoseButtonPressed() {
 
   nkUIRemoveControls("layoutDialog", "");
 
-  print("  result:" + $result + "\n");
-  print("    nkCopyPoseInitPasteSetting  :{" + intArrayToString($nkCopyPoseInitPasteSetting, ", ") + "}\n");
-  print("    nkCopyPoseInitSelectSetting :{" + stringArrayToString($nkCopyPoseInitSelectSetting, ", ") + "}\n");
-  print("    nkCopyPoseInitMirrorSetting :{" + intArrayToString($nkCopyPoseInitMirrorSetting, ", ") + "}\n");
-  print("    nkCopyPosePromptPoseName    :" + $nkCopyPosePromptPoseName + "\n");
-  print("    nkCopyPosePromptNodes       :{\n      " + stringArrayToString($nkCopyPosePromptNodes, ",\n      ") + "\n    }\n");
-  print("    nkCopyPosePromptPoseSettings:{\n      " + stringArrayToString($nkCopyPosePromptPoseSettings, ",\n      ") + "\n    }\n");
+  // print("  result:" + $result + "\n");
+  // print("    nkCopyPoseInitPasteSetting  :{" + intArrayToString($nkCopyPoseInitPasteSetting, ", ") + "}\n");
+  // print("    nkCopyPoseInitSelectSetting :{" + stringArrayToString($nkCopyPoseInitSelectSetting, ", ") + "}\n");
+  // print("    nkCopyPoseInitMirrorSetting :{" + intArrayToString($nkCopyPoseInitMirrorSetting, ", ") + "}\n");
+  // print("    nkCopyPosePromptPoseName    :" + $nkCopyPosePromptPoseName + "\n");
+  // print("    nkCopyPosePromptNodes       :{\n      " + stringArrayToString($nkCopyPosePromptNodes, ",\n      ") + "\n    }\n");
+  // print("    nkCopyPosePromptPoseSettings:{\n      " + stringArrayToString($nkCopyPosePromptPoseSettings, ",\n      ") + "\n    }\n");
 
   if ($result != "OK") return;
 
@@ -2304,10 +2380,10 @@ proc editPoseButtonPressed() {
 @returns <>
 */
 proc duplicatePoseButtonPressed() {
-  print("duplicatePoseButtonPressed\n");
+  // print("duplicatePoseButtonPressed\n");
   string $poseList = nkUIGetControl("nkCopyPoseWindow", "poseList");
   int $poseIndex = textScrollListGetSelectIndexedItem($poseList);
-  print("  poseIndex:" + $poseIndex + "\n");
+  // print("  poseIndex:" + $poseIndex + "\n");
   if ($poseIndex == -1) return;
   int $newPoseIndex = duplicatePose($poseIndex);
   if ($poseIndex == $newPoseIndex) return;
@@ -2319,10 +2395,10 @@ proc duplicatePoseButtonPressed() {
 @returns <>
 */
 proc moveUpPoseButtonPressed() {
-  print("moveUpPoseButtonPressed\n");
+  // print("moveUpPoseButtonPressed\n");
   string $poseList = nkUIGetControl("nkCopyPoseWindow", "poseList");
   int $poseIndex = textScrollListGetSelectIndexedItem($poseList);
-  print("  poseIndex:" + $poseIndex + "\n");
+  // print("  poseIndex:" + $poseIndex + "\n");
   if ($poseIndex == -1) return;
   int $newPoseIndex = moveUpPose($poseIndex);
   if ($poseIndex == $newPoseIndex) return;
@@ -2334,10 +2410,10 @@ proc moveUpPoseButtonPressed() {
 @returns <>
 */
 proc moveDownPoseButtonPressed() {
-  print("moveDownPoseButtonPressed\n");
+  // print("moveDownPoseButtonPressed\n");
   string $poseList = nkUIGetControl("nkCopyPoseWindow", "poseList");
   int $poseIndex = textScrollListGetSelectIndexedItem($poseList);
-  print("  poseIndex:" + $poseIndex + "\n");
+  // print("  poseIndex:" + $poseIndex + "\n");
   if ($poseIndex == -1) return;
   int $newPoseIndex = moveDownPose($poseIndex);
   if ($poseIndex == $newPoseIndex) return;
@@ -2349,8 +2425,20 @@ proc moveDownPoseButtonPressed() {
 @returns <>
 */
 proc poseListDoubleClicked() {
-  print("poseListDoubleClicked\n");
+  // print("poseListDoubleClicked\n");
   editPoseButtonPressed();
+}
+
+/*-
+@returns <>
+*/
+proc updatePoseButtonPressed() {
+  // print("updatePoseButtonPressed\n");
+  string $poseList = nkUIGetControl("nkCopyPoseWindow", "poseList");
+  int $poseIndex = textScrollListGetSelectIndexedItem($poseList);
+  // print("  poseIndex:" + $poseIndex + "\n");
+  if ($poseIndex == -1) return;
+  updatePose($poseIndex);
 }
 
 /*-
@@ -2358,11 +2446,11 @@ proc poseListDoubleClicked() {
 @returns <>
 */
 proc selectButtonPressed(int $isOpposite) {
-  print("selectButtonPressed\n");
-  print("  isOpposite:" + $isOpposite + "\n");
+  // print("selectButtonPressed\n");
+  // print("  isOpposite:" + $isOpposite + "\n");
   string $poseList = nkUIGetControl("nkCopyPoseWindow", "poseList");
   int $poseIndex = textScrollListGetSelectIndexedItem($poseList);
-  print("  poseIndex:" + $poseIndex + "\n");
+  // print("  poseIndex:" + $poseIndex + "\n");
   if ($poseIndex == -1) return;
   selectNodes($poseIndex, $isOpposite);
 }
@@ -2372,28 +2460,16 @@ proc selectButtonPressed(int $isOpposite) {
 @returns <>
 */
 proc pasteButtonPressed(int $isOpposite) {
-  print("pasteButtonPressed\n");
-  print("  isOpposite:" + $isOpposite + "\n");
+  // print("pasteButtonPressed\n");
+  // print("  isOpposite:" + $isOpposite + "\n");
   string $poseList = nkUIGetControl("nkCopyPoseWindow", "poseList");
   int $poseIndex = textScrollListGetSelectIndexedItem($poseList);
-  print("  poseIndex:" + $poseIndex + "\n");
+  // print("  poseIndex:" + $poseIndex + "\n");
   if ($poseIndex == -1) return;
   string $nodes[] = getSelectedNodes();
-  print("  nodes:{\n    " + (stringArrayToString($nodes, ",\n    ")) + "\n  }\n");
+  // print("  nodes:{\n    " + (stringArrayToString($nodes, ",\n    ")) + "\n  }\n");
   if (!`size $nodes`) return;
   pastePose($poseIndex, $isOpposite, $nodes);
-}
-
-/*-
-@returns <>
-*/
-proc updatePoseButtonPressed() {
-  print("updatePoseButtonPressed\n");
-  string $poseList = nkUIGetControl("nkCopyPoseWindow", "poseList");
-  int $poseIndex = textScrollListGetSelectIndexedItem($poseList);
-  print("  poseIndex:" + $poseIndex + "\n");
-  if ($poseIndex == -1) return;
-  updatePose($poseIndex);
 }
 
 /*-
@@ -2466,17 +2542,22 @@ global proc nkCopyPoseInvokeEvent(
       switch ($event) {
         case "c":
           switch ($control) {
+            // case "openMenuItem": openMenuItemSelected(); break;
+            // case "importMenuItem": importMenuItemSelected(); break;
+            // case "saveAsMenuItem": saveAsMenuItemSelected(); break;
+            case "quitMenuItem": quitMenuItemSelected(); break;
+            case "aboutMenuItem": aboutMenuItemSelected(); break;
             case "addPoseButton": addPoseButtonPressed(); break;
             case "deletePoseButton": deletePoseButtonPressed(); break;
             case "editPoseButton": editPoseButtonPressed(); break;
             case "duplicatePoseButton": duplicatePoseButtonPressed(); break;
             case "moveUpPoseButton": moveUpPoseButtonPressed(); break;
             case "moveDownPoseButton": moveDownPoseButtonPressed(); break;
+            case "updatePoseButton": updatePoseButtonPressed(); break;
             case "selectSourceButton": selectButtonPressed(false); break;
             case "selectOppositeButton": selectButtonPressed(true); break;
             case "pasteSourceButton": pasteButtonPressed(false); break;
             case "pasteOppositeButton": pasteButtonPressed(true); break;
-            case "updatePoseButton": updatePoseButtonPressed(); break;
             default: break;
           }
           break;
@@ -2505,6 +2586,7 @@ global proc nkCopyPoseInvokeEvent(
 @returns <>
 */
 global proc buildPromptWindow() {
+  // print("buildPromptWindow\n");
   global string $nkCopyPosePromptPoseName;
 
   string $outerForm = `setParent -q`;
@@ -2658,21 +2740,16 @@ global proc buildPromptWindow() {
 
   textFieldGrp -e -tcc "nkCopyPoseInvokeEvent(\"layoutDialog\", \"tcc\", \"poseNameText\");" $poseNameText;
   textScrollList -e -sc "nkCopyPoseInvokeEvent(\"layoutDialog\", \"sc\", \"nodeList\");" $nodeList;
-
   checkBoxGrp -e -cc1 "nkCopyPoseInvokeEvent(\"layoutDialog\", \"cc1\", \"pasteAttributesCheckBoxGrp\");" $pasteAttributesCheckBoxGrp;
   checkBoxGrp -e -cc2 "nkCopyPoseInvokeEvent(\"layoutDialog\", \"cc2\", \"pasteAttributesCheckBoxGrp\");" $pasteAttributesCheckBoxGrp;
   checkBoxGrp -e -cc3 "nkCopyPoseInvokeEvent(\"layoutDialog\", \"cc3\", \"pasteAttributesCheckBoxGrp\");" $pasteAttributesCheckBoxGrp;
-
   textFieldGrp -e -tcc "nkCopyPoseInvokeEvent(\"layoutDialog\", \"tcc\", \"selectPatternAText\");" $selectPatternAText;
   textFieldGrp -e -tcc "nkCopyPoseInvokeEvent(\"layoutDialog\", \"tcc\", \"selectPatternBText\");" $selectPatternBText;
-
   radioButtonGrp -e -onc "nkCopyPoseInvokeEvent(\"layoutDialog\", \"onc\", \"mirrorAxisRadioButton\");" $mirrorAxisRadioButton;
   radioButtonGrp -e -onc "nkCopyPoseInvokeEvent(\"layoutDialog\", \"onc\", \"primaryAxisRadioButton\");" $primaryAxisRadioButton;
   radioButtonGrp -e -onc "nkCopyPoseInvokeEvent(\"layoutDialog\", \"onc\", \"secondaryAxisRadioButton\");" $secondaryAxisRadioButton;
-
   checkBoxGrp -e -cc1 "nkCopyPoseInvokeEvent(\"layoutDialog\", \"cc1\", \"invertAxisCheckBoxGrp\");" $invertAxisCheckBoxGrp;
   checkBoxGrp -e -cc2 "nkCopyPoseInvokeEvent(\"layoutDialog\", \"cc2\", \"invertAxisCheckBoxGrp\");" $invertAxisCheckBoxGrp;
-
   button -e -c "nkCopyPoseInvokeEvent(\"layoutDialog\", \"c\", \"okButton\");" $okButton;
   button -e -c "nkCopyPoseInvokeEvent(\"layoutDialog\", \"c\", \"cancelButton\");" $cancelButton;
 
@@ -2716,10 +2793,8 @@ global proc buildPromptWindow() {
 /*-
 @returns <>
 */
-proc buildMainWindow() {
-  if (`window -ex "nkCopyPoseWindow"` == true) {
-    deleteUI "nkCopyPoseWindow";
-  }
+global proc nkCopyPoseBuildMainWindow() {
+  // print("nkCopyPoseBuildMainWindow\n");
 
   string $sourceDirname = getSourceDirname("nkCopyPose");
   string $iconDir = `size $sourceDirname` ? $sourceDirname + "/icons/" : "";
@@ -2734,25 +2809,50 @@ proc buildMainWindow() {
   string $pasteSourceIcon = $iconDir + "pasteSource.png";
   string $pasteOppositeIcon = $iconDir + "pasteOpposite.png";
   string $updateIcon = $iconDir + "updatePose.png";
-  // print("addIcon           :" + $addIcon + "\n");
-  // print("deleteIcon        :" + $deleteIcon + "\n");
-  // print("editIcon          :" + $editIcon + "\n");
-  // print("duplicateIcon     :" + $duplicateIcon + "\n");
-  // print("moveUpIcon        :" + $moveUpIcon + "\n");
-  // print("moveDownIcon      :" + $moveDownIcon + "\n");
-  // print("selectSourceIcon  :" + $selectSourceIcon + "\n");
-  // print("selectOppositeIcon:" + $selectOppositeIcon + "\n");
-  // print("pasteSourceIcon   :" + $pasteSourceIcon + "\n");
-  // print("pasteOppositeIcon :" + $pasteOppositeIcon + "\n");
-  // print("updateIcon        :" + $updateIcon + "\n");
+  // print("  addIcon           :" + $addIcon + "\n");
+  // print("  deleteIcon        :" + $deleteIcon + "\n");
+  // print("  editIcon          :" + $editIcon + "\n");
+  // print("  duplicateIcon     :" + $duplicateIcon + "\n");
+  // print("  moveUpIcon        :" + $moveUpIcon + "\n");
+  // print("  moveDownIcon      :" + $moveDownIcon + "\n");
+  // print("  selectSourceIcon  :" + $selectSourceIcon + "\n");
+  // print("  selectOppositeIcon:" + $selectOppositeIcon + "\n");
+  // print("  pasteSourceIcon   :" + $pasteSourceIcon + "\n");
+  // print("  pasteOppositeIcon :" + $pasteOppositeIcon + "\n");
+  // print("  updateIcon        :" + $updateIcon + "\n");
 
-  string $nkCopyPoseWindow = `window
-      -mxb false
-      -mnb false
-      -s true
-      -t ("nkCopyPose " + (nkCopyPoseVersion()))
-      "nkCopyPoseWindow"`;
+  string $nkCopyPoseWindow = `setParent -q`;
+  // print("  nkCopyPoseWindow:" + $nkCopyPoseWindow + "\n");
     string $outerForm = `formLayout "outerForm"`;
+      string $menuBar = `menuBarLayout
+          // -bgc 0.25 0.5 0.25
+          "menuBar"`;
+        string $fileMenu = `menu
+            -l "File"
+            "fileMenu"`;
+          // string $openMenuItem = `menuItem
+          //     -l "Open"
+          //     "openMenuItem"`;
+          // string $importMenuItem = `menuItem
+          //     -l "Import"
+          //     "importMenuItem"`;
+          // menuItem -d true;
+          // string $saveAsMenuItem = `menuItem
+          //     -l "Save As"
+          //     "saveAsMenuItem"`;
+          // menuItem -d true;
+          string $quitMenuItem = `menuItem
+              -l "Quit"
+              "quitMenuItem"`;
+        string $helpMenu = `menu
+            -hm true
+            -l "Help"
+            "helpMenu"`;
+          string $aboutMenuItem = `menuItem
+              -l "About nkCopyPose"
+              "aboutMenuItem"`;
+      setParent ..;
+
       string $poseManipRow = `rowLayout
           // -bgc 0.5 0.25 0.25
           -nc 7
@@ -2797,13 +2897,20 @@ proc buildMainWindow() {
             "moveDownPoseButton"`;
       setParent ..;
 
-      string $poseList = `textScrollList -ams false "poseList"`;
+      string $poseList = `textScrollList -ams false -h 18 "poseList"`;
 
       string $nodeManipRow = `rowLayout
           // -bgc 0.5 0.25 0.25
-          -nc 6
-          -adj 5
+          -nc 7
+          -adj 2
           "nodeManipRow"`;
+        string $updatePoseButton = `iconTextButton
+            -ann "Update"
+            // -bgc 0.25 0.5 0.5
+            -i $updateIcon
+            -w 23
+            "updatePoseButton"`;
+        separator -st "none" -vis false;
         string $selectSourceButton = `iconTextButton
             -ann "Select Source"
             // -bgc 0.25 0.5 0.5
@@ -2816,6 +2923,7 @@ proc buildMainWindow() {
             -i $selectOppositeIcon
             -w 23
             "selectOppositeButton"`;
+        separator -st "none" -vis false -w 23;
         string $pasteSourceButton = `iconTextButton
             -ann "As Is Paste"
             // -bgc 0.25 0.5 0.5
@@ -2828,18 +2936,14 @@ proc buildMainWindow() {
             -i $pasteOppositeIcon
             -w 23
             "pasteOppositeButton"`;
-        separator -st "none" -vis false;
-        string $updatePoseButton = `iconTextButton
-            -ann "Update"
-            // -bgc 0.25 0.5 0.5
-            -i $updateIcon
-            -w 23
-            "updatePoseButton"`;
       setParent ..;
     setParent ..;
 
   formLayout -e
-      -af $poseManipRow "top" 5
+      -af $menuBar "top" 0
+      -af $menuBar "left" 0
+      -af $menuBar "right" 0
+      -ac $poseManipRow "top" 0 $menuBar
       -af $poseManipRow "left" 5
       -af $poseManipRow "right" 5
       -ac $poseList "top" 5 $poseManipRow
@@ -2851,7 +2955,12 @@ proc buildMainWindow() {
       -af $nodeManipRow "bottom" 5
       $outerForm;
 
-  window -e -cc "nkCopyPoseInvokeEvent(\"nkCopyPoseWindow\", \"cc\", \"nkCopyPoseWindow\");" $nkCopyPoseWindow;
+  workspaceControl -e -cc "catchQuiet (nkCopyPoseInvokeEvent(\"nkCopyPoseWindow\", \"cc\", \"nkCopyPoseWindow\"));" $nkCopyPoseWindow;
+  // menuItem -e -c "nkCopyPoseInvokeEvent(\"nkCopyPoseWindow\", \"c\", \"openMenuItem\");" $openMenuItem;
+  // menuItem -e -c "nkCopyPoseInvokeEvent(\"nkCopyPoseWindow\", \"c\", \"importMenuItem\");" $importMenuItem;
+  // menuItem -e -c "nkCopyPoseInvokeEvent(\"nkCopyPoseWindow\", \"c\", \"saveAsMenuItem\");" $saveAsMenuItem;
+  menuItem -e -c "nkCopyPoseInvokeEvent(\"nkCopyPoseWindow\", \"c\", \"quitMenuItem\");" $quitMenuItem;
+  menuItem -e -c "nkCopyPoseInvokeEvent(\"nkCopyPoseWindow\", \"c\", \"aboutMenuItem\");" $aboutMenuItem;
   iconTextButton -e -c "nkCopyPoseInvokeEvent(\"nkCopyPoseWindow\", \"c\", \"addPoseButton\");" $addPoseButton;
   iconTextButton -e -c "nkCopyPoseInvokeEvent(\"nkCopyPoseWindow\", \"c\", \"deletePoseButton\");" $deletePoseButton;
   iconTextButton -e -c "nkCopyPoseInvokeEvent(\"nkCopyPoseWindow\", \"c\", \"editPoseButton\");" $editPoseButton;
@@ -2859,35 +2968,65 @@ proc buildMainWindow() {
   iconTextButton -e -c "nkCopyPoseInvokeEvent(\"nkCopyPoseWindow\", \"c\", \"moveUpPoseButton\");" $moveUpPoseButton;
   iconTextButton -e -c "nkCopyPoseInvokeEvent(\"nkCopyPoseWindow\", \"c\", \"moveDownPoseButton\");" $moveDownPoseButton;
   textScrollList -e -dcc "nkCopyPoseInvokeEvent(\"nkCopyPoseWindow\", \"dcc\", \"poseList\");" $poseList;
+  iconTextButton -e -c "nkCopyPoseInvokeEvent(\"nkCopyPoseWindow\", \"c\", \"updatePoseButton\");" $updatePoseButton;
   iconTextButton -e -c "nkCopyPoseInvokeEvent(\"nkCopyPoseWindow\", \"c\", \"selectSourceButton\");" $selectSourceButton;
   iconTextButton -e -c "nkCopyPoseInvokeEvent(\"nkCopyPoseWindow\", \"c\", \"selectOppositeButton\");" $selectOppositeButton;
   iconTextButton -e -c "nkCopyPoseInvokeEvent(\"nkCopyPoseWindow\", \"c\", \"pasteSourceButton\");" $pasteSourceButton;
   iconTextButton -e -c "nkCopyPoseInvokeEvent(\"nkCopyPoseWindow\", \"c\", \"pasteOppositeButton\");" $pasteOppositeButton;
-  iconTextButton -e -c "nkCopyPoseInvokeEvent(\"nkCopyPoseWindow\", \"c\", \"updatePoseButton\");" $updatePoseButton;
 
-  // print("// " + $nkCopyPoseWindow + "\n");
-  // print("// " + $outerForm + "\n");
-  // print("// " + $poseManipRow + "\n");
-  // print("// " + $addPoseButton + "\n");
-  // print("// " + $deletePoseButton + "\n");
-  // print("// " + $editPoseButton + "\n");
-  // print("// " + $duplicatePoseButton + "\n");
-  // print("// " + $moveUpPoseButton + "\n");
-  // print("// " + $moveDownPoseButton + "\n");
-  // print("// " + $poseList + "\n");
-  // print("// " + $nodeManipRow + "\n");
-  // print("// " + $selectSourceButton + "\n");
-  // print("// " + $selectOppositeButton + "\n");
-  // print("// " + $pasteSourceButton + "\n");
-  // print("// " + $pasteOppositeButton + "\n");
-  // print("// " + $updatePoseButton + "\n");
+  // print("  " + $nkCopyPoseWindow + "\n");
+  // print("  " + $outerForm + "\n");
+  // print("  " + $menuBar + "\n");
+  // print("  " + $fileMenu + "\n");
+  // // print("  " + $openMenuItem + "\n");
+  // // print("  " + $importMenuItem + "\n");
+  // // print("  " + $saveAsMenuItem + "\n");
+  // print("  " + $quitMenuItem + "\n");
+  // print("  " + $helpMenu + "\n");
+  // print("  " + $aboutMenuItem + "\n");
+  // print("  " + $poseManipRow + "\n");
+  // print("  " + $addPoseButton + "\n");
+  // print("  " + $deletePoseButton + "\n");
+  // print("  " + $editPoseButton + "\n");
+  // print("  " + $duplicatePoseButton + "\n");
+  // print("  " + $moveUpPoseButton + "\n");
+  // print("  " + $moveDownPoseButton + "\n");
+  // print("  " + $poseList + "\n");
+  // print("  " + $nodeManipRow + "\n");
+  // print("  " + $selectSourceButton + "\n");
+  // print("  " + $selectOppositeButton + "\n");
+  // print("  " + $pasteSourceButton + "\n");
+  // print("  " + $pasteOppositeButton + "\n");
+  // print("  " + $updatePoseButton + "\n");
 
-  nkUIAppendControls({$poseList});
+  nkUIAppendControls({
+    $nkCopyPoseWindow,
+    $poseList
+  });
 
   updatePoseList();
 
   setFocus $nkCopyPoseWindow;
   showWindow $nkCopyPoseWindow;
+}
+
+/*-
+@returns <>
+*/
+proc buildMainWorkspaceControl() {
+  // print("buildMainWorkspaceControl\n");
+  int $exists = workspaceControlGetExists("nkCopyPoseWindow");
+  // print("  exists:" + $exists + "\n");
+  if (!$exists) {
+    string $nkCopyPoseWindow = `workspaceControl
+        -dup false
+        -fl true
+        -l "nkCopyPose"
+        -mw 260
+        -rt false
+        -ui "catchQuiet (nkCopyPoseBuildMainWindow());"
+        "nkCopyPoseWindow"`;
+  }
 }
 
 // -----------------------------------------------------------------------------
@@ -2906,7 +3045,7 @@ proc buildMainWindow() {
 @returns <>
 */
 proc initialize() {
-  buildMainWindow();
+  buildMainWorkspaceControl();
   // registerScriptJob();
 }
 
@@ -2914,7 +3053,7 @@ proc initialize() {
 @returns <string>
 */
 global proc string nkCopyPoseVersion() {
-  return "3.1.0";
+  return "3.2.0";
 }
 
 /*-

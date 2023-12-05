@@ -655,6 +655,30 @@ proc int textScrollListGetSelectIndexedItem(string $control) {
   return ((`size $indices`) ? $indices[0] : -1);
 }
 
+/*-
+@param $control <string>
+@returns <>
+*/
+proc workspaceControlClose(string $control) {
+  workspaceControl -e -cl $control;
+}
+
+/*-
+@param $control <string>
+@returns <int>
+*/
+proc int workspaceControlGetExists(string $control) {
+  return `workspaceControl -q -ex $control`;
+}
+
+/*-
+@param $control <string>
+@returns <int>
+*/
+proc int workspaceControlGetVisible(string $control) {
+  return `workspaceControl -q -vis $control`;
+}
+
 // /////////////////////////////////////////////////////////////////////////////
 // コアプロシージャ
 // /////////////////////////////////////////////////////////////////////////////
@@ -1446,6 +1470,47 @@ proc int moveDownPose(int $poseIndex) {
 
 /*-
 @param $poseIndex <int> 基数`0`の整数。
+@returns <>
+*/
+proc updatePose(int $poseIndex) {
+  print("updatePose\n");
+  print("  poseIndex:" + $poseIndex + "\n");
+  global string $nkCopyPosePoses[];
+
+  string $pose = getPose($poseIndex);
+  if (!`size $pose`) return;
+
+  string $poseName = extractPoseName($pose);
+  print("  poseName      :" + $poseName + "\n");
+  string $poseTransforms[] = extractPoseTransforms($pose);
+  print("  poseTransforms:{\n    " + stringArrayToString($poseTransforms, ",\n    ") + "\n  }\n");
+  if (!`size $poseTransforms`) return;
+
+  string $nodes[];
+  string $poseSettings[];
+  for ($i = 0; $i < `size $poseTransforms`; $i++) {
+    string $poseTransform = $poseTransforms[$i];
+    print("  poseTransform:" + $poseTransform + "\n");
+    string $node = extractTransformNode($poseTransform);
+    print("    node       :" + $node + "\n");
+    string $poseSetting = extractPoseSetting($poseTransform);
+    print("    poseSetting:" + $poseSetting + "\n");
+    $nodes[$i] = $node;
+    $poseSettings[$i] = $poseSetting;
+  }
+  string $newPoseTransforms[] = generatePoseTransforms($nodes, $poseSettings);
+  print("  newPoseTransforms:{\n    " + (stringArrayToString($newPoseTransforms, ",\n    ")) + "\n  }\n");
+
+  string $newPose = buildPose(
+    $poseName,
+    $newPoseTransforms
+  );
+  print("  newPose:" + $newPose + "\n");
+  $nkCopyPosePoses[$poseIndex] = $newPose;
+}
+
+/*-
+@param $poseIndex <int> 基数`0`の整数。
 @param $isOpposite <boolean>
 @returns <>
 */
@@ -1577,46 +1642,9 @@ proc pastePose(int $poseIndex, int $isOpposite, string $targetNodes[]) {
   }
 }
 
-/*-
-@param $poseIndex <int> 基数`0`の整数。
-@returns <>
-*/
-proc updatePose(int $poseIndex) {
-  print("updatePose\n");
-  print("  poseIndex:" + $poseIndex + "\n");
-  global string $nkCopyPosePoses[];
-
-  string $pose = getPose($poseIndex);
-  if (!`size $pose`) return;
-
-  string $poseName = extractPoseName($pose);
-  print("  poseName      :" + $poseName + "\n");
-  string $poseTransforms[] = extractPoseTransforms($pose);
-  print("  poseTransforms:{\n    " + stringArrayToString($poseTransforms, ",\n    ") + "\n  }\n");
-  if (!`size $poseTransforms`) return;
-
-  string $nodes[];
-  string $poseSettings[];
-  for ($i = 0; $i < `size $poseTransforms`; $i++) {
-    string $poseTransform = $poseTransforms[$i];
-    print("  poseTransform:" + $poseTransform + "\n");
-    string $node = extractTransformNode($poseTransform);
-    print("    node       :" + $node + "\n");
-    string $poseSetting = extractPoseSetting($poseTransform);
-    print("    poseSetting:" + $poseSetting + "\n");
-    $nodes[$i] = $node;
-    $poseSettings[$i] = $poseSetting;
-  }
-  string $newPoseTransforms[] = generatePoseTransforms($nodes, $poseSettings);
-  print("  newPoseTransforms:{\n    " + (stringArrayToString($newPoseTransforms, ",\n    ")) + "\n  }\n");
-
-  string $newPose = buildPose(
-    $poseName,
-    $newPoseTransforms
-  );
-  print("  newPose:" + $newPose + "\n");
-  $nkCopyPosePoses[$poseIndex] = $newPose;
-}
+// /////////////////////////////////////////////////////////////////////////////
+// テスト
+// /////////////////////////////////////////////////////////////////////////////
 
 // オイラーからクォータニオンへの変換テスト
 if (0) {
