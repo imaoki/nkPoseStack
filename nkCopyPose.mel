@@ -2514,30 +2514,30 @@ global proc buildPromptWindow() {
         -cw2 60 10
         -l "Pose Name:"
         -tx $nkCopyPosePromptPoseName
-        poseNameText`;
-    string $nodeList = `textScrollList -ams true -h 18 nodeList`;
+        "poseNameText"`;
+    string $nodeList = `textScrollList -ams true -h 18 "nodeList"`;
     string $poseSettingColumn = `columnLayout
         -adj true
         -rs 3
-        poseSettingColumn`;
+        "poseSettingColumn"`;
       string $pasteFrame = `frameLayout
           -l "Paste"
           -bgs true
           -cll false
           -mh 7
           -mw 7
-          pasteFrame`;
+          "pasteFrame"`;
         string $pasteColumn = `columnLayout
             -adj true
             -rs 3
-            pasteColumn`;
+            "pasteColumn"`;
           string $pasteAttributesCheckBoxGrp = `checkBoxGrp
               -cw4 80 60 60 60
               -en false
               -l "Attributes:"
               -la3 "T" "R" "S"
               -ncb 3
-              pasteAttributesCheckBoxGrp`;
+              "pasteAttributesCheckBoxGrp"`;
         setParent ..;
       setParent ..;
       string $selectFrame = `frameLayout
@@ -2546,26 +2546,26 @@ global proc buildPromptWindow() {
           -cll false
           -mh 7
           -mw 7
-          selectFrame`;
+          "selectFrame"`;
         string $selectColumn = `columnLayout
             -adj true
             -rs 3
-            selectColumn`;
-          string $selectTextForm = `formLayout selectTextForm`;
+            "selectColumn"`;
+          string $selectTextForm = `formLayout "selectTextForm"`;
             string $selectPatternAText = `textFieldGrp
                 -adj 2
                 -cat 2 "right" -5
                 -cw2 16 10
                 -en false
                 -l "A:"
-                selectPatternAText`;
+                "selectPatternAText"`;
             string $selectPatternBText = `textFieldGrp
                 -adj 2
                 -cat 2 "right" -5
                 -cw2 16 10
                 -en false
                 -l "B:"
-                selectPatternBText`;
+                "selectPatternBText"`;
           setParent ..;
         setParent ..;
       setParent ..;
@@ -2575,11 +2575,11 @@ global proc buildPromptWindow() {
           -cll false
           -mh 7
           -mw 7
-          mirrorFrame`;
+          "mirrorFrame"`;
         string $mirrorColumn = `columnLayout
             -adj true
             -rs 3
-            mirrorColumn`;
+            "mirrorColumn"`;
           string $mirrorAxisRadioButton = `radioButtonGrp
               // -bgc 0.25 0.25 0.5
               -cw4 80 60 60 60
@@ -2587,7 +2587,7 @@ global proc buildPromptWindow() {
               -l "Mirror Axis:"
               -la3 "X" "Y" "Z"
               -nrb 3
-              mirrorAxisRadioButton`;
+              "mirrorAxisRadioButton"`;
           string $primaryAxisRadioButton = `radioButtonGrp
               // -bgc 0.25 0.25 0.5
               -cw4 80 60 60 60
@@ -2595,7 +2595,7 @@ global proc buildPromptWindow() {
               -l "Primary Axis:"
               -la3 "X" "Y" "Z"
               -nrb 3
-              primaryAxisRadioButton`;
+              "primaryAxisRadioButton"`;
           string $secondaryAxisRadioButton = `radioButtonGrp
               // -bgc 0.25 0.25 0.5
               -cw4 80 60 60 60
@@ -2603,21 +2603,21 @@ global proc buildPromptWindow() {
               -l "Secondary Axis:"
               -la3 "X" "Y" "Z"
               -nrb 3
-              secondaryAxisRadioButton`;
+              "secondaryAxisRadioButton"`;
           string $invertAxisCheckBoxGrp = `checkBoxGrp
               -cw3 80 60 60
               -en false
               -l "Invert Axis:"
               -la2 "Primary" "Secondary"
               -ncb 2
-              invertAxisCheckBoxGrp`;
+              "invertAxisCheckBoxGrp"`;
         setParent ..;
       setParent ..;
     setParent ..;
 
-    string $buttonsForm = `formLayout buttonsForm`;
-      string $okButton = `button -h 26 -l "OK" okButton`;
-      string $cancelButton = `button -h 26 -l "Cancel" cancelButton`;
+    string $buttonsForm = `formLayout "buttonsForm"`;
+      string $okButton = `button -h 26 -l "OK" "okButton"`;
+      string $cancelButton = `button -h 26 -l "Cancel" "cancelButton"`;
     setParent ..;
 
   formLayout -e
@@ -2746,94 +2746,95 @@ proc buildMainWindow() {
   // print("pasteOppositeIcon :" + $pasteOppositeIcon + "\n");
   // print("updateIcon        :" + $updateIcon + "\n");
 
-  string $nkCopyPoseWindow = `window -t ("nkCopyPose " + (nkCopyPoseVersion()))
+  string $nkCopyPoseWindow = `window
       -mxb false
       -mnb false
       -s true
-      nkCopyPoseWindow`;
-    string $outerForm = `formLayout outerForm`;
+      -t ("nkCopyPose " + (nkCopyPoseVersion()))
+      "nkCopyPoseWindow"`;
+    string $outerForm = `formLayout "outerForm"`;
       string $poseManipRow = `rowLayout
           // -bgc 0.5 0.25 0.25
           -nc 7
           -adj 5
-          poseManipRow`;
+          "poseManipRow"`;
         string $addPoseButton = `iconTextButton
             -ann "Add"
             // -bgc 0.25 0.5 0.5
             -i $addIcon
             -w 23
-            addPoseButton`;
+            "addPoseButton"`;
         string $deletePoseButton = `iconTextButton
             -ann "Delete"
             // -bgc 0.25 0.5 0.5
             -i $deleteIcon
             -w 23
-            deletePoseButton`;
+            "deletePoseButton"`;
         string $editPoseButton = `iconTextButton
             -ann "Edit"
             // -bgc 0.25 0.5 0.5
             -i $editIcon
             -w 23
-            editPoseButton`;
+            "editPoseButton"`;
         string $duplicatePoseButton = `iconTextButton
             -ann "Duplicate"
             // -bgc 0.25 0.5 0.5
             -i $duplicateIcon
             -w 23
-            duplicatePoseButton`;
+            "duplicatePoseButton"`;
         separator -st "none" -vis false;
         string $moveUpPoseButton = `iconTextButton
             -ann "Move Up"
             // -bgc 0.25 0.5 0.5
             -i $moveUpIcon
             -w 23
-            moveUpPoseButton`;
+            "moveUpPoseButton"`;
         string $moveDownPoseButton = `iconTextButton
             -ann "Move Down"
             // -bgc 0.25 0.5 0.5
             -i $moveDownIcon
             -w 23
-            moveDownPoseButton`;
+            "moveDownPoseButton"`;
       setParent ..;
 
-      string $poseList = `textScrollList -ams false poseList`;
+      string $poseList = `textScrollList -ams false "poseList"`;
 
       string $nodeManipRow = `rowLayout
           // -bgc 0.5 0.25 0.25
           -nc 6
           -adj 5
-          nodeManipRow`;
+          "nodeManipRow"`;
         string $selectSourceButton = `iconTextButton
             -ann "Select Source"
             // -bgc 0.25 0.5 0.5
             -i $selectSourceIcon
             -w 23
-            selectSourceButton`;
+            "selectSourceButton"`;
         string $selectOppositeButton = `iconTextButton
             -ann "Select Opposite"
             // -bgc 0.25 0.5 0.5
             -i $selectOppositeIcon
             -w 23
-            selectOppositeButton`;
+            "selectOppositeButton"`;
         string $pasteSourceButton = `iconTextButton
             -ann "As Is Paste"
             // -bgc 0.25 0.5 0.5
             -i $pasteSourceIcon
             -w 23
-            pasteSourceButton`;
+            "pasteSourceButton"`;
         string $pasteOppositeButton = `iconTextButton
             -ann "Mirror Paste"
             // -bgc 0.25 0.5 0.5
             -i $pasteOppositeIcon
             -w 23
-            pasteOppositeButton`;
+            "pasteOppositeButton"`;
         separator -st "none" -vis false;
         string $updatePoseButton = `iconTextButton
             -ann "Update"
             // -bgc 0.25 0.5 0.5
             -i $updateIcon
             -w 23
-            updatePoseButton`;
+            "updatePoseButton"`;
       setParent ..;
     setParent ..;
 
