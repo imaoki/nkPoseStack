@@ -2797,7 +2797,8 @@ global proc nkPoseStackBuildMainWindow() {
   // print("nkPoseStackBuildMainWindow\n");
 
   string $sourceDirname = getSourceDirname("nkPoseStack");
-  string $iconDir = `size $sourceDirname` ? $sourceDirname + "/icons/" : "";
+  string $iconDir;
+  if (`size $sourceDirname`) $iconDir = $sourceDirname + "/nkPoseStackIcons/";
   string $addIcon = $iconDir + "addPose.png";
   string $deleteIcon = $iconDir + "deletePose.png";
   string $editIcon = $iconDir + "editPose.png";
@@ -3053,7 +3054,7 @@ proc initialize() {
 @returns <string>
 */
 global proc string nkPoseStackVersion() {
-  return "3.2.0";
+  return "3.2.1";
 }
 
 /*-
