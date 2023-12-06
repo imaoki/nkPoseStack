@@ -396,12 +396,12 @@ global string $nkUIControls[];
 @returns <>
 */
 proc nkUIAppendControls(string $controls[]) {
-  print("nkUIAppendControls\n");
+  print("nkUIAppendControls\n"); // debug
   global string $nkUIControls[];
   for ($control in $controls) {
     $nkUIControls[`size $nkUIControls`] = $control;
   }
-  print("  nkUIControls:{\n    " + stringArrayToString($nkUIControls, ",\n    ") + "\n  }\n");
+  print("  nkUIControls:{\n    " + stringArrayToString($nkUIControls, ",\n    ") + "\n  }\n"); // debug
 }
 
 /*-
@@ -410,7 +410,7 @@ proc nkUIAppendControls(string $controls[]) {
 @returns <>
 */
 proc nkUIRemoveControls(string $root, string $end) {
-  print("nkUIRemoveControls\n");
+  print("nkUIRemoveControls\n"); // debug
   global string $nkUIControls[];
   string $paths[];
   for ($control in $nkUIControls) {
@@ -426,7 +426,7 @@ proc nkUIRemoveControls(string $root, string $end) {
   if (`size $paths` > 0) {
     $nkUIControls = stringArrayRemove($paths, $nkUIControls);
   }
-  print("  nkUIControls:{\n    " + stringArrayToString($nkUIControls, ",\n    ") + "\n  }\n");
+  print("  nkUIControls:{\n    " + stringArrayToString($nkUIControls, ",\n    ") + "\n  }\n"); // debug
 }
 
 /*-
@@ -675,6 +675,23 @@ proc int workspaceControlGetExists(string $control) {
 @param $control <string>
 @returns <int>
 */
+proc int workspaceControlGetFloating(string $control) {
+  return `workspaceControl -q -fl $control`;
+}
+
+/*-
+@param $state <int>
+@param $control <string>
+@returns <>
+*/
+proc workspaceControlSetFloating(int $state, string $control) {
+  workspaceControl -e -fl $state $control;
+}
+
+/*-
+@param $control <string>
+@returns <int>
+*/
 proc int workspaceControlGetVisible(string $control) {
   return `workspaceControl -q -vis $control`;
 }
@@ -731,21 +748,21 @@ global int $nkPoseStackInitMirrorSetting[];
 @returns <>
 */
 proc initializeInitSettingVariables() {
-  print("initializeInitSettingVariables\n");
+  print("initializeInitSettingVariables\n"); // debug
   global int $nkPoseStackInitPasteSetting[];
   global string $nkPoseStackInitSelectSetting[];
   global int $nkPoseStackInitMirrorSetting[];
   if (!`size $nkPoseStackInitPasteSetting`) {
     $nkPoseStackInitPasteSetting = {1, 1, 0};
-    print("  nkPoseStackInitPasteSetting :{" + intArrayToString($nkPoseStackInitPasteSetting, ", ") + "}\n");
+    print("  nkPoseStackInitPasteSetting :{" + intArrayToString($nkPoseStackInitPasteSetting, ", ") + "}\n"); // debug
   }
   if (!`size $nkPoseStackInitSelectSetting`) {
     $nkPoseStackInitSelectSetting = {"_L", "_R"};
-    print("  nkPoseStackInitSelectSetting:{" + stringArrayToString($nkPoseStackInitSelectSetting, ", ") + "}\n");
+    print("  nkPoseStackInitSelectSetting:{" + stringArrayToString($nkPoseStackInitSelectSetting, ", ") + "}\n"); // debug
   }
   if (!`size $nkPoseStackInitMirrorSetting`) {
     $nkPoseStackInitMirrorSetting = {0, 0, 1, 0, 0};
-    print("  nkPoseStackInitMirrorSetting:{" + intArrayToString($nkPoseStackInitMirrorSetting, ", ") + "}\n");
+    print("  nkPoseStackInitMirrorSetting:{" + intArrayToString($nkPoseStackInitMirrorSetting, ", ") + "}\n"); // debug
   }
 }
 
@@ -766,8 +783,8 @@ proc string makeTransformHeader(string $n, string $poseSetting) {
 @returns <float[]>
 */
 proc float[] makeTransformValues(string $n) {
-  print("makeTransformValues\n");
-  print("  n:" + $n + "\n");
+  print("makeTransformValues\n"); // debug
+  print("  n:" + $n + "\n"); // debug
   float $values[] = {
     0, 0, 0,
     0, 0, 0, 1,
@@ -780,10 +797,10 @@ proc float[] makeTransformValues(string $n) {
     float $r[] = `getAttr ($n + ".rotate")`;
     float $s[] = `getAttr ($n + ".scale")`;
     float $h[] = `getAttr ($n + ".shear")`;
-    print("  t :{" + floatArrayToString($t, ", ") + "}\n");
-    print("  r :{" + floatArrayToString($r, ", ") + "}\n");
-    print("  s :{" + floatArrayToString($s, ", ") + "}\n");
-    print("  h :{" + floatArrayToString($h, ", ") + "}\n");
+    print("  t :{" + floatArrayToString($t, ", ") + "}\n"); // debug
+    print("  r :{" + floatArrayToString($r, ", ") + "}\n"); // debug
+    print("  s :{" + floatArrayToString($s, ", ") + "}\n"); // debug
+    print("  h :{" + floatArrayToString($h, ", ") + "}\n"); // debug
 
     int $o = `getAttr ($n + ".rotateOrder")`;
     $o = reverseRotateOrder($o);
@@ -802,11 +819,11 @@ proc float[] makeTransformValues(string $n) {
 
     float $q[] = quatMultiply($jo, quatMultiply($ra, $rq));
 
-    print("  o :" + $o + "\n");
-    print("  rq:{" + floatArrayToString($rq, ", ") + "}\n");
-    print("  ra:{" + floatArrayToString($ra, ", ") + "}\n");
-    print("  jo:{" + floatArrayToString($jo, ", ") + "}\n");
-    print("  q :{" + floatArrayToString($q, ", ") + "}\n");
+    print("  o :" + $o + "\n"); // debug
+    print("  rq:{" + floatArrayToString($rq, ", ") + "}\n"); // debug
+    print("  ra:{" + floatArrayToString($ra, ", ") + "}\n"); // debug
+    print("  jo:{" + floatArrayToString($jo, ", ") + "}\n"); // debug
+    print("  q :{" + floatArrayToString($q, ", ") + "}\n"); // debug
 
     $values = {
       $t[0], $t[1], $t[2],
@@ -833,18 +850,18 @@ proc string makePoseTransform(string $header, float $values[]) {
 @returns <string[]>
 */
 proc string[] generatePoseTransforms(string $nodes[], string $poseSettings[]) {
-  print("generatePoseTransforms\n");
-  print("  nodes       :{\n    " + stringArrayToString($nodes, ",\n    ") + "\n  }\n");
-  print("  poseSettings:{\n    " + stringArrayToString($poseSettings, ",\n    ") + "\n  }\n");
+  print("generatePoseTransforms\n"); // debug
+  print("  nodes       :{\n    " + stringArrayToString($nodes, ",\n    ") + "\n  }\n"); // debug
+  print("  poseSettings:{\n    " + stringArrayToString($poseSettings, ",\n    ") + "\n  }\n"); // debug
   string $poseTransforms[];
   int $numTransforms = minStringArrayCount($nodes, $poseSettings);
   for ($i = 0; $i < $numTransforms; $i++) {
     string $n = $nodes[$i];
-    print("  n:" + $n + "\n");
+    print("  n:" + $n + "\n"); // debug
     string $header = makeTransformHeader($n, $poseSettings[$i]);
     float $values[] = makeTransformValues($n);
     string $poseTransform = makePoseTransform($header, $values);
-    print("    poseTransform:" + $poseTransform + "\n");
+    print("    poseTransform:" + $poseTransform + "\n"); // debug
     $poseTransforms[$i] = $poseTransform;
   }
   return $poseTransforms;
@@ -865,21 +882,21 @@ proc setTransformAttributes(
   int $shouldApplyR,
   int $shouldApplyS
 ) {
-  print("setTransformAttributes\n");
-  print("  n           :" + $n + "\n");
-  print("  m           :{" + floatArrayToString($m, ", ") + "}\n");
-  print("  shouldApplyT:" + $shouldApplyT + "\n");
-  print("  shouldApplyR:" + $shouldApplyR + "\n");
-  print("  shouldApplyS:" + $shouldApplyS + "\n");
+  print("setTransformAttributes\n"); // debug
+  print("  n           :" + $n + "\n"); // debug
+  print("  m           :{" + floatArrayToString($m, ", ") + "}\n"); // debug
+  print("  shouldApplyT:" + $shouldApplyT + "\n"); // debug
+  print("  shouldApplyR:" + $shouldApplyR + "\n"); // debug
+  print("  shouldApplyS:" + $shouldApplyS + "\n"); // debug
   if (`objExists $n` && `size $m` == 12) {
     float $t[] = {$m[0], $m[1], $m[2]};
     float $r[] = {$m[3], $m[4], $m[5]};
     float $s[] = {$m[6], $m[7], $m[8]};
     float $h[] = {$m[9], $m[10], $m[11]};
-    print("  t:{" + floatArrayToString($t, ", ") + "}\n");
-    print("  r:{" + floatArrayToString($r, ", ") + "}\n");
-    print("  s:{" + floatArrayToString($s, ", ") + "}\n");
-    print("  h:{" + floatArrayToString($h, ", ") + "}\n");
+    print("  t:{" + floatArrayToString($t, ", ") + "}\n"); // debug
+    print("  r:{" + floatArrayToString($r, ", ") + "}\n"); // debug
+    print("  s:{" + floatArrayToString($s, ", ") + "}\n"); // debug
+    print("  h:{" + floatArrayToString($h, ", ") + "}\n"); // debug
 
     string $tx = $n + ".tx";
     string $ty = $n + ".ty";
@@ -915,18 +932,18 @@ proc setTransformAttributes(
 @returns <float[]>
 */
 proc float[] asIsTransform(string $n, float $m[]) {
-  print("asIsTransform\n");
-  print("  n :" + $n + "\n");
-  print("  m :{" + floatArrayToString($m, ", ") + "}\n");
+  print("asIsTransform\n"); // debug
+  print("  n :" + $n + "\n"); // debug
+  print("  m :{" + floatArrayToString($m, ", ") + "}\n"); // debug
 
   float $t[] = {$m[0], $m[1], $m[2]};
   float $q[] = {$m[3], $m[4], $m[5], $m[6]};
   float $s[] = {$m[7], $m[8], $m[9]};
   float $h[] = {$m[10], $m[11], $m[12]};
-  print("  t :{" + floatArrayToString($t, ", ") + "}\n");
-  print("  q :{" + floatArrayToString($q, ", ") + "}\n");
-  print("  s :{" + floatArrayToString($s, ", ") + "}\n");
-  print("  h :{" + floatArrayToString($h, ", ") + "}\n");
+  print("  t :{" + floatArrayToString($t, ", ") + "}\n"); // debug
+  print("  q :{" + floatArrayToString($q, ", ") + "}\n"); // debug
+  print("  s :{" + floatArrayToString($s, ", ") + "}\n"); // debug
+  print("  h :{" + floatArrayToString($h, ", ") + "}\n"); // debug
 
   int $o = `getAttr ($n + ".rotateOrder")`;
   $o = reverseRotateOrder($o);
@@ -944,12 +961,12 @@ proc float[] asIsTransform(string $n, float $m[]) {
   float $rq[] = quatMultiply($jo, quatMultiply($ra, $q));
   float $r[] = quatToEuler($rq, $o);
 
-  print("  o :" + $o + "\n");
-  print("  q :{" + floatArrayToString($q, ", ") + "}\n");
-  print("  ra:{" + floatArrayToString($ra, ", ") + "}\n");
-  print("  jo:{" + floatArrayToString($jo, ", ") + "}\n");
-  print("  rq:{" + floatArrayToString($rq, ", ") + "}\n");
-  print("  r :{" + floatArrayToString($r, ", ") + "}\n");
+  print("  o :" + $o + "\n"); // debug
+  print("  q :{" + floatArrayToString($q, ", ") + "}\n"); // debug
+  print("  ra:{" + floatArrayToString($ra, ", ") + "}\n"); // debug
+  print("  jo:{" + floatArrayToString($jo, ", ") + "}\n"); // debug
+  print("  rq:{" + floatArrayToString($rq, ", ") + "}\n"); // debug
+  print("  r :{" + floatArrayToString($r, ", ") + "}\n"); // debug
 
   float $values[] = {
     $t[0], $t[1], $t[2],
@@ -957,7 +974,7 @@ proc float[] asIsTransform(string $n, float $m[]) {
     $s[0], $s[1], $s[2],
     $h[0], $h[1], $h[2]
   };
-  print("  values:{" + floatArrayToString($values, ", ") + "}\n");
+  print("  values:{" + floatArrayToString($values, ", ") + "}\n"); // debug
 
   return $values;
 }
@@ -983,24 +1000,24 @@ proc float[] mirrorTransform(
   int $invertPrimaryAxis,
   int $invertSecondaryAxis
 ) {
-  print("mirrorTransform\n");
-  print("  n                  :" + $n + "\n");
-  print("  m                  :{" + floatArrayToString($m, ", ") + "}\n");
-  print("  hasCommonParent    :" + $hasCommonParent + "\n");
-  print("  mirrorAxis         :" + $mirrorAxis + "\n");
-  print("  primaryAxis        :" + $primaryAxis + "\n");
-  print("  secondaryAxis      :" + $secondaryAxis + "\n");
-  print("  invertPrimaryAxis  :" + $invertPrimaryAxis + "\n");
-  print("  invertSecondaryAxis:" + $invertSecondaryAxis + "\n");
+  print("mirrorTransform\n"); // debug
+  print("  n                  :" + $n + "\n"); // debug
+  print("  m                  :{" + floatArrayToString($m, ", ") + "}\n"); // debug
+  print("  hasCommonParent    :" + $hasCommonParent + "\n"); // debug
+  print("  mirrorAxis         :" + $mirrorAxis + "\n"); // debug
+  print("  primaryAxis        :" + $primaryAxis + "\n"); // debug
+  print("  secondaryAxis      :" + $secondaryAxis + "\n"); // debug
+  print("  invertPrimaryAxis  :" + $invertPrimaryAxis + "\n"); // debug
+  print("  invertSecondaryAxis:" + $invertSecondaryAxis + "\n"); // debug
 
   float $t[] = {$m[0], $m[1], $m[2]};
   float $q[] = {$m[3], $m[4], $m[5], $m[6]};
   float $s[] = {$m[7], $m[8], $m[9]};
   float $h[] = {$m[10], $m[11], $m[12]};
-  print("  t :{" + floatArrayToString($t, ", ") + "}\n");
-  print("  q :{" + floatArrayToString($q, ", ") + "}\n");
-  print("  s :{" + floatArrayToString($s, ", ") + "}\n");
-  print("  h :{" + floatArrayToString($h, ", ") + "}\n");
+  print("  t :{" + floatArrayToString($t, ", ") + "}\n"); // debug
+  print("  q :{" + floatArrayToString($q, ", ") + "}\n"); // debug
+  print("  s :{" + floatArrayToString($s, ", ") + "}\n"); // debug
+  print("  h :{" + floatArrayToString($h, ", ") + "}\n"); // debug
 
   // 位置のミラーリング
   if ($hasCommonParent) {
@@ -1039,11 +1056,11 @@ proc float[] mirrorTransform(
   $mq[3] *= -1;
   float $cq[] = quatMultiply($jo, quatMultiply($ra, $mq));
 
-  print("  o :" + $o + "\n");
-  print("  q :{" + floatArrayToString($q, ", ") + "}\n");
-  print("  ra:{" + floatArrayToString($ra, ", ") + "}\n");
-  print("  jo:{" + floatArrayToString($jo, ", ") + "}\n");
-  print("  mq:{" + floatArrayToString($mq, ", ") + "}\n");
+  print("  o :" + $o + "\n"); // debug
+  print("  q :{" + floatArrayToString($q, ", ") + "}\n"); // debug
+  print("  ra:{" + floatArrayToString($ra, ", ") + "}\n"); // debug
+  print("  jo:{" + floatArrayToString($jo, ", ") + "}\n"); // debug
+  print("  mq:{" + floatArrayToString($mq, ", ") + "}\n"); // debug
 
   // ソースとターゲットの親が異なる場合は親ノードの反転をリセットしておく
   if (!$hasCommonParent) {
@@ -1097,8 +1114,8 @@ proc float[] mirrorTransform(
   }
 
   float $r[] = quatToEuler($cq, $o);
-  print("  cq:{" + floatArrayToString($cq, ", ") + "}\n");
-  print("  r :{" + floatArrayToString($r, ", ") + "}\n");
+  print("  cq:{" + floatArrayToString($cq, ", ") + "}\n"); // debug
+  print("  r :{" + floatArrayToString($r, ", ") + "}\n"); // debug
 
   float $values[] = {
     $t[0], $t[1], $t[2],
@@ -1106,7 +1123,7 @@ proc float[] mirrorTransform(
     $s[0], $s[1], $s[2],
     $h[0], $h[1], $h[2]
   };
-  print("  values:{" + floatArrayToString($values, ", ") + "}\n");
+  print("  values:{" + floatArrayToString($values, ", ") + "}\n"); // debug
 
   return $values;
 }
@@ -1353,18 +1370,18 @@ proc int addPose(
   string $nodes[],
   string $poseSettings[]
 ) {
-  print("addPose\n");
-  print("  poseName    :" + $poseName + "\n");
-  print("  nodes       :{\n    " + stringArrayToString($nodes, ",\n    ") + "\n  }\n");
-  print("  poseSettings:{\n    " + stringArrayToString($poseSettings, ",\n    ") + "\n  }\n");
+  print("addPose\n"); // debug
+  print("  poseName    :" + $poseName + "\n"); // debug
+  print("  nodes       :{\n    " + stringArrayToString($nodes, ",\n    ") + "\n  }\n"); // debug
+  print("  poseSettings:{\n    " + stringArrayToString($poseSettings, ",\n    ") + "\n  }\n"); // debug
   global string $nkPoseStackPoses[];
   string $poseTransforms[] = generatePoseTransforms($nodes, $poseSettings);
-  print("  poseTransforms:{\n    " + (stringArrayToString($poseTransforms, ",\n    ")) + "\n  }\n");
+  print("  poseTransforms:{\n    " + (stringArrayToString($poseTransforms, ",\n    ")) + "\n  }\n"); // debug
   string $pose = buildPose(
     $poseName,
     $poseTransforms
   );
-  print("  pose:" + $pose + "\n");
+  print("  pose:" + $pose + "\n"); // debug
   $nkPoseStackPoses[(getNumPoses())] = $pose;
   return (getNumPoses());
 }
@@ -1374,8 +1391,8 @@ proc int addPose(
 @returns <int> 削除後のポーズ数。
 */
 proc int deletePose(int $poseIndex) {
-  print("deletePose\n");
-  print("  poseIndex:" + $poseIndex + "\n");
+  print("deletePose\n"); // debug
+  print("  poseIndex:" + $poseIndex + "\n"); // debug
   global string $nkPoseStackPoses[];
   if (betweenInt($poseIndex, 0, getNumPoses() - 1)) {
     stringArrayRemoveAtIndex($poseIndex, $nkPoseStackPoses);
@@ -1390,41 +1407,41 @@ proc int deletePose(int $poseIndex) {
 @returns <>
 */
 proc editPose(int $poseIndex, string $poseName, string $poseSettings[]) {
-  print("editPose\n");
-  print("  poseIndex   :" + $poseIndex + "\n");
-  print("  poseName    :" + $poseName + "\n");
-  print("  poseSettings:{\n    " + stringArrayToString($poseSettings, ",\n    ") + "\n  }\n");
+  print("editPose\n"); // debug
+  print("  poseIndex   :" + $poseIndex + "\n"); // debug
+  print("  poseName    :" + $poseName + "\n"); // debug
+  print("  poseSettings:{\n    " + stringArrayToString($poseSettings, ",\n    ") + "\n  }\n"); // debug
   global string $nkPoseStackPoses[];
 
   string $pose = getPose($poseIndex);
   if (!`size $pose`) return;
 
   string $poseTransforms[] = extractPoseTransforms($pose);
-  print("  poseTransforms:{\n    " + stringArrayToString($poseTransforms, ",\n    ") + "\n  }\n");
+  print("  poseTransforms:{\n    " + stringArrayToString($poseTransforms, ",\n    ") + "\n  }\n"); // debug
   if (!`size $poseTransforms`) return;
 
   string $newPoseTransforms[];
   int $numTransforms = minStringArrayCount($poseSettings, $poseTransforms);
   for ($i = 0; $i < $numTransforms; $i++) {
     string $poseTransform = $poseTransforms[$i];
-    print("  poseTransform:" + $poseTransform + "\n");
+    print("  poseTransform:" + $poseTransform + "\n"); // debug
     string $n = extractTransformNode($poseTransform);
-    print("    n               :" + $n + "\n");
+    print("    n               :" + $n + "\n"); // debug
     string $header = makeTransformHeader($n, $poseSettings[$i]);
-    print("    header          :" + $header + "\n");
+    print("    header          :" + $header + "\n"); // debug
     float $values[] = extractTransformValues($poseTransform);
-    print("    values          :{" + floatArrayToString($values, ", ") + "}\n");
+    print("    values          :{" + floatArrayToString($values, ", ") + "}\n"); // debug
     string $newPoseTransform = makePoseTransform($header, $values);
-    print("    newPoseTransform:" + $newPoseTransform + "\n");
+    print("    newPoseTransform:" + $newPoseTransform + "\n"); // debug
     $newPoseTransforms[$i] = $newPoseTransform;
   }
-  print("  newPoseTransforms:{\n    " + (stringArrayToString($newPoseTransforms, ",\n    ")) + "\n  }\n");
+  print("  newPoseTransforms:{\n    " + (stringArrayToString($newPoseTransforms, ",\n    ")) + "\n  }\n"); // debug
 
   string $newPose = buildPose(
     $poseName,
     $newPoseTransforms
   );
-  print("  newPose:" + $newPose + "\n");
+  print("  newPose:" + $newPose + "\n"); // debug
   $nkPoseStackPoses[$poseIndex] = $newPose;
 }
 
@@ -1433,14 +1450,14 @@ proc editPose(int $poseIndex, string $poseName, string $poseSettings[]) {
 @returns <int> 複製先のポーズインデックス。基数は`0`。
 */
 proc int duplicatePose(int $poseIndex) {
-  print("duplicatePose\n");
-  print("  poseIndex:" + $poseIndex + "\n");
+  print("duplicatePose\n"); // debug
+  print("  poseIndex:" + $poseIndex + "\n"); // debug
   global string $nkPoseStackPoses[];
   if (!betweenInt($poseIndex, 0, getNumPoses() - 1)) return $poseIndex;
   string $pose = getPose($poseIndex);
   if (!`size $pose`) return $poseIndex;
   int $newPoseIndex = $poseIndex + 1;
-  print("  newPoseIndex:" + $newPoseIndex + "\n");
+  print("  newPoseIndex:" + $newPoseIndex + "\n"); // debug
   stringArrayInsertAtIndex($newPoseIndex, $nkPoseStackPoses, $pose);
   return $newPoseIndex;
 }
@@ -1450,14 +1467,14 @@ proc int duplicatePose(int $poseIndex) {
 @returns <int> 移動後のポーズインデックス。基数は`0`。
 */
 proc int moveUpPose(int $poseIndex) {
-  print("moveUpPose\n");
-  print("  poseIndex:" + $poseIndex + "\n");
+  print("moveUpPose\n"); // debug
+  print("  poseIndex:" + $poseIndex + "\n"); // debug
   global string $nkPoseStackPoses[];
   if (!betweenInt($poseIndex, 1, getNumPoses() - 1)) return $poseIndex;
   string $pose = getPose($poseIndex);
   if (!`size $pose`) return $poseIndex;
   int $newPoseIndex = $poseIndex - 1;
-  print("  newPoseIndex:" + $newPoseIndex + "\n");
+  print("  newPoseIndex:" + $newPoseIndex + "\n"); // debug
   stringArrayRemoveAtIndex($poseIndex, $nkPoseStackPoses);
   stringArrayInsertAtIndex($newPoseIndex, $nkPoseStackPoses, $pose);
   return $newPoseIndex;
@@ -1468,14 +1485,14 @@ proc int moveUpPose(int $poseIndex) {
 @returns <int> 移動後のポーズインデックス。基数は`0`。
 */
 proc int moveDownPose(int $poseIndex) {
-  print("moveDownPose\n");
-  print("  poseIndex:" + $poseIndex + "\n");
+  print("moveDownPose\n"); // debug
+  print("  poseIndex:" + $poseIndex + "\n"); // debug
   global string $nkPoseStackPoses[];
   if (!betweenInt($poseIndex, 0, getNumPoses() - 2)) return $poseIndex;
   string $pose = getPose($poseIndex);
   if (!`size $pose`) return $poseIndex;
   int $newPoseIndex = $poseIndex + 1;
-  print("  newPoseIndex:" + $newPoseIndex + "\n");
+  print("  newPoseIndex:" + $newPoseIndex + "\n"); // debug
   stringArrayRemoveAtIndex($poseIndex, $nkPoseStackPoses);
   stringArrayInsertAtIndex($newPoseIndex, $nkPoseStackPoses, $pose);
   return $newPoseIndex;
@@ -1486,39 +1503,39 @@ proc int moveDownPose(int $poseIndex) {
 @returns <>
 */
 proc updatePose(int $poseIndex) {
-  print("updatePose\n");
-  print("  poseIndex:" + $poseIndex + "\n");
+  print("updatePose\n"); // debug
+  print("  poseIndex:" + $poseIndex + "\n"); // debug
   global string $nkPoseStackPoses[];
 
   string $pose = getPose($poseIndex);
   if (!`size $pose`) return;
 
   string $poseName = extractPoseName($pose);
-  print("  poseName      :" + $poseName + "\n");
+  print("  poseName      :" + $poseName + "\n"); // debug
   string $poseTransforms[] = extractPoseTransforms($pose);
-  print("  poseTransforms:{\n    " + stringArrayToString($poseTransforms, ",\n    ") + "\n  }\n");
+  print("  poseTransforms:{\n    " + stringArrayToString($poseTransforms, ",\n    ") + "\n  }\n"); // debug
   if (!`size $poseTransforms`) return;
 
   string $nodes[];
   string $poseSettings[];
   for ($i = 0; $i < `size $poseTransforms`; $i++) {
     string $poseTransform = $poseTransforms[$i];
-    print("  poseTransform:" + $poseTransform + "\n");
+    print("  poseTransform:" + $poseTransform + "\n"); // debug
     string $node = extractTransformNode($poseTransform);
-    print("    node       :" + $node + "\n");
+    print("    node       :" + $node + "\n"); // debug
     string $poseSetting = extractPoseSetting($poseTransform);
-    print("    poseSetting:" + $poseSetting + "\n");
+    print("    poseSetting:" + $poseSetting + "\n"); // debug
     $nodes[$i] = $node;
     $poseSettings[$i] = $poseSetting;
   }
   string $newPoseTransforms[] = generatePoseTransforms($nodes, $poseSettings);
-  print("  newPoseTransforms:{\n    " + (stringArrayToString($newPoseTransforms, ",\n    ")) + "\n  }\n");
+  print("  newPoseTransforms:{\n    " + (stringArrayToString($newPoseTransforms, ",\n    ")) + "\n  }\n"); // debug
 
   string $newPose = buildPose(
     $poseName,
     $newPoseTransforms
   );
-  print("  newPose:" + $newPose + "\n");
+  print("  newPose:" + $newPose + "\n"); // debug
   $nkPoseStackPoses[$poseIndex] = $newPose;
 }
 
@@ -1528,31 +1545,31 @@ proc updatePose(int $poseIndex) {
 @returns <>
 */
 proc selectNodes(int $poseIndex, int $isOpposite) {
-  print("selectNodes\n");
-  print("  poseIndex :" + $poseIndex + "\n");
-  print("  isOpposite:" + $isOpposite + "\n");
+  print("selectNodes\n"); // debug
+  print("  poseIndex :" + $poseIndex + "\n"); // debug
+  print("  isOpposite:" + $isOpposite + "\n"); // debug
 
   string $pose = getPose($poseIndex);
-  print("  pose:" + $pose + "\n");
+  print("  pose:" + $pose + "\n"); // debug
   if (!`size $pose`) return;
 
   string $poseTransforms[] = extractPoseTransforms($pose);
-  print("  poseTransforms:{\n    " + stringArrayToString($poseTransforms, ",\n    ") + "\n  }\n");
+  print("  poseTransforms:{\n    " + stringArrayToString($poseTransforms, ",\n    ") + "\n  }\n"); // debug
   if (!`size $poseTransforms`) return;
 
   string $targetNodes[];
   for ($poseTransform in $poseTransforms) {
-    print("  poseTransform:" + $poseTransform + "\n");
+    print("  poseTransform:" + $poseTransform + "\n"); // debug
     string $targetNode = extractTransformNode($poseTransform);
-    print("    targetNode   :" + $targetNode + "\n");
+    print("    targetNode   :" + $targetNode + "\n"); // debug
     string $poseSetting = extractPoseSetting($poseTransform);
-    print("    poseSetting  :" + $poseSetting + "\n");
+    print("    poseSetting  :" + $poseSetting + "\n"); // debug
     string $selectSetting[] = extractSelectSetting($poseSetting);
-    print("    selectSetting:{" + stringArrayToString($selectSetting, ", ") + "}\n");
+    print("    selectSetting:{" + stringArrayToString($selectSetting, ", ") + "}\n"); // debug
     string $patternA = $selectSetting[0];
     string $patternB = $selectSetting[1];
-    print("    patternA     :" + $patternA + "\n");
-    print("    patternB     :" + $patternB + "\n");
+    print("    patternA     :" + $patternA + "\n"); // debug
+    print("    patternB     :" + $patternB + "\n"); // debug
     if ($isOpposite) {
       if (`gmatch $targetNode ("*" + $patternA + "*")`) {
         $targetNode = substituteAllString($targetNode, $patternA, $patternB);
@@ -1565,11 +1582,11 @@ proc selectNodes(int $poseIndex, int $isOpposite) {
       $targetNodes[`size $targetNodes`] = $targetNode;
     }
   }
-  print("  targetNodes:{\n    " + stringArrayToString($targetNodes, "\n    ") + "\n  }\n");
+  print("  targetNodes:{\n    " + stringArrayToString($targetNodes, "\n    ") + "\n  }\n"); // debug
   if (!`size $targetNodes`) return;
 
   int $mods = `getModifiers`;
-  print("  mods:" + $mods + "\n");
+  print("  mods:" + $mods + "\n"); // debug
   switch ($mods) {
     // Nothing
     case 0: select -r $targetNodes; break;
@@ -1590,46 +1607,46 @@ proc selectNodes(int $poseIndex, int $isOpposite) {
 @returns <>
 */
 proc pastePose(int $poseIndex, int $isOpposite, string $targetNodes[]) {
-  print("pastePose\n");
-  print("  poseIndex  :" + $poseIndex + "\n");
-  print("  isOpposite :" + $isOpposite + "\n");
-  print("  targetNodes:{\n    " + stringArrayToString($targetNodes, ",\n    ") + "\n  }\n");
+  print("pastePose\n"); // debug
+  print("  poseIndex  :" + $poseIndex + "\n"); // debug
+  print("  isOpposite :" + $isOpposite + "\n"); // debug
+  print("  targetNodes:{\n    " + stringArrayToString($targetNodes, ",\n    ") + "\n  }\n"); // debug
 
   if (!`size $targetNodes`) return;
 
   string $pose = getPose($poseIndex);
-  print("  pose:" + $pose + "\n");
+  print("  pose:" + $pose + "\n"); // debug
   if (!`size $pose`) return;
 
   string $poseTransforms[] = extractPoseTransforms($pose);
-  print("  poseTransforms:{\n    " + stringArrayToString($poseTransforms, ",\n    ") + "\n  }\n");
+  print("  poseTransforms:{\n    " + stringArrayToString($poseTransforms, ",\n    ") + "\n  }\n"); // debug
   if (!`size $poseTransforms`) return;
 
   int $numTargets = minStringArrayCount($targetNodes, $poseTransforms);
-  print("  numTargets:" + $numTargets + "\n");
+  print("  numTargets:" + $numTargets + "\n"); // debug
   for ($i = 0; $i < $numTargets; $i++) {
     string $poseTransform = $poseTransforms[$i];
-    print("  poseTransform:" + $poseTransform + "\n");
+    print("  poseTransform:" + $poseTransform + "\n"); // debug
     string $sourceNode = extractTransformNode($poseTransform);
-    print("    sourceNode     :" + $sourceNode + "\n");
+    print("    sourceNode     :" + $sourceNode + "\n"); // debug
     string $targetNode = $targetNodes[$i];
-    print("    targetNode     :" + $targetNode + "\n");
+    print("    targetNode     :" + $targetNode + "\n"); // debug
 
     float $transformValues[] = extractTransformValues($poseTransform);
-    print("    transformValues:{" + floatArrayToString($transformValues, ", ") + "}\n");
+    print("    transformValues:{" + floatArrayToString($transformValues, ", ") + "}\n"); // debug
 
     string $poseSetting = extractPoseSetting($poseTransform);
-    print("    poseSetting    :" + $poseSetting + "\n");
+    print("    poseSetting    :" + $poseSetting + "\n"); // debug
     int $pasteSetting[] = extractPasteSetting($poseSetting);
-    print("    pasteSetting   :{" + intArrayToString($pasteSetting, ", ") + "}\n");
+    print("    pasteSetting   :{" + intArrayToString($pasteSetting, ", ") + "}\n"); // debug
 
     if ($isOpposite) {
       int $mirrorSetting[] = extractMirrorSetting($poseSetting);
-      print("    mirrorSetting  :{" + intArrayToString($mirrorSetting, ", ") + "}\n");
+      print("    mirrorSetting  :{" + intArrayToString($mirrorSetting, ", ") + "}\n"); // debug
       string $sourceParent = getParentNode($sourceNode);
       string $targetParent = getParentNode($targetNode);
       int $hasCommonParent = $sourceParent == $targetParent;
-      print("    hasCommonParent:" + $hasCommonParent + "\n");
+      print("    hasCommonParent:" + $hasCommonParent + "\n"); // debug
       $transformValues = mirrorTransform(
         $targetNode,
         $transformValues,
