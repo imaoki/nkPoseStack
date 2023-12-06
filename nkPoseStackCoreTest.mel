@@ -1754,5 +1754,5 @@ if (1) {
 }
 
 /*
-eval ("source \"" + `getenv "MAYA_APP_DIR"` + "/library/nkPoseStack/nkPoseStackCoreTest.mel\"");
+eval ("source \"" + `getenv "MAYA_APP_DIR"` + "/dev/nkPoseStack/nkPoseStackCoreTest.mel\"");
 */

@@ -3109,6 +3109,6 @@ global proc nkPoseStack() {
 }
 
 /*
-eval ("source \"" + `getenv "MAYA_APP_DIR"` + "/library/nkPoseStack/nkPoseStack.mel\"");
+eval ("source \"" + `getenv "MAYA_APP_DIR"` + "/dev/nkPoseStack/nkPoseStack.mel\"");
 nkPoseStack;
 */
