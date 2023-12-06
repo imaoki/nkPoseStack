@@ -3049,9 +3049,6 @@ global proc nkPoseStackBuildMainWindow() {
   });
 
   updatePoseList();
-
-  setFocus $nkPoseStackWindow;
-  showWindow $nkPoseStackWindow;
 }
 
 /*-
@@ -3098,7 +3095,7 @@ proc initialize() {
 @returns <string>
 */
 global proc string nkPoseStackVersion() {
-  return "3.2.3";
+  return "3.2.4";
 }
 
 /*-
