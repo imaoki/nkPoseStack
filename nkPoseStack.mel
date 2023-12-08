@@ -96,8 +96,8 @@ proc int minStringArrayCount(string $a[], string $b[]) {
 // -----------------------------------------------------------------------------
 /*-
 @param $degree <float>
-@param $axis <float[]>
-@returns <float[]>
+@param $axis <float[3]>
+@returns <float[4]>
 @remarks https://github.com/mrdoob/three.js/blob/dev/LICENSE
 */
 proc float[] angleAxisToQuat(float $degree, float $axis[]) {
@@ -120,9 +120,9 @@ proc int reverseRotateOrder(int $order) {
 }
 
 /*-
-@param $r <float[]>
+@param $r <float[3]>
 @param $order <int>
-@returns <float[]>
+@returns <float[4]>
 @remarks https://github.com/mrdoob/three.js/blob/dev/LICENSE
 */
 proc float[] eulerToQuat(float $r[], int $order) {
@@ -188,9 +188,9 @@ proc float[] eulerToQuat(float $r[], int $order) {
 }
 
 /*-
-@param $q <float[]>
+@param $q <float[4]>
 @param $order <int>
-@returns <float[]>
+@returns <float[3]>
 @remarks https://github.com/aadebdeb/MatrixQuaternionEulerAngleConversions
 */
 proc float[] quatToEuler(float $q[], int $order) {
@@ -269,9 +269,9 @@ proc float[] quatToEuler(float $q[], int $order) {
 }
 
 /*-
-@param $q1 <float[]>
-@param $q2 <float[]>
-@returns <float[]>
+@param $q1 <float[4]>
+@param $q2 <float[4]>
+@returns <float[4]>
 */
 proc float[] quatAdd(float $q1[], float $q2[]) {
   float $q1x = $q1[0];
@@ -290,9 +290,9 @@ proc float[] quatAdd(float $q1[], float $q2[]) {
 }
 
 /*-
-@param $q1 <float[]>
-@param $q2 <float[]>
-@returns <float[]>
+@param $q1 <float[4]>
+@param $q2 <float[4]>
+@returns <float[4]>
 */
 proc float[] quatSubtract(float $q1[], float $q2[]) {
   float $q1x = $q1[0];
@@ -311,9 +311,9 @@ proc float[] quatSubtract(float $q1[], float $q2[]) {
 }
 
 /*-
-@param $q1 <float[]>
-@param $q2 <float[]>
-@returns <float[]>
+@param $q1 <float[4]>
+@param $q2 <float[4]>
+@returns <float[4]>
 @remarks https://github.com/mrdoob/three.js/blob/dev/LICENSE
 */
 proc float[] quatMultiply(float $q1[], float $q2[]) {
@@ -333,17 +333,17 @@ proc float[] quatMultiply(float $q1[], float $q2[]) {
 }
 
 /*-
-@param $q <float[]>
-@returns <float[]>
+@param $q <float[4]>
+@returns <float[4]>
 */
 proc float[] quatInverse(float $q[]) {
   return {$q[0] * -1, $q[1] * -1, $q[2] * -1, $q[3]};
 }
 
 /*-
-@param $v <float[]>
-@param $q <float[]>
-@returns <float[]>
+@param $v <float[3]>
+@param $q <float[4]>
+@returns <float[3]>
 */
 proc float[] rotateVectorByQuat(float $v[], float $q[]) {
   float $iq[] = quatInverse($q);
@@ -353,9 +353,9 @@ proc float[] rotateVectorByQuat(float $v[], float $q[]) {
 }
 
 /*-
-@param $q <float[]>
-@param $axis <float[]>
-@returns <float[]>
+@param $q <float[4]>
+@param $axis <float[3]>
+@returns <float[4]>
 */
 proc float[] quatFlip(float $q[], float $axis[]) {
   float $flipQ[] = angleAxisToQuat(180.0, $axis);
@@ -470,7 +470,7 @@ proc checkBoxGrpSetEnable(int $enable, string $control) {
 /*-
 @param $ncb <int> チェックボックスの数。1から4まで。
 @param $control <string>
-@returns <int[]>
+@returns <int[1-4]>
 */
 proc int[] checkBoxGrpGetValues(int $ncb, string $control) {
   $ncb = `clamp 1 4 $ncb`;
@@ -483,7 +483,7 @@ proc int[] checkBoxGrpGetValues(int $ncb, string $control) {
 }
 
 /*-
-@param $values <int[]>
+@param $values <int[1-4]>
 @param $control <string>
 @returns <>
 */
@@ -730,17 +730,17 @@ transform_values = t , "," , q , "," , s , "," , h ;
 global string $nkPoseStackPoses[];
 
 /*-
-@var <int[]>
+@var <int[3]>
 */
 global int $nkPoseStackInitPasteSetting[];
 
 /*-
-@var <string[]>
+@var <string[2]>
 */
 global string $nkPoseStackInitSelectSetting[];
 
 /*-
-@var <int[]>
+@var <int[5]>
 */
 global int $nkPoseStackInitMirrorSetting[];
 
@@ -780,7 +780,7 @@ proc string makeTransformHeader(string $n, string $poseSetting) {
 
 /*-
 @param $n <string>
-@returns <float[]>
+@returns <float[13]>
 */
 proc float[] makeTransformValues(string $n) {
   // print("makeTransformValues\n"); // debug
@@ -869,7 +869,7 @@ proc string[] generatePoseTransforms(string $nodes[], string $poseSettings[]) {
 
 /*-
 @param $n <string>
-@param $m <float[]>
+@param $m <float[12]>
 @param $shouldSetT <int>
 @param $shouldSetR <int>
 @param $shouldSetS <int>
@@ -928,8 +928,8 @@ proc setTransformAttributes(
 
 /*-
 @param $n <string>
-@param $m <float[]>
-@returns <float[]>
+@param $m <float[13]>
+@returns <float[12]>
 */
 proc float[] asIsTransform(string $n, float $m[]) {
   // print("asIsTransform\n"); // debug
@@ -981,14 +981,14 @@ proc float[] asIsTransform(string $n, float $m[]) {
 
 /*-
 @param $n <string>
-@param $m <float[]>
+@param $m <float[13]>
 @param $hasCommonParent <boolean>
 @param $mirrorAxis <int>
 @param $primaryAxis <int>
 @param $secondaryAxis <int>
 @param $invertPrimaryAxis <boolean>
 @param $invertSecondaryAxis <boolean>
-@returns <float[]>
+@returns <float[12]>
 */
 proc float[] mirrorTransform(
   string $n,
@@ -1132,9 +1132,9 @@ proc float[] mirrorTransform(
 // データ変換
 // -----------------------------------------------------------------------------
 /*-
-@param $pasteSetting <int[]>
-@param $selectSetting <string[]>
-@param $mirrorSetting <int[]>
+@param $pasteSetting <int[3]>
+@param $selectSetting <string[2]>
+@param $mirrorSetting <int[5]>
 @returns <string>
 */
 proc string buildPoseSetting(
@@ -1195,7 +1195,7 @@ proc string[] extractPoseTransforms(string $pose) {
 
 /*-
 @param $poseTransform <string>
-@returns <string[]>
+@returns <string[2]>
 */
 proc string[] extractTransformHeader(string $poseTransform) {
   string $header[];
@@ -1233,7 +1233,7 @@ proc string extractPoseSetting(string $poseTransform) {
 
 /*-
 @param $poseSetting <string>
-@returns <string[]>
+@returns <string[3]>
 */
 proc string[] extractPoseSettings(string $poseSetting) {
   string $poseSettings[];
@@ -1246,7 +1246,7 @@ proc string[] extractPoseSettings(string $poseSetting) {
 
 /*-
 @param $poseSetting <string>
-@returns <int[]>
+@returns <int[3]>
 */
 proc int[] extractPasteSetting(string $poseSetting) {
   int $pasteSetting[] = {1, 1, 0};
@@ -1262,7 +1262,7 @@ proc int[] extractPasteSetting(string $poseSetting) {
 
 /*-
 @param $poseSetting <string>
-@returns <string[]>
+@returns <string[2]>
 */
 proc string[] extractSelectSetting(string $poseSetting) {
   string $selectSetting[] = {"_L", "_R"};
@@ -1278,7 +1278,7 @@ proc string[] extractSelectSetting(string $poseSetting) {
 
 /*-
 @param $poseSetting <string>
-@returns <int[]>
+@returns <int[5]>
 */
 proc int[] extractMirrorSetting(string $poseSetting) {
   int $mirrorSetting[] = {0, 0, 1, 0, 0};
@@ -1294,7 +1294,7 @@ proc int[] extractMirrorSetting(string $poseSetting) {
 
 /*-
 @param $poseTransform <string>
-@returns <float[]>
+@returns <float[13]>
 */
 proc float[] extractTransformValues(string $poseTransform) {
   float $values[] = {
@@ -1696,7 +1696,7 @@ global string $nkPoseStackPromptPoseSettings[];
 global int $nkPoseStackPromptIsUIUpdating;
 
 /*-
-@var <int[]> プロンプトを閉じる際に初期化用の設定値を更新するかどうか。
+@var <int[3]> プロンプトを閉じる際に初期化用の設定値を更新するかどうか。
 */
 global int $nkPoseStackPromptNeedUpdateInitSetting[];
 
@@ -1866,7 +1866,7 @@ proc updatePoseSettings(int $id) {
 }
 
 /*-
-@param $pasteSetting <int[]>
+@param $pasteSetting <int[0|3]>
 @returns <>
 */
 proc updatePasteSettingUI(int $pasteSetting[]) {
@@ -1885,7 +1885,7 @@ proc updatePasteSettingUI(int $pasteSetting[]) {
 }
 
 /*-
-@param $selectSetting <string[]>
+@param $selectSetting <string[0|2]>
 @returns <>
 */
 proc updateSelectSettingUI(string $selectSetting[]) {
@@ -1907,7 +1907,7 @@ proc updateSelectSettingUI(string $selectSetting[]) {
 }
 
 /*-
-@param $mirrorSetting <int[]>
+@param $mirrorSetting <int[0|5]>
 @returns <>
 */
 proc updateMirrorSettingUI(int $mirrorSetting[]) {
