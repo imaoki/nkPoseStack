@@ -12,7 +12,7 @@
 @param $max <float>
 @returns <int>
 */
-proc int betweenFloat(float $value, float $min, float $max) {
+proc int isInRangeFloat(float $value, float $min, float $max) {
   return ($min <= $value && $value <= $max);
 }
 
@@ -22,12 +22,12 @@ proc int betweenFloat(float $value, float $min, float $max) {
 @param $max <int>
 @returns <int>
 */
-proc int betweenInt(int $value, int $min, int $max) {
+proc int isInRangeInt(int $value, int $min, int $max) {
   return ($min <= $value && $value <= $max);
 }
 
 // -----------------------------------------------------------------------------
-// 文字列
+// ファイル
 // -----------------------------------------------------------------------------
 /*-
 @param $procName <string>
@@ -1341,7 +1341,7 @@ proc int getNumPoses() {
 proc string getPose(int $poseIndex) {
   global string $nkPoseStackPoses[];
   string $pose;
-  if (betweenInt($poseIndex, 0, getNumPoses() - 1)) {
+  if (isInRangeInt($poseIndex, 0, getNumPoses() - 1)) {
     $pose = $nkPoseStackPoses[$poseIndex];
   }
   return $pose;
@@ -1394,7 +1394,7 @@ proc int deletePose(int $poseIndex) {
   // print("deletePose\n"); // debug
   // print("  poseIndex:" + $poseIndex + "\n"); // debug
   global string $nkPoseStackPoses[];
-  if (betweenInt($poseIndex, 0, getNumPoses() - 1)) {
+  if (isInRangeInt($poseIndex, 0, getNumPoses() - 1)) {
     stringArrayRemoveAtIndex($poseIndex, $nkPoseStackPoses);
   }
   return (getNumPoses());
@@ -1453,7 +1453,7 @@ proc int duplicatePose(int $poseIndex) {
   // print("duplicatePose\n"); // debug
   // print("  poseIndex:" + $poseIndex + "\n"); // debug
   global string $nkPoseStackPoses[];
-  if (!betweenInt($poseIndex, 0, getNumPoses() - 1)) return $poseIndex;
+  if (!isInRangeInt($poseIndex, 0, getNumPoses() - 1)) return $poseIndex;
   string $pose = getPose($poseIndex);
   if (!`size $pose`) return $poseIndex;
   int $newPoseIndex = $poseIndex + 1;
@@ -1470,7 +1470,7 @@ proc int moveUpPose(int $poseIndex) {
   // print("moveUpPose\n"); // debug
   // print("  poseIndex:" + $poseIndex + "\n"); // debug
   global string $nkPoseStackPoses[];
-  if (!betweenInt($poseIndex, 1, getNumPoses() - 1)) return $poseIndex;
+  if (!isInRangeInt($poseIndex, 1, getNumPoses() - 1)) return $poseIndex;
   string $pose = getPose($poseIndex);
   if (!`size $pose`) return $poseIndex;
   int $newPoseIndex = $poseIndex - 1;
@@ -1488,7 +1488,7 @@ proc int moveDownPose(int $poseIndex) {
   // print("moveDownPose\n"); // debug
   // print("  poseIndex:" + $poseIndex + "\n"); // debug
   global string $nkPoseStackPoses[];
-  if (!betweenInt($poseIndex, 0, getNumPoses() - 2)) return $poseIndex;
+  if (!isInRangeInt($poseIndex, 0, getNumPoses() - 2)) return $poseIndex;
   string $pose = getPose($poseIndex);
   if (!`size $pose`) return $poseIndex;
   int $newPoseIndex = $poseIndex + 1;
