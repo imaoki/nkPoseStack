@@ -1,7 +1,6 @@
 # nkPoseStack
 
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/imaoki/nkPoseStack)](https://github.com/imaoki/nkPoseStack/releases/latest)
-[![GitHub](https://img.shields.io/github/license/imaoki/nkPoseStack)](https://github.com/imaoki/nkPoseStack/blob/main/LICENSE)
 
 ポーズをコピペするツール。
 
@@ -30,10 +29,6 @@
 * メインウィンドウはドッキング可能。
 
   ![window-docking](resource/window-docking.png "window-docking")
-
-## ライセンス
-
-[MIT License](https://github.com/imaoki/nkPoseStack/blob/main/LICENSE)
 
 <!-- ## 要件 -->
 
