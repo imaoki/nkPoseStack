@@ -1,700 +1,20 @@
 /*! © 2023 imaoki | MIT License | https://github.com/imaoki */
 
 // /////////////////////////////////////////////////////////////////////////////
-// 汎用プロシージャ
+// ボイラープレート
 // /////////////////////////////////////////////////////////////////////////////
-// -----------------------------------------------------------------------------
 // 数値
-// -----------------------------------------------------------------------------
-/*-
-@param $value <float>
-@param $min <float>
-@param $max <float>
-@returns <int>
-*/
-proc int betweenFloat(float $value, float $min, float $max) {
-  return ($min <= $value && $value <= $max);
-}
-
-/*-
-@param $value <int>
-@param $min <int>
-@param $max <int>
-@returns <int>
-*/
-proc int betweenInt(int $value, int $min, int $max) {
-  return ($min <= $value && $value <= $max);
-}
-
-// -----------------------------------------------------------------------------
-// 文字列
-// -----------------------------------------------------------------------------
-/*-
-@param $procName <string>
-@returns <string>
-*/
-proc string getSourceFilename(string $procName) {
-  string $filename;
-  string $thisIs = `whatIs $procName`;
-  string $regex1 = "^Mel procedure found in: *";
-  string $regex2 = "^Script found in: *";
-  if (`match $regex1 $thisIs` != "") {
-    $filename = `substitute $regex1 $thisIs ""`;
-  }
-  else if (`match $regex2 $thisIs` != "") {
-    $filename = `substitute $regex2 $thisIs ""`;
-  }
-  return $filename;
-}
-
-/*-
-@param $procName <string>
-@returns <string>
-*/
-proc string getSourceDirname(string $procName) {
-  return dirname(getSourceFilename($procName));
-}
-
-// -----------------------------------------------------------------------------
+proc int isInRangeFloat(float $value, float $min, float $max) {return ($min <= $value && $value <= $max);}proc int isInRangeInt(int $value, int $min, int $max) {return ($min <= $value && $value <= $max);}
+// ファイル
+proc string getSourceFilename(string $procName) {string $filename;string $thisIs = `whatIs $procName`;string $regex1 = "^Mel procedure found in: *";string $regex2 = "^Script found in: *";if (`match $regex1 $thisIs` != "") {$filename = `substitute $regex1 $thisIs ""`;}else if (`match $regex2 $thisIs` != "") {$filename = `substitute $regex2 $thisIs ""`;}return $filename;}proc string getSourceDirname(string $procName) {return dirname(getSourceFilename($procName));}
 // 配列
-// -----------------------------------------------------------------------------
-/*-
-@param $a <float[]>
-@param $b <float[]>
-@returns <int>
-*/
-proc int minFloatArrayCount(float $a[], float $b[]) {
-  int $numA = `size $a`;
-  int $numB = `size $b`;
-  return `min $numA $numB`;
-}
-
-/*-
-@param $a <int[]>
-@param $b <int[]>
-@returns <int>
-*/
-proc int minIntArrayCount(int $a[], int $b[]) {
-  int $numA = `size $a`;
-  int $numB = `size $b`;
-  return `min $numA $numB`;
-}
-
-/*-
-@param $a <string[]>
-@param $b <string[]>
-@returns <int>
-*/
-proc int minStringArrayCount(string $a[], string $b[]) {
-  int $numA = `size $a`;
-  int $numB = `size $b`;
-  return `min $numA $numB`;
-}
-
-// -----------------------------------------------------------------------------
+proc int minFloatArrayCount(float $a[], float $b[]) {int $numA = `size $a`;int $numB = `size $b`;return `min $numA $numB`;}proc int minIntArrayCount(int $a[], int $b[]) {int $numA = `size $a`;int $numB = `size $b`;return `min $numA $numB`;}proc int minStringArrayCount(string $a[], string $b[]) {int $numA = `size $a`;int $numB = `size $b`;return `min $numA $numB`;}
 // クォータニオン
-// -----------------------------------------------------------------------------
-/*-
-@param $degree <float>
-@param $axis <float[]>
-@returns <float[]>
-@remarks https://github.com/mrdoob/three.js/blob/dev/LICENSE
-*/
-proc float[] angleAxisToQuat(float $degree, float $axis[]) {
-  float $ha = `deg_to_rad $degree` * 0.5;
-  float $s = sin($ha);
-  float $qx = $axis[0] * $s;
-  float $qy = $axis[1] * $s;
-  float $qz = $axis[2] * $s;
-  float $qw = cos($ha);
-  return {$qx, $qy, $qz, $qw};
-}
-
-/*-
-@param $order <int>
-@returns <int>
-*/
-proc int reverseRotateOrder(int $order) {
-  int $reverseOrder[] = {5, 3, 4, 1, 2, 0};
-  return $reverseOrder[$order];
-}
-
-/*-
-@param $r <float[]>
-@param $order <int>
-@returns <float[]>
-@remarks https://github.com/mrdoob/three.js/blob/dev/LICENSE
-*/
-proc float[] eulerToQuat(float $r[], int $order) {
-  float $qx = 0.0;
-  float $qy = 0.0;
-  float $qz = 0.0;
-  float $qw = 1.0;
-  float $rx = `deg_to_rad $r[0]`;
-  float $ry = `deg_to_rad $r[1]`;
-  float $rz = `deg_to_rad $r[2]`;
-  float $cx = cos(0.5 * $rx);
-  float $cy = cos(0.5 * $ry);
-  float $cz = cos(0.5 * $rz);
-  float $sx = sin(0.5 * $rx);
-  float $sy = sin(0.5 * $ry);
-  float $sz = sin(0.5 * $rz);
-  switch ($order) {
-    // XYZ
-    case 0:
-      $qx = $sx * $cy * $cz + $cx * $sy * $sz;
-      $qy = $cx * $sy * $cz - $sx * $cy * $sz;
-      $qz = $cx * $cy * $sz + $sx * $sy * $cz;
-      $qw = $cx * $cy * $cz - $sx * $sy * $sz;
-      break;
-    // YZX
-    case 1:
-      $qx = $sx * $cy * $cz + $cx * $sy * $sz;
-      $qy = $cx * $sy * $cz + $sx * $cy * $sz;
-      $qz = $cx * $cy * $sz - $sx * $sy * $cz;
-      $qw = $cx * $cy * $cz - $sx * $sy * $sz;
-      break;
-    // ZXY
-    case 2:
-      $qx = $sx * $cy * $cz - $cx * $sy * $sz;
-      $qy = $cx * $sy * $cz + $sx * $cy * $sz;
-      $qz = $cx * $cy * $sz + $sx * $sy * $cz;
-      $qw = $cx * $cy * $cz - $sx * $sy * $sz;
-      break;
-    // XZY
-    case 3:
-      $qx = $sx * $cy * $cz - $cx * $sy * $sz;
-      $qy = $cx * $sy * $cz - $sx * $cy * $sz;
-      $qz = $cx * $cy * $sz + $sx * $sy * $cz;
-      $qw = $cx * $cy * $cz + $sx * $sy * $sz;
-      break;
-    // YXZ
-    case 4:
-      $qx = $sx * $cy * $cz + $cx * $sy * $sz;
-      $qy = $cx * $sy * $cz - $sx * $cy * $sz;
-      $qz = $cx * $cy * $sz - $sx * $sy * $cz;
-      $qw = $cx * $cy * $cz + $sx * $sy * $sz;
-      break;
-    // ZYX
-    case 5:
-      $qx = $sx * $cy * $cz - $cx * $sy * $sz;
-      $qy = $cx * $sy * $cz + $sx * $cy * $sz;
-      $qz = $cx * $cy * $sz - $sx * $sy * $cz;
-      $qw = $cx * $cy * $cz + $sx * $sy * $sz;
-      break;
-    default: break;
-  }
-  return {$qx, $qy, $qz, $qw};
-}
-
-/*-
-@param $q <float[]>
-@param $order <int>
-@returns <float[]>
-@remarks https://github.com/aadebdeb/MatrixQuaternionEulerAngleConversions
-*/
-proc float[] quatToEuler(float $q[], int $order) {
-  float $rx = 0.0;
-  float $ry = 0.0;
-  float $rz = 0.0;
-  float $qx = $q[0];
-  float $qy = $q[1];
-  float $qz = $q[2];
-  float $qw = $q[3];
-  float $sx;
-  float $sy;
-  float $sz;
-  int $unlocked;
-  switch ($order) {
-    // XYZ
-    case 0:
-      $sy = 2 * $qx * $qz + 2 * $qy * $qw;
-      $unlocked = abs($sy) < 0.9999999;
-      $rx = $unlocked ? atan2(-(2 * $qy * $qz - 2 * $qx * $qw), 2 * $qw * $qw + 2 * $qz * $qz - 1)
-          : atan2(2 * $qy * $qz + 2 * $qx * $qw, 2 * $qw * $qw + 2 * $qy * $qy - 1);
-      $ry = asin($sy);
-      $rz = $unlocked ? atan2(-(2 * $qx * $qy - 2 * $qz * $qw), 2 * $qw * $qw + 2 * $qx * $qx - 1) : 0;
-      break;
-    // YZX
-    case 1:
-      $sz = 2 * $qx * $qy + 2 * $qz * $qw;
-      $unlocked = abs($sz) < 0.9999999;
-      $rx = $unlocked ? atan2(-(2 * $qy * $qz - 2 * $qx * $qw), 2 * $qw * $qw + 2 * $qy * $qy - 1) : 0;
-      $ry = $unlocked ? atan2(-(2 * $qx * $qz - 2 * $qy * $qw), 2 * $qw * $qw + 2 * $qx * $qx - 1)
-          : atan2(2 * $qx * $qz + 2 * $qy * $qw, 2 * $qw * $qw + 2 * $qz * $qz - 1);
-      $rz = asin($sz);
-      break;
-    // ZXY
-    case 2:
-      $sx = 2 * $qy * $qz + 2 * $qx * $qw;
-      $unlocked = abs($sx) < 0.9999999;
-      $rx = asin($sx);
-      $ry = $unlocked ? atan2(-(2 * $qx * $qz - 2 * $qy * $qw), 2 * $qw * $qw + 2 * $qz * $qz - 1) : 0;
-      $rz = $unlocked ? atan2(-(2 * $qx * $qy - 2 * $qz * $qw), 2 * $qw * $qw + 2 * $qy * $qy - 1)
-          : atan2(2 * $qx * $qy + 2 * $qz * $qw, 2 * $qw * $qw + 2 * $qx * $qx - 1);
-      break;
-    // XZY
-    case 3:
-      $sz = -(2 * $qx * $qy - 2 * $qz * $qw);
-      $unlocked = abs($sz) < 0.9999999;
-      $rx = $unlocked ? atan2(2 * $qy * $qz + 2 * $qx * $qw, 2 * $qw * $qw + 2 * $qy * $qy - 1)
-          : atan2(-(2 * $qy * $qz - 2 * $qx * $qw), 2 * $qw * $qw + 2 * $qz * $qz - 1);
-      $ry = $unlocked ? atan2(2 * $qx * $qz + 2 * $qy * $qw, 2 * $qw * $qw + 2 * $qx * $qx - 1) : 0;
-      $rz = asin($sz);
-      break;
-    // YXZ
-    case 4:
-      $sx = -(2 * $qy * $qz - 2 * $qx * $qw);
-      $unlocked = abs($sx) < 0.9999999;
-      $rx = asin($sx);
-      $ry = $unlocked ? atan2(2 * $qx * $qz + 2 * $qy * $qw, 2 * $qw * $qw + 2 * $qz * $qz - 1)
-          : atan2(-(2 * $qx * $qz - 2 * $qy * $qw), 2 * $qw * $qw + 2 * $qx * $qx - 1);
-      $rz = $unlocked ? atan2(2 * $qx * $qy + 2 * $qz * $qw, 2 * $qw * $qw + 2 * $qy * $qy - 1) : 0;
-      break;
-    // ZYX
-    case 5:
-      $sy = -(2 * $qx * $qz - 2 * $qy * $qw);
-      $unlocked = abs($sy) < 0.9999999;
-      $rx = $unlocked ? atan2(2 * $qy * $qz + 2 * $qx * $qw, 2 * $qw * $qw + 2 * $qz * $qz - 1) : 0;
-      $ry = asin($sy);
-      $rz = $unlocked ? atan2(2 * $qx * $qy + 2 * $qz * $qw, 2 * $qw * $qw + 2 * $qx * $qx - 1)
-          : atan2(-(2 * $qx * $qy - 2 * $qz * $qw), 2 * $qw * $qw + 2 * $qy * $qy - 1);
-      break;
-    default: break;
-  }
-  $rx = `rad_to_deg $rx`;
-  $ry = `rad_to_deg $ry`;
-  $rz = `rad_to_deg $rz`;
-  return {$rx, $ry, $rz};
-}
-
-/*-
-@param $q1 <float[]>
-@param $q2 <float[]>
-@returns <float[]>
-*/
-proc float[] quatAdd(float $q1[], float $q2[]) {
-  float $q1x = $q1[0];
-  float $q1y = $q1[1];
-  float $q1z = $q1[2];
-  float $q1w = $q1[3];
-  float $q2x = $q2[0];
-  float $q2y = $q2[1];
-  float $q2z = $q2[2];
-  float $q2w = $q2[3];
-  float $qx = $q1x + $q2x;
-  float $qy = $q1y + $q2y;
-  float $qz = $q1z + $q2z;
-  float $qw = $q1w + $q2w;
-  return {$qx, $qy, $qz, $qw};
-}
-
-/*-
-@param $q1 <float[]>
-@param $q2 <float[]>
-@returns <float[]>
-*/
-proc float[] quatSubtract(float $q1[], float $q2[]) {
-  float $q1x = $q1[0];
-  float $q1y = $q1[1];
-  float $q1z = $q1[2];
-  float $q1w = $q1[3];
-  float $q2x = $q2[0];
-  float $q2y = $q2[1];
-  float $q2z = $q2[2];
-  float $q2w = $q2[3];
-  float $qx = $q1x - $q2x;
-  float $qy = $q1y - $q2y;
-  float $qz = $q1z - $q2z;
-  float $qw = $q1w - $q2w;
-  return {$qx, $qy, $qz, $qw};
-}
-
-/*-
-@param $q1 <float[]>
-@param $q2 <float[]>
-@returns <float[]>
-@remarks https://github.com/mrdoob/three.js/blob/dev/LICENSE
-*/
-proc float[] quatMultiply(float $q1[], float $q2[]) {
-  float $q1x = $q1[0];
-  float $q1y = $q1[1];
-  float $q1z = $q1[2];
-  float $q1w = $q1[3];
-  float $q2x = $q2[0];
-  float $q2y = $q2[1];
-  float $q2z = $q2[2];
-  float $q2w = $q2[3];
-  float $qx = $q1x * $q2w + $q1w * $q2x + $q1y * $q2z - $q1z * $q2y;
-  float $qy = $q1y * $q2w + $q1w * $q2y + $q1z * $q2x - $q1x * $q2z;
-  float $qz = $q1z * $q2w + $q1w * $q2z + $q1x * $q2y - $q1y * $q2x;
-  float $qw = $q1w * $q2w - $q1x * $q2x - $q1y * $q2y - $q1z * $q2z;
-  return {$qx, $qy, $qz, $qw};
-}
-
-/*-
-@param $q <float[]>
-@returns <float[]>
-*/
-proc float[] quatInverse(float $q[]) {
-  return {$q[0] * -1, $q[1] * -1, $q[2] * -1, $q[3]};
-}
-
-/*-
-@param $v <float[]>
-@param $q <float[]>
-@returns <float[]>
-*/
-proc float[] rotateVectorByQuat(float $v[], float $q[]) {
-  float $iq[] = quatInverse($q);
-  float $vq[] = {$v[0], $v[1], $v[2], 0};
-  $vq = quatMultiply(quatMultiply($q, $vq), $iq);
-  return {$vq[0], $vq[1], $vq[2]};
-}
-
-/*-
-@param $q <float[]>
-@param $axis <float[]>
-@returns <float[]>
-*/
-proc float[] quatFlip(float $q[], float $axis[]) {
-  float $flipQ[] = angleAxisToQuat(180.0, $axis);
-  return quatMultiply($flipQ, $q);
-}
-
-// -----------------------------------------------------------------------------
+proc int reverseRotateOrder(int $order) {int $reverseOrder[] = {5, 3, 4, 1, 2, 0};return $reverseOrder[$order];}proc float[] eulerToQuat(float $r[], int $order) {float $qx = 0.0;float $qy = 0.0;float $qz = 0.0;float $qw = 1.0;float $rx = `deg_to_rad $r[0]`;float $ry = `deg_to_rad $r[1]`;float $rz = `deg_to_rad $r[2]`;float $cx = cos(0.5 * $rx);float $cy = cos(0.5 * $ry);float $cz = cos(0.5 * $rz);float $sx = sin(0.5 * $rx);float $sy = sin(0.5 * $ry);float $sz = sin(0.5 * $rz);switch ($order) {case 0:$qx = $sx * $cy * $cz + $cx * $sy * $sz;$qy = $cx * $sy * $cz - $sx * $cy * $sz;$qz = $cx * $cy * $sz + $sx * $sy * $cz;$qw = $cx * $cy * $cz - $sx * $sy * $sz;break;case 1:$qx = $sx * $cy * $cz + $cx * $sy * $sz;$qy = $cx * $sy * $cz + $sx * $cy * $sz;$qz = $cx * $cy * $sz - $sx * $sy * $cz;$qw = $cx * $cy * $cz - $sx * $sy * $sz;break;case 2:$qx = $sx * $cy * $cz - $cx * $sy * $sz;$qy = $cx * $sy * $cz + $sx * $cy * $sz;$qz = $cx * $cy * $sz + $sx * $sy * $cz;$qw = $cx * $cy * $cz - $sx * $sy * $sz;break;case 3:$qx = $sx * $cy * $cz - $cx * $sy * $sz;$qy = $cx * $sy * $cz - $sx * $cy * $sz;$qz = $cx * $cy * $sz + $sx * $sy * $cz;$qw = $cx * $cy * $cz + $sx * $sy * $sz;break;case 4:$qx = $sx * $cy * $cz + $cx * $sy * $sz;$qy = $cx * $sy * $cz - $sx * $cy * $sz;$qz = $cx * $cy * $sz - $sx * $sy * $cz;$qw = $cx * $cy * $cz + $sx * $sy * $sz;break;case 5:$qx = $sx * $cy * $cz - $cx * $sy * $sz;$qy = $cx * $sy * $cz + $sx * $cy * $sz;$qz = $cx * $cy * $sz - $sx * $sy * $cz;$qw = $cx * $cy * $cz + $sx * $sy * $sz;break;default: break;}return {$qx, $qy, $qz, $qw};}proc float[] quatToEuler(float $q[], int $order) {float $rx = 0.0;float $ry = 0.0;float $rz = 0.0;float $qx = $q[0];float $qy = $q[1];float $qz = $q[2];float $qw = $q[3];float $sx;float $sy;float $sz;int $unlocked;switch ($order) {case 0:$sy = 2 * $qx * $qz + 2 * $qy * $qw;$unlocked = abs($sy) < 0.9999999;$rx = $unlocked ? atan2(-(2 * $qy * $qz - 2 * $qx * $qw), 2 * $qw * $qw + 2 * $qz * $qz - 1) : atan2(2 * $qy * $qz + 2 * $qx * $qw, 2 * $qw * $qw + 2 * $qy * $qy - 1);$ry = asin($sy);$rz = $unlocked ? atan2(-(2 * $qx * $qy - 2 * $qz * $qw), 2 * $qw * $qw + 2 * $qx * $qx - 1) : 0;break;case 1:$sz = 2 * $qx * $qy + 2 * $qz * $qw;$unlocked = abs($sz) < 0.9999999;$rx = $unlocked ? atan2(-(2 * $qy * $qz - 2 * $qx * $qw), 2 * $qw * $qw + 2 * $qy * $qy - 1) : 0;$ry = $unlocked ? atan2(-(2 * $qx * $qz - 2 * $qy * $qw), 2 * $qw * $qw + 2 * $qx * $qx - 1) : atan2(2 * $qx * $qz + 2 * $qy * $qw, 2 * $qw * $qw + 2 * $qz * $qz - 1);$rz = asin($sz);break;case 2:$sx = 2 * $qy * $qz + 2 * $qx * $qw;$unlocked = abs($sx) < 0.9999999;$rx = asin($sx);$ry = $unlocked ? atan2(-(2 * $qx * $qz - 2 * $qy * $qw), 2 * $qw * $qw + 2 * $qz * $qz - 1) : 0;$rz = $unlocked ? atan2(-(2 * $qx * $qy - 2 * $qz * $qw), 2 * $qw * $qw + 2 * $qy * $qy - 1) : atan2(2 * $qx * $qy + 2 * $qz * $qw, 2 * $qw * $qw + 2 * $qx * $qx - 1);break;case 3:$sz = -(2 * $qx * $qy - 2 * $qz * $qw);$unlocked = abs($sz) < 0.9999999;$rx = $unlocked ? atan2(2 * $qy * $qz + 2 * $qx * $qw, 2 * $qw * $qw + 2 * $qy * $qy - 1) : atan2(-(2 * $qy * $qz - 2 * $qx * $qw), 2 * $qw * $qw + 2 * $qz * $qz - 1);$ry = $unlocked ? atan2(2 * $qx * $qz + 2 * $qy * $qw, 2 * $qw * $qw + 2 * $qx * $qx - 1) : 0;$rz = asin($sz);break;case 4:$sx = -(2 * $qy * $qz - 2 * $qx * $qw);$unlocked = abs($sx) < 0.9999999;$rx = asin($sx);$ry = $unlocked ? atan2(2 * $qx * $qz + 2 * $qy * $qw, 2 * $qw * $qw + 2 * $qz * $qz - 1) : atan2(-(2 * $qx * $qz - 2 * $qy * $qw), 2 * $qw * $qw + 2 * $qx * $qx - 1);$rz = $unlocked ? atan2(2 * $qx * $qy + 2 * $qz * $qw, 2 * $qw * $qw + 2 * $qy * $qy - 1) : 0;break;case 5:$sy = -(2 * $qx * $qz - 2 * $qy * $qw);$unlocked = abs($sy) < 0.9999999;$rx = $unlocked ? atan2(2 * $qy * $qz + 2 * $qx * $qw, 2 * $qw * $qw + 2 * $qz * $qz - 1) : 0;$ry = asin($sy);$rz = $unlocked ? atan2(2 * $qx * $qy + 2 * $qz * $qw, 2 * $qw * $qw + 2 * $qx * $qx - 1) : atan2(-(2 * $qx * $qy - 2 * $qz * $qw), 2 * $qw * $qw + 2 * $qy * $qy - 1);break;default: break;}$rx = `rad_to_deg $rx`;$ry = `rad_to_deg $ry`;$rz = `rad_to_deg $rz`;return {$rx, $ry, $rz};}proc float[] angleAxisToQuat(float $degree, float $axis[]) {float $ha = `deg_to_rad $degree` * 0.5;float $s = sin($ha);float $qx = $axis[0] * $s;float $qy = $axis[1] * $s;float $qz = $axis[2] * $s;float $qw = cos($ha);return {$qx, $qy, $qz, $qw};}proc float[] quatAdd(float $q1[], float $q2[]) {float $q1x = $q1[0];float $q1y = $q1[1];float $q1z = $q1[2];float $q1w = $q1[3];float $q2x = $q2[0];float $q2y = $q2[1];float $q2z = $q2[2];float $q2w = $q2[3];float $qx = $q1x + $q2x;float $qy = $q1y + $q2y;float $qz = $q1z + $q2z;float $qw = $q1w + $q2w;return {$qx, $qy, $qz, $qw};}proc float[] quatSubtract(float $q1[], float $q2[]) {float $q1x = $q1[0];float $q1y = $q1[1];float $q1z = $q1[2];float $q1w = $q1[3];float $q2x = $q2[0];float $q2y = $q2[1];float $q2z = $q2[2];float $q2w = $q2[3];float $qx = $q1x - $q2x;float $qy = $q1y - $q2y;float $qz = $q1z - $q2z;float $qw = $q1w - $q2w;return {$qx, $qy, $qz, $qw};}proc float[] quatMultiply(float $q1[], float $q2[]) {float $q1x = $q1[0];float $q1y = $q1[1];float $q1z = $q1[2];float $q1w = $q1[3];float $q2x = $q2[0];float $q2y = $q2[1];float $q2z = $q2[2];float $q2w = $q2[3];float $qx = $q1x * $q2w + $q1w * $q2x + $q1y * $q2z - $q1z * $q2y;float $qy = $q1y * $q2w + $q1w * $q2y + $q1z * $q2x - $q1x * $q2z;float $qz = $q1z * $q2w + $q1w * $q2z + $q1x * $q2y - $q1y * $q2x;float $qw = $q1w * $q2w - $q1x * $q2x - $q1y * $q2y - $q1z * $q2z;return {$qx, $qy, $qz, $qw};}proc float[] quatInverse(float $q[]) {return {$q[0] * -1, $q[1] * -1, $q[2] * -1, $q[3]};}proc float[] rotateVectorByQuat(float $v[], float $q[]) {float $iq[] = quatInverse($q);float $vq[] = {$v[0], $v[1], $v[2], 0};$vq = quatMultiply(quatMultiply($q, $vq), $iq);return {$vq[0], $vq[1], $vq[2]};}proc float[] quatFlip(float $q[], float $axis[]) {float $flipQ[] = angleAxisToQuat(180.0, $axis);return quatMultiply($flipQ, $q);}
 // ノード
-// -----------------------------------------------------------------------------
-/*-
-@returns <string[]>
-*/
-proc string[] getSelectedNodes() {
-  return `ls -l -sl -typ "joint" -typ "transform"`;
-}
-
-/*-
-@param $n <string>
-@returns <string>
-*/
-proc string getParentNode(string $n) {
-  string $parent;
-  string $parents[] = `listRelatives -f -p $n`;
-  if (`size $parents` > 0) $parent = $parents[0];
-  return $parent;
-}
-
-// -----------------------------------------------------------------------------
+proc string[] getSelectedNodes() {return `ls -l -sl -typ "joint" -typ "transform"`;}proc string getParentNode(string $n) {string $parent;string $parents[] = `listRelatives -f -p $n`;if (`size $parents` > 0) $parent = $parents[0];return $parent;}
 // UIコントロール
-// -----------------------------------------------------------------------------
-/*-
-@var <string[]> 共有のUIコントロール配列。
-*/
-global string $nkUIControls[];
-
-/*-
-@param $control <string[]>
-@returns <>
-*/
-proc nkUIAppendControls(string $controls[]) {
-  print("nkUIAppendControls\n"); // debug
-  global string $nkUIControls[];
-  for ($control in $controls) {
-    $nkUIControls[`size $nkUIControls`] = $control;
-  }
-  print("  nkUIControls:{\n    " + stringArrayToString($nkUIControls, ",\n    ") + "\n  }\n"); // debug
-}
-
-/*-
-@param $root <string>
-@param $end <string> 同じウィンドウのコントロールを一括除去する場合は空文字列を指定する。
-@returns <>
-*/
-proc nkUIRemoveControls(string $root, string $end) {
-  print("nkUIRemoveControls\n"); // debug
-  global string $nkUIControls[];
-  string $paths[];
-  for ($control in $nkUIControls) {
-    string $buffer[];
-    int $depth = `tokenize $control "|" $buffer`;
-    string $first = ($depth > 0) ? $buffer[0] : "";
-    string $last = ($depth > 0) ? $buffer[$depth - 1] : "";
-    int $shouldRemove = (!`size $end`)
-        ? $first == $root
-        : $first == $root && $last == $end;
-    if ($shouldRemove) $paths[`size $paths`] = $control;
-  }
-  if (`size $paths` > 0) {
-    $nkUIControls = stringArrayRemove($paths, $nkUIControls);
-  }
-  print("  nkUIControls:{\n    " + stringArrayToString($nkUIControls, ",\n    ") + "\n  }\n"); // debug
-}
-
-/*-
-@param $root <string>
-@param $end <string> ウィンドウの場合は`$root`と同じ値を指定する。
-@returns <string>
-*/
-proc string nkUIGetControl(string $root, string $end) {
-  global string $nkUIControls[];
-  string $path;
-  for ($control in $nkUIControls) {
-    string $buffer[];
-    int $depth = `tokenize $control "|" $buffer`;
-    string $first = ($depth > 0) ? $buffer[0] : "";
-    string $last = ($depth > 0) ? $buffer[$depth - 1] : "";
-    if ($first == $root && $last == $end) {
-      $path = $control;
-      break;
-    }
-  }
-  return $path;
-}
-
-/*-
-@param $control <string>
-@returns <int>
-*/
-proc int[] checkBoxGrpGetEnable(string $control) {
-  return `checkBoxGrp -q -en $control`;
-}
-
-/*-
-@param $enable <int>
-@param $control <string>
-@returns <>
-*/
-proc checkBoxGrpSetEnable(int $enable, string $control) {
-  checkBoxGrp -e -en $enable $control;
-}
-
-/*-
-@param $ncb <int> チェックボックスの数。1から4まで。
-@param $control <string>
-@returns <int[]>
-*/
-proc int[] checkBoxGrpGetValues(int $ncb, string $control) {
-  $ncb = `clamp 1 4 $ncb`;
-  int $values[];
-  if ($ncb > 0) $values[0] = `checkBoxGrp -q -v1 $control`;
-  if ($ncb > 1) $values[1] = `checkBoxGrp -q -v2 $control`;
-  if ($ncb > 2) $values[2] = `checkBoxGrp -q -v3 $control`;
-  if ($ncb > 3) $values[3] = `checkBoxGrp -q -v4 $control`;
-  return $values;
-}
-
-/*-
-@param $values <int[]>
-@param $control <string>
-@returns <>
-*/
-proc checkBoxGrpSetValues(int $values[], string $control) {
-  int $ncb = `size $values`;
-  if ($ncb > 0) checkBoxGrp -e -v1 $values[0] $control;
-  if ($ncb > 1) checkBoxGrp -e -v2 $values[1] $control;
-  if ($ncb > 2) checkBoxGrp -e -v3 $values[2] $control;
-  if ($ncb > 3) checkBoxGrp -e -v4 $values[3] $control;
-}
-
-/*-
-@param $control <string>
-@returns <int>
-*/
-proc int radioButtonGrpGetEnable(string $control) {
-  return `radioButtonGrp -q -en $control`;
-}
-
-/*-
-@param $enable <int>
-@param $control <string>
-@returns <>
-*/
-proc radioButtonGrpSetEnable(int $enable, string $control) {
-  radioButtonGrp -e -en $enable $control;
-}
-
-/*-
-@param $control <string>
-@returns <int> 基数を`0`に補正した値。
-*/
-proc int radioButtonGrpGetSelect(string $control) {
-  return (`radioButtonGrp -q -sl $control` - 1);
-}
-
-/*-
-@param $index <int> 基数`0`の整数。
-@param $control <string>
-@returns <>
-*/
-proc radioButtonGrpSetSelect(int $index, string $control) {
-  radioButtonGrp -e -sl ($index + 1) $control;
-}
-
-/*-
-@param $control <string>
-@returns <int>
-*/
-proc int textFieldGrpGetEnable(string $control) {
-  return `textFieldGrp -q -en $control`;
-}
-
-/*-
-@param $enable <int>
-@param $control <string>
-@returns <>
-*/
-proc textFieldGrpSetEnable(int $enable, string $control) {
-  textFieldGrp -e -en $enable $control;
-}
-
-/*-
-@param $control <string>
-@returns <int> 基数を`0`に補正した値。
-*/
-proc int textFieldGrpGetInsertionPosition(string $control) {
-  return (`textFieldGrp -q -ip $control` - 1);
-}
-
-/*-
-@param $position <int> 基数`0`の整数。`-1`を指定すると末尾にセットされる。
-@param $control <string>
-@returns <>
-*/
-proc textFieldGrpSetInsertionPosition(int $position, string $control) {
-  textFieldGrp -e -ip ($position + 1) $control;
-}
-
-/*-
-@param $control <string>
-@returns <string>
-*/
-proc string textFieldGrpGetText(string $control) {
-  return `textFieldGrp -q -tx $control`;
-}
-
-/*-
-@param $text <string>
-@param $control <string>
-@returns <>
-*/
-proc textFieldGrpSetText(string $text, string $control) {
-  textFieldGrp -e -tx $text $control;
-}
-
-/*-
-@param $label <string>
-@param $control <string>
-@returns <>
-*/
-proc textScrollListAppend(string $label, string $control) {
-  textScrollList -e -a $label $control;
-}
-
-/*-
-@param $index <int> 基数`0`の整数。
-@param $label <string>
-@param $control <string>
-@returns <>
-*/
-proc textScrollListAppendPosition(int $index, string $label, string $control) {
-  textScrollList -e -ap ($index + 1) $label $control;
-}
-
-/*-
-@param $control <string>
-@returns <>
-*/
-proc textScrollListRemoveAll(string $control) {
-  textScrollList -e -ra $control;
-}
-
-/*-
-@param $index <int> 基数`0`の整数。
-@param $control <string>
-@returns <>
-*/
-proc textScrollListRemoveIndexedItem(int $index, string $control) {
-  textScrollList -e -rii ($index + 1) $control;
-}
-
-/*-
-@param $index <int> 基数`0`の整数。
-@param $control <string>
-@returns <>
-*/
-proc textScrollListSetSelectIndexedItem(int $index, string $control) {
-  textScrollList -e -sii ($index + 1) $control;
-}
-
-/*-
-@param $indices <int[]> 基数`0`の整数配列。
-@param $control <string>
-@returns <>
-*/
-proc textScrollListSetSelectIndexedItems(int $indices[], string $control) {
-  for ($i in $indices) {
-    textScrollList -e -sii ($i + 1) $control;
-  }
-}
-
-/*-
-@param $control <string>
-@returns <int[]> 基数を`0`に補正した値。
-*/
-proc int[] textScrollListGetSelectIndexedItems(string $control) {
-  int $indices[] = `textScrollList -q -sii $control`;
-  for ($i = 0; $i < `size $indices`; $i++) $indices[$i] -= 1;
-  return $indices;
-}
-
-/*-
-@param $control <string>
-@returns <int> 基数を`0`に補正した値。未選択の場合は`-1`を返す。
-*/
-proc int textScrollListGetSelectIndexedItem(string $control) {
-  int $indices[] = textScrollListGetSelectIndexedItems($control);
-  return ((`size $indices`) ? $indices[0] : -1);
-}
-
-/*-
-@param $control <string>
-@returns <>
-*/
-proc workspaceControlClose(string $control) {
-  workspaceControl -e -cl $control;
-}
-
-/*-
-@param $control <string>
-@returns <int>
-*/
-proc int workspaceControlGetExists(string $control) {
-  return `workspaceControl -q -ex $control`;
-}
-
-/*-
-@param $control <string>
-@returns <int>
-*/
-proc int workspaceControlGetFloating(string $control) {
-  return `workspaceControl -q -fl $control`;
-}
-
-/*-
-@param $state <int>
-@param $control <string>
-@returns <>
-*/
-proc workspaceControlSetFloating(int $state, string $control) {
-  workspaceControl -e -fl $state $control;
-}
-
-/*-
-@param $control <string>
-@returns <int>
-*/
-proc int workspaceControlGetVisible(string $control) {
-  return `workspaceControl -q -vis $control`;
-}
+global string $nkUIControls[];proc nkUIAppendControls(string $controls[]) {global string $nkUIControls[];for ($control in $controls) {$nkUIControls[`size $nkUIControls`] = $control;}}proc nkUIRemoveControls(string $root, string $end) {global string $nkUIControls[];string $paths[];for ($control in $nkUIControls) {string $buffer[];int $depth = `tokenize $control "|" $buffer`;string $first = ($depth > 0) ? $buffer[0] : "";string $last = ($depth > 0) ? $buffer[$depth - 1] : "";int $shouldRemove = (!`size $end`) ? $first == $root : $first == $root && $last == $end;if ($shouldRemove) $paths[`size $paths`] = $control;}if (`size $paths` > 0) {$nkUIControls = stringArrayRemove($paths, $nkUIControls);}}proc string nkUIGetControl(string $root, string $end) {global string $nkUIControls[];string $path;for ($control in $nkUIControls) {string $buffer[];int $depth = `tokenize $control "|" $buffer`;string $first = ($depth > 0) ? $buffer[0] : "";string $last = ($depth > 0) ? $buffer[$depth - 1] : "";if ($first == $root && $last == $end) {$path = $control;break;}}return $path;}proc int[] checkBoxGrpGetEnable(string $control) {return `checkBoxGrp -q -en $control`;}proc checkBoxGrpSetEnable(int $enable, string $control) {checkBoxGrp -e -en $enable $control;}proc int[] checkBoxGrpGetValues(int $ncb, string $control) {$ncb = `clamp 1 4 $ncb`;int $values[];if ($ncb > 0) $values[0] = `checkBoxGrp -q -v1 $control`;if ($ncb > 1) $values[1] = `checkBoxGrp -q -v2 $control`;if ($ncb > 2) $values[2] = `checkBoxGrp -q -v3 $control`;if ($ncb > 3) $values[3] = `checkBoxGrp -q -v4 $control`;return $values;}proc checkBoxGrpSetValues(int $values[], string $control) {int $ncb = `size $values`;if ($ncb > 0) checkBoxGrp -e -v1 $values[0] $control;if ($ncb > 1) checkBoxGrp -e -v2 $values[1] $control;if ($ncb > 2) checkBoxGrp -e -v3 $values[2] $control;if ($ncb > 3) checkBoxGrp -e -v4 $values[3] $control;}proc int radioButtonGrpGetEnable(string $control) {return `radioButtonGrp -q -en $control`;}proc radioButtonGrpSetEnable(int $enable, string $control) {radioButtonGrp -e -en $enable $control;}proc int radioButtonGrpGetSelect(string $control) {return (`radioButtonGrp -q -sl $control` - 1);}proc radioButtonGrpSetSelect(int $index, string $control) {radioButtonGrp -e -sl ($index + 1) $control;}proc int textFieldGrpGetEnable(string $control) {return `textFieldGrp -q -en $control`;}proc textFieldGrpSetEnable(int $enable, string $control) {textFieldGrp -e -en $enable $control;}proc int textFieldGrpGetInsertionPosition(string $control) {return (`textFieldGrp -q -ip $control` - 1);}proc textFieldGrpSetInsertionPosition(int $position, string $control) {textFieldGrp -e -ip ($position + 1) $control;}proc string textFieldGrpGetText(string $control) {return `textFieldGrp -q -tx $control`;}proc textFieldGrpSetText(string $text, string $control) {textFieldGrp -e -tx $text $control;}proc textScrollListAppend(string $label, string $control) {textScrollList -e -a $label $control;}proc textScrollListAppendPosition(int $index, string $label, string $control) {textScrollList -e -ap ($index + 1) $label $control;}proc textScrollListRemoveAll(string $control) {textScrollList -e -ra $control;}proc textScrollListRemoveIndexedItem(int $index, string $control) {textScrollList -e -rii ($index + 1) $control;}proc textScrollListSetSelectIndexedItem(int $index, string $control) {textScrollList -e -sii ($index + 1) $control;}proc textScrollListSetSelectIndexedItems(int $indices[], string $control) {for ($i in $indices) {textScrollList -e -sii ($i + 1) $control;}}proc int[] textScrollListGetSelectIndexedItems(string $control) {int $indices[] = `textScrollList -q -sii $control`;for ($i = 0; $i < `size $indices`; $i++) $indices[$i] -= 1;return $indices;}proc int textScrollListGetSelectIndexedItem(string $control) {int $indices[] = textScrollListGetSelectIndexedItems($control);return ((`size $indices`) ? $indices[0] : -1);}proc string[] textScrollListGetSelectItems(string $control) {return `textScrollList -q -si $control`;}proc string textScrollListGetSelectItem(string $control) {string $items[] = textScrollListGetSelectItems($control);return ((`size $items`) ? $items[0] : "");}proc workspaceControlClose(string $control) {workspaceControl -e -cl $control;}proc int workspaceControlGetExists(string $control) {return `workspaceControl -q -ex $control`;}proc int workspaceControlGetFloating(string $control) {return `workspaceControl -q -fl $control`;}proc workspaceControlSetFloating(int $state, string $control) {workspaceControl -e -fl $state $control;}proc int workspaceControlGetVisible(string $control) {return `workspaceControl -q -vis $control`;}
 
 // /////////////////////////////////////////////////////////////////////////////
 // コアプロシージャ
@@ -1341,7 +661,7 @@ proc int getNumPoses() {
 proc string getPose(int $poseIndex) {
   global string $nkPoseStackPoses[];
   string $pose;
-  if (betweenInt($poseIndex, 0, getNumPoses() - 1)) {
+  if (isInRangeInt($poseIndex, 0, getNumPoses() - 1)) {
     $pose = $nkPoseStackPoses[$poseIndex];
   }
   return $pose;
@@ -1394,7 +714,7 @@ proc int deletePose(int $poseIndex) {
   print("deletePose\n"); // debug
   print("  poseIndex:" + $poseIndex + "\n"); // debug
   global string $nkPoseStackPoses[];
-  if (betweenInt($poseIndex, 0, getNumPoses() - 1)) {
+  if (isInRangeInt($poseIndex, 0, getNumPoses() - 1)) {
     stringArrayRemoveAtIndex($poseIndex, $nkPoseStackPoses);
   }
   return (getNumPoses());
@@ -1453,7 +773,7 @@ proc int duplicatePose(int $poseIndex) {
   print("duplicatePose\n"); // debug
   print("  poseIndex:" + $poseIndex + "\n"); // debug
   global string $nkPoseStackPoses[];
-  if (!betweenInt($poseIndex, 0, getNumPoses() - 1)) return $poseIndex;
+  if (!isInRangeInt($poseIndex, 0, getNumPoses() - 1)) return $poseIndex;
   string $pose = getPose($poseIndex);
   if (!`size $pose`) return $poseIndex;
   int $newPoseIndex = $poseIndex + 1;
@@ -1470,7 +790,7 @@ proc int moveUpPose(int $poseIndex) {
   print("moveUpPose\n"); // debug
   print("  poseIndex:" + $poseIndex + "\n"); // debug
   global string $nkPoseStackPoses[];
-  if (!betweenInt($poseIndex, 1, getNumPoses() - 1)) return $poseIndex;
+  if (!isInRangeInt($poseIndex, 1, getNumPoses() - 1)) return $poseIndex;
   string $pose = getPose($poseIndex);
   if (!`size $pose`) return $poseIndex;
   int $newPoseIndex = $poseIndex - 1;
@@ -1488,7 +808,7 @@ proc int moveDownPose(int $poseIndex) {
   print("moveDownPose\n"); // debug
   print("  poseIndex:" + $poseIndex + "\n"); // debug
   global string $nkPoseStackPoses[];
-  if (!betweenInt($poseIndex, 0, getNumPoses() - 2)) return $poseIndex;
+  if (!isInRangeInt($poseIndex, 0, getNumPoses() - 2)) return $poseIndex;
   string $pose = getPose($poseIndex);
   if (!`size $pose`) return $poseIndex;
   int $newPoseIndex = $poseIndex + 1;
@@ -1675,82 +995,83 @@ proc pastePose(int $poseIndex, int $isOpposite, string $targetNodes[]) {
 // /////////////////////////////////////////////////////////////////////////////
 // テスト
 // /////////////////////////////////////////////////////////////////////////////
-
-// オイラーからクォータニオンへの変換テスト
-if (0) {
-  string $roNames[] = {"XYZ", "YZX", "ZXY", "XZY", "YXZ", "ZYX"};
-  float $jo[] = {-90, 0, 90};
-  print("jo:{" + floatArrayToString($jo, ", ") + "}\n");
-  for ($i = 0; $i < `size $roNames`; $i++) {
-    int $o = reverseRotateOrder($i);
-    float $joq[] = quatInverse(eulerToQuat($jo, $o));
-    print($roNames[$i] + ":{" + floatArrayToString($joq, ", ") + "}\n");
-  }
-}
-
-// 2022-mirror-transform-test.ma
-if (1) {
-  print("--------------------------------------------------------------------------------\n");
-
-  string $axisNames[] = {"X", "Y", "Z"};
-  string $planeNames[] = {"XY", "XZ", "YX", "YZ", "ZX", "ZY"};
-  int $mirrorAxes[] = {0, 1, 2};
-  int $primaryAxes[] = {0, 0, 1, 1, 2, 2};
-  int $secondaryAxes[] = {1, 2, 0, 2, 0, 1};
-
-  // default:{0, 1, 2}
-  int $axisFlags[] = {0, 1, 2};
-  // default:{0, 1, 2, 3, 4, 5}
-  int $planeFlags[] = {0, 1, 2, 3, 4, 5};
-  // default:{0, 1, 2}
-  int $depthFlags[] = {0, 1, 2};
-
-  string $roNames[] = {"XYZ", "YZX", "ZXY", "XZY", "YXZ", "ZYX"};
-  int $rotateOrder = 0;
-
-  int $isOpposite = 0;
-  int $pasteSetting[] = {1, 1, 0};
-  string $selectSetting[] = {"_L", "_R"};
-  int $mirrorSetting[] = {0, 0, 1, 0, 0};
-
-  for ($i = 0; $i < `size $axisFlags`; $i++) {
-    int $axisIndex = $axisFlags[$i];
-    $mirrorSetting[0] = $mirrorAxes[$axisIndex];
-    for ($j = 0; $j < `size $planeFlags`; $j++) {
-      int $planeIndex = $planeFlags[$j];
-      $mirrorSetting[1] = $primaryAxes[$planeIndex];
-      $mirrorSetting[2] = $secondaryAxes[$planeIndex];
-
-      string $poseSetting = buildPoseSetting(
-        $pasteSetting, $selectSetting, $mirrorSetting
-      );
-
-      string $baseName = "|" + $axisNames[$axisIndex] + "|ROOT";
-      string $nL = $baseName;
-      string $nR = $baseName;
-      for ($k = 0; $k < `size $depthFlags`; $k++) {
-        clearPoses();
-
-        int $depthIndex = $depthFlags[$k] + 1;
-        $nL += "|" + $planeNames[$planeIndex] + "_L" + $depthIndex;
-        $nR += "|" + $planeNames[$planeIndex] + "_R" + $depthIndex;
-
-        print("--------------------------------------------------------------------------------\n");
-        print("nL[" + `objExists $nL` + "]:" + $nL + "\n");
-        print("nR[" + `objExists $nR` + "]:" + $nR + "\n");
-
-        setAttr ($nL + ".rotateOrder") $rotateOrder;
-        select -r $nL;
-        addPose("a", {$nL}, {$poseSetting});
-
-        setAttr ($nR + ".rotateOrder") $rotateOrder;
-        select -r $nR;
-        pastePose(0, $isOpposite, {$nR});
-      }
+{
+  // オイラーからクォータニオンへの変換テスト
+  if (0) {
+    string $roNames[] = {"XYZ", "YZX", "ZXY", "XZY", "YXZ", "ZYX"};
+    float $jo[] = {-90, 0, 90};
+    print("jo:{" + floatArrayToString($jo, ", ") + "}\n");
+    for ($i = 0; $i < `size $roNames`; $i++) {
+      int $o = reverseRotateOrder($i);
+      float $joq[] = quatInverse(eulerToQuat($jo, $o));
+      print($roNames[$i] + ":{" + floatArrayToString($joq, ", ") + "}\n");
     }
   }
 
-  print("--------------------------------------------------------------------------------\n");
+  // 2022-mirror-transform-test.ma
+  if (1) {
+    print("--------------------------------------------------------------------------------\n");
+
+    string $axisNames[] = {"X", "Y", "Z"};
+    string $planeNames[] = {"XY", "XZ", "YX", "YZ", "ZX", "ZY"};
+    int $mirrorAxes[] = {0, 1, 2};
+    int $primaryAxes[] = {0, 0, 1, 1, 2, 2};
+    int $secondaryAxes[] = {1, 2, 0, 2, 0, 1};
+
+    // default:{0, 1, 2}
+    int $axisFlags[] = {0, 1, 2};
+    // default:{0, 1, 2, 3, 4, 5}
+    int $planeFlags[] = {0, 1, 2, 3, 4, 5};
+    // default:{0, 1, 2}
+    int $depthFlags[] = {0, 1, 2};
+
+    string $roNames[] = {"XYZ", "YZX", "ZXY", "XZY", "YXZ", "ZYX"};
+    int $rotateOrder = 0;
+
+    int $isOpposite = 0;
+    int $pasteSetting[] = {1, 1, 0};
+    string $selectSetting[] = {"_L", "_R"};
+    int $mirrorSetting[] = {0, 0, 1, 0, 0};
+
+    for ($i = 0; $i < `size $axisFlags`; $i++) {
+      int $axisIndex = $axisFlags[$i];
+      $mirrorSetting[0] = $mirrorAxes[$axisIndex];
+      for ($j = 0; $j < `size $planeFlags`; $j++) {
+        int $planeIndex = $planeFlags[$j];
+        $mirrorSetting[1] = $primaryAxes[$planeIndex];
+        $mirrorSetting[2] = $secondaryAxes[$planeIndex];
+
+        string $poseSetting = buildPoseSetting(
+          $pasteSetting, $selectSetting, $mirrorSetting
+        );
+
+        string $baseName = "|" + $axisNames[$axisIndex] + "|ROOT";
+        string $nL = $baseName;
+        string $nR = $baseName;
+        for ($k = 0; $k < `size $depthFlags`; $k++) {
+          clearPoses();
+
+          int $depthIndex = $depthFlags[$k] + 1;
+          $nL += "|" + $planeNames[$planeIndex] + "_L" + $depthIndex;
+          $nR += "|" + $planeNames[$planeIndex] + "_R" + $depthIndex;
+
+          print("--------------------------------------------------------------------------------\n");
+          print("nL[" + `objExists $nL` + "]:" + $nL + "\n");
+          print("nR[" + `objExists $nR` + "]:" + $nR + "\n");
+
+          setAttr ($nL + ".rotateOrder") $rotateOrder;
+          select -r $nL;
+          addPose("a", {$nL}, {$poseSetting});
+
+          setAttr ($nR + ".rotateOrder") $rotateOrder;
+          select -r $nR;
+          pastePose(0, $isOpposite, {$nR});
+        }
+      }
+    }
+
+    print("--------------------------------------------------------------------------------\n");
+  }
 }
 
 /*
