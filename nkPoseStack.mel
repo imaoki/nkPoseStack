@@ -169,8 +169,8 @@ proc string makePoseTransform(string $header, float $values[]) {
 @param $poseSettings <string[]>
 @returns <string[]>
 */
-proc string[] generatePoseTransforms(string $nodes[], string $poseSettings[]) {
-  // print("generatePoseTransforms\n"); // debug
+proc string[] makePoseTransforms(string $nodes[], string $poseSettings[]) {
+  // print("makePoseTransforms\n"); // debug
   // print("  nodes       :{\n    " + stringArrayToString($nodes, ",\n    ") + "\n  }\n"); // debug
   // print("  poseSettings:{\n    " + stringArrayToString($poseSettings, ",\n    ") + "\n  }\n"); // debug
   string $poseTransforms[];
@@ -695,7 +695,7 @@ proc int addPose(
   // print("  nodes       :{\n    " + stringArrayToString($nodes, ",\n    ") + "\n  }\n"); // debug
   // print("  poseSettings:{\n    " + stringArrayToString($poseSettings, ",\n    ") + "\n  }\n"); // debug
   global string $nkPoseStackPoses[];
-  string $poseTransforms[] = generatePoseTransforms($nodes, $poseSettings);
+  string $poseTransforms[] = makePoseTransforms($nodes, $poseSettings);
   // print("  poseTransforms:{\n    " + (stringArrayToString($poseTransforms, ",\n    ")) + "\n  }\n"); // debug
   string $pose = buildPose(
     $poseName,
@@ -848,7 +848,7 @@ proc updatePose(int $poseIndex) {
     $nodes[$i] = $node;
     $poseSettings[$i] = $poseSetting;
   }
-  string $newPoseTransforms[] = generatePoseTransforms($nodes, $poseSettings);
+  string $newPoseTransforms[] = makePoseTransforms($nodes, $poseSettings);
   // print("  newPoseTransforms:{\n    " + (stringArrayToString($newPoseTransforms, ",\n    ")) + "\n  }\n"); // debug
 
   string $newPose = buildPose(
@@ -1069,7 +1069,7 @@ proc string sanitizeText(string $input) {
 @param $index <int> 基数`0`の整数。
 @returns <string>
 */
-proc string generateNodeListLabel(int $index) {
+proc string makeNodeListLabel(int $index) {
   global string $nkPoseStackPromptNodes[];
   global string $nkPoseStackPromptPoseSettings[];
   string $label = "[" + $nkPoseStackPromptPoseSettings[$index] + "] ";
@@ -1096,7 +1096,7 @@ proc updateNodeList(int $partial) {
   if ($partial) {
     for ($i = `size $nodeIndices`; $i > 0; $i--) {
       int $index = $nodeIndices[$i - 1];
-      $label = generateNodeListLabel($index);
+      $label = makeNodeListLabel($index);
       textScrollListRemoveIndexedItem($index, $nodeList);
       textScrollListAppendPosition($index, $label, $nodeList);
     }
@@ -1104,7 +1104,7 @@ proc updateNodeList(int $partial) {
   else {
     textScrollListRemoveAll($nodeList);
     for ($i = 0; $i < $numTransforms; $i++) {
-      $label = generateNodeListLabel($i);
+      $label = makeNodeListLabel($i);
       textScrollListAppend($label, $nodeList);
     }
   }
