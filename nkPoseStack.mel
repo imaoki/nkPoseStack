@@ -2319,7 +2319,7 @@ global proc nkPoseStackBuildMainWindow() {
       -af $nodeManipRow "bottom" 5
       $outerForm;
 
-  workspaceControl -e -cc "catchQuiet (nkPoseStackInvokeEvent(\"nkPoseStackWindow\", \"cc\", \"nkPoseStackWindow\"));" $nkPoseStackWindow;
+  workspaceControl -e -cc "nkPoseStackInvokeEvent(\"nkPoseStackWindow\", \"cc\", \"nkPoseStackWindow\");" $nkPoseStackWindow;
   // menuItem -e -c "nkPoseStackInvokeEvent(\"nkPoseStackWindow\", \"c\", \"openMenuItem\");" $openMenuItem;
   // menuItem -e -c "nkPoseStackInvokeEvent(\"nkPoseStackWindow\", \"c\", \"importMenuItem\");" $importMenuItem;
   // menuItem -e -c "nkPoseStackInvokeEvent(\"nkPoseStackWindow\", \"c\", \"saveAsMenuItem\");" $saveAsMenuItem;
@@ -2379,13 +2379,18 @@ proc buildMainWorkspaceControl() {
   int $exists = workspaceControlGetExists("nkPoseStackWindow");
   // print("  exists:" + $exists + "\n"); // debug
   if (!$exists) {
+    string $sourceFilename = getSourceFilename("nkPoseStack");
+    string $uiScript = "if (!`exists nkPoseStackBuildMainWindow`)"
+        + " source \"" + $sourceFilename + "\";"
+        + " nkPoseStackBuildMainWindow();";
+    // print("  uiScript:" + $uiScript + "\n"); // debug
     string $nkPoseStackWindow = `workspaceControl
         -dup false
         -fl true
         -l "nkPoseStack"
         -mw 260
         -rt false
-        -ui "catchQuiet (nkPoseStackBuildMainWindow());"
+        -ui $uiScript
         "nkPoseStackWindow"`;
   }
 }
@@ -2415,7 +2420,7 @@ proc initialize() {
 @returns <string>
 */
 global proc string nkPoseStackVersion() {
-  return "3.3.0";
+  return "3.4.0";
 }
 
 /*-
