@@ -1681,7 +1681,7 @@ proc aboutMenuItemSelected() {
         + "\n\nMIT License\nhttps://github.com/imaoki/nkPoseStack"
       )
       -p (nkUIGetParentableWindow("nkPoseStackWindow"))
-      -t "nkPoseStack - About";
+      -t "About - nkPoseStack";
 }
 
 /*-
