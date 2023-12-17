@@ -3,18 +3,18 @@
 // /////////////////////////////////////////////////////////////////////////////
 // ボイラープレート
 // /////////////////////////////////////////////////////////////////////////////
-// 数値
-proc int isInRangeFloat(float $value, float $min, float $max) {return ($min <= $value && $value <= $max);}proc int isInRangeInt(int $value, int $min, int $max) {return ($min <= $value && $value <= $max);}
-// ファイル
-proc string getSourceFilename(string $procName) {string $filename;string $thisIs = `whatIs $procName`;string $regex1 = "^Mel procedure found in: *";string $regex2 = "^Script found in: *";if (`match $regex1 $thisIs` != "") {$filename = `substitute $regex1 $thisIs ""`;}else if (`match $regex2 $thisIs` != "") {$filename = `substitute $regex2 $thisIs ""`;}return $filename;}proc string getSourceDirname(string $procName) {return dirname(getSourceFilename($procName));}
 // 配列
-proc int minFloatArrayCount(float $a[], float $b[]) {int $numA = `size $a`;int $numB = `size $b`;return `min $numA $numB`;}proc int minIntArrayCount(int $a[], int $b[]) {int $numA = `size $a`;int $numB = `size $b`;return `min $numA $numB`;}proc int minStringArrayCount(string $a[], string $b[]) {int $numA = `size $a`;int $numB = `size $b`;return `min $numA $numB`;}
-// クォータニオン
-proc int reverseRotateOrder(int $order) {int $reverseOrder[] = {5, 3, 4, 1, 2, 0};return $reverseOrder[$order];}proc float[] eulerToQuat(float $r[], int $order) {float $qx = 0.0;float $qy = 0.0;float $qz = 0.0;float $qw = 1.0;float $rx = `deg_to_rad $r[0]`;float $ry = `deg_to_rad $r[1]`;float $rz = `deg_to_rad $r[2]`;float $cx = cos(0.5 * $rx);float $cy = cos(0.5 * $ry);float $cz = cos(0.5 * $rz);float $sx = sin(0.5 * $rx);float $sy = sin(0.5 * $ry);float $sz = sin(0.5 * $rz);switch ($order) {case 0:$qx = $sx * $cy * $cz + $cx * $sy * $sz;$qy = $cx * $sy * $cz - $sx * $cy * $sz;$qz = $cx * $cy * $sz + $sx * $sy * $cz;$qw = $cx * $cy * $cz - $sx * $sy * $sz;break;case 1:$qx = $sx * $cy * $cz + $cx * $sy * $sz;$qy = $cx * $sy * $cz + $sx * $cy * $sz;$qz = $cx * $cy * $sz - $sx * $sy * $cz;$qw = $cx * $cy * $cz - $sx * $sy * $sz;break;case 2:$qx = $sx * $cy * $cz - $cx * $sy * $sz;$qy = $cx * $sy * $cz + $sx * $cy * $sz;$qz = $cx * $cy * $sz + $sx * $sy * $cz;$qw = $cx * $cy * $cz - $sx * $sy * $sz;break;case 3:$qx = $sx * $cy * $cz - $cx * $sy * $sz;$qy = $cx * $sy * $cz - $sx * $cy * $sz;$qz = $cx * $cy * $sz + $sx * $sy * $cz;$qw = $cx * $cy * $cz + $sx * $sy * $sz;break;case 4:$qx = $sx * $cy * $cz + $cx * $sy * $sz;$qy = $cx * $sy * $cz - $sx * $cy * $sz;$qz = $cx * $cy * $sz - $sx * $sy * $cz;$qw = $cx * $cy * $cz + $sx * $sy * $sz;break;case 5:$qx = $sx * $cy * $cz - $cx * $sy * $sz;$qy = $cx * $sy * $cz + $sx * $cy * $sz;$qz = $cx * $cy * $sz - $sx * $sy * $cz;$qw = $cx * $cy * $cz + $sx * $sy * $sz;break;default: break;}return {$qx, $qy, $qz, $qw};}proc float[] quatToEuler(float $q[], int $order) {float $rx = 0.0;float $ry = 0.0;float $rz = 0.0;float $qx = $q[0];float $qy = $q[1];float $qz = $q[2];float $qw = $q[3];float $sx;float $sy;float $sz;int $unlocked;switch ($order) {case 0:$sy = 2 * $qx * $qz + 2 * $qy * $qw;$unlocked = abs($sy) < 0.9999999;$rx = $unlocked ? atan2(-(2 * $qy * $qz - 2 * $qx * $qw), 2 * $qw * $qw + 2 * $qz * $qz - 1) : atan2(2 * $qy * $qz + 2 * $qx * $qw, 2 * $qw * $qw + 2 * $qy * $qy - 1);$ry = asin($sy);$rz = $unlocked ? atan2(-(2 * $qx * $qy - 2 * $qz * $qw), 2 * $qw * $qw + 2 * $qx * $qx - 1) : 0;break;case 1:$sz = 2 * $qx * $qy + 2 * $qz * $qw;$unlocked = abs($sz) < 0.9999999;$rx = $unlocked ? atan2(-(2 * $qy * $qz - 2 * $qx * $qw), 2 * $qw * $qw + 2 * $qy * $qy - 1) : 0;$ry = $unlocked ? atan2(-(2 * $qx * $qz - 2 * $qy * $qw), 2 * $qw * $qw + 2 * $qx * $qx - 1) : atan2(2 * $qx * $qz + 2 * $qy * $qw, 2 * $qw * $qw + 2 * $qz * $qz - 1);$rz = asin($sz);break;case 2:$sx = 2 * $qy * $qz + 2 * $qx * $qw;$unlocked = abs($sx) < 0.9999999;$rx = asin($sx);$ry = $unlocked ? atan2(-(2 * $qx * $qz - 2 * $qy * $qw), 2 * $qw * $qw + 2 * $qz * $qz - 1) : 0;$rz = $unlocked ? atan2(-(2 * $qx * $qy - 2 * $qz * $qw), 2 * $qw * $qw + 2 * $qy * $qy - 1) : atan2(2 * $qx * $qy + 2 * $qz * $qw, 2 * $qw * $qw + 2 * $qx * $qx - 1);break;case 3:$sz = -(2 * $qx * $qy - 2 * $qz * $qw);$unlocked = abs($sz) < 0.9999999;$rx = $unlocked ? atan2(2 * $qy * $qz + 2 * $qx * $qw, 2 * $qw * $qw + 2 * $qy * $qy - 1) : atan2(-(2 * $qy * $qz - 2 * $qx * $qw), 2 * $qw * $qw + 2 * $qz * $qz - 1);$ry = $unlocked ? atan2(2 * $qx * $qz + 2 * $qy * $qw, 2 * $qw * $qw + 2 * $qx * $qx - 1) : 0;$rz = asin($sz);break;case 4:$sx = -(2 * $qy * $qz - 2 * $qx * $qw);$unlocked = abs($sx) < 0.9999999;$rx = asin($sx);$ry = $unlocked ? atan2(2 * $qx * $qz + 2 * $qy * $qw, 2 * $qw * $qw + 2 * $qz * $qz - 1) : atan2(-(2 * $qx * $qz - 2 * $qy * $qw), 2 * $qw * $qw + 2 * $qx * $qx - 1);$rz = $unlocked ? atan2(2 * $qx * $qy + 2 * $qz * $qw, 2 * $qw * $qw + 2 * $qy * $qy - 1) : 0;break;case 5:$sy = -(2 * $qx * $qz - 2 * $qy * $qw);$unlocked = abs($sy) < 0.9999999;$rx = $unlocked ? atan2(2 * $qy * $qz + 2 * $qx * $qw, 2 * $qw * $qw + 2 * $qz * $qz - 1) : 0;$ry = asin($sy);$rz = $unlocked ? atan2(2 * $qx * $qy + 2 * $qz * $qw, 2 * $qw * $qw + 2 * $qx * $qx - 1) : atan2(-(2 * $qx * $qy - 2 * $qz * $qw), 2 * $qw * $qw + 2 * $qy * $qy - 1);break;default: break;}$rx = `rad_to_deg $rx`;$ry = `rad_to_deg $ry`;$rz = `rad_to_deg $rz`;return {$rx, $ry, $rz};}proc float[] angleAxisToQuat(float $degree, float $axis[]) {float $ha = `deg_to_rad $degree` * 0.5;float $s = sin($ha);float $qx = $axis[0] * $s;float $qy = $axis[1] * $s;float $qz = $axis[2] * $s;float $qw = cos($ha);return {$qx, $qy, $qz, $qw};}proc float[] quatAdd(float $q1[], float $q2[]) {float $q1x = $q1[0];float $q1y = $q1[1];float $q1z = $q1[2];float $q1w = $q1[3];float $q2x = $q2[0];float $q2y = $q2[1];float $q2z = $q2[2];float $q2w = $q2[3];float $qx = $q1x + $q2x;float $qy = $q1y + $q2y;float $qz = $q1z + $q2z;float $qw = $q1w + $q2w;return {$qx, $qy, $qz, $qw};}proc float[] quatSubtract(float $q1[], float $q2[]) {float $q1x = $q1[0];float $q1y = $q1[1];float $q1z = $q1[2];float $q1w = $q1[3];float $q2x = $q2[0];float $q2y = $q2[1];float $q2z = $q2[2];float $q2w = $q2[3];float $qx = $q1x - $q2x;float $qy = $q1y - $q2y;float $qz = $q1z - $q2z;float $qw = $q1w - $q2w;return {$qx, $qy, $qz, $qw};}proc float[] quatMultiply(float $q1[], float $q2[]) {float $q1x = $q1[0];float $q1y = $q1[1];float $q1z = $q1[2];float $q1w = $q1[3];float $q2x = $q2[0];float $q2y = $q2[1];float $q2z = $q2[2];float $q2w = $q2[3];float $qx = $q1x * $q2w + $q1w * $q2x + $q1y * $q2z - $q1z * $q2y;float $qy = $q1y * $q2w + $q1w * $q2y + $q1z * $q2x - $q1x * $q2z;float $qz = $q1z * $q2w + $q1w * $q2z + $q1x * $q2y - $q1y * $q2x;float $qw = $q1w * $q2w - $q1x * $q2x - $q1y * $q2y - $q1z * $q2z;return {$qx, $qy, $qz, $qw};}proc float[] quatInverse(float $q[]) {return {$q[0] * -1, $q[1] * -1, $q[2] * -1, $q[3]};}proc float[] rotateVectorByQuat(float $v[], float $q[]) {float $iq[] = quatInverse($q);float $vq[] = {$v[0], $v[1], $v[2], 0};$vq = quatMultiply(quatMultiply($q, $vq), $iq);return {$vq[0], $vq[1], $vq[2]};}proc float[] quatFlip(float $q[], float $axis[]) {float $flipQ[] = angleAxisToQuat(180.0, $axis);return quatMultiply($flipQ, $q);}
+/*1.0.0*/proc int minFloatArrayCount(float $a[], float $b[]) {int $numA = `size $a`;int $numB = `size $b`;return `min $numA $numB`;}proc int minIntArrayCount(int $a[], int $b[]) {int $numA = `size $a`;int $numB = `size $b`;return `min $numA $numB`;}proc int minStringArrayCount(string $a[], string $b[]) {int $numA = `size $a`;int $numB = `size $b`;return `min $numA $numB`;}
+// ファイル
+/*1.0.0*/proc string escapeStringForPythonAtFile(string $input) {string $escapedText;int $size = `size $input`;for ($i = 1; $i <= $size; $i++) {string $c = `substring $input $i $i`;switch ($c) {case "\\": $escapedText += "\\\\"; break;case "'": $escapedText += "\\'"; break;case "\n": $escapedText += "\\n"; break;case "\r": $escapedText += "\\r"; break;default: $escapedText += $c; break;}}return $escapedText;}proc string getSourceFilename(string $procName) {string $filename;string $thisIs = `whatIs $procName`;string $pattern1 = "^Mel procedure found in: *";string $pattern2 = "^Script found in: *";if (`match $pattern1 $thisIs` != "") {$filename = `substitute $pattern1 $thisIs ""`;}else if (`match $pattern2 $thisIs` != "") {$filename = `substitute $pattern2 $thisIs ""`;}return $filename;}proc string getSourceDirname(string $procName) {return dirname(getSourceFilename($procName));}proc int existsDirname(string $dirname) {return `filetest -d $dirname`;}proc int existsFilename(string $filename) {return `filetest -f $filename`;}proc string[] getDirnames(string $dirname) {string $subDirnames[];string $filenames[] = `getFileList -fld $dirname`;for ($i = 0; $i < `size $filenames`; $i++) {string $subDirname = $dirname + "/" + $filenames[$i];if (existsDirname($subDirname)) {$subDirnames[`size $subDirnames`] = $subDirname;}}$subDirnames = `sort $subDirnames`;return $subDirnames;}proc string[] getFilenames(string $dirname, string $filenamePattern) {string $filenames[] = `getFileList -fs $filenamePattern -fld $dirname`;for ($i = 0; $i < `size $filenames`; $i++) {$filenames[$i] = $dirname + "/" + $filenames[$i];}$filenames = `sort $filenames`;return $filenames;}proc string[] readAllLines(string $filename, string $encoding) {if (!`size $encoding`) $encoding = "utf-8";string $lines[];if (existsFilename($filename)) {python("with open('" + $filename + "', 'r', encoding='" + $encoding + "') as f:" + " lines = tuple(s.rstrip() for s in f.readlines())");$lines = `python("lines")`;}return $lines;}proc string readAllText(string $filename, string $encoding) {if (!`size $encoding`) $encoding = "utf-8";string $text;if (existsFilename($filename)) {python("with open('" + $filename + "', 'r', encoding='" + $encoding + "') as f: text = f.read()");$text = `python("text")`;}return $text;}proc int writeAllText(string $filename, string $encoding, string $input) {string $dirname = dirname($filename);if (!existsDirname($dirname)) return false;$input = escapeStringForPythonAtFile($input);if (!`size $encoding`) $encoding = "utf-8";python("with open('" + $filename + "', 'w', encoding='" + $encoding + "') as f:" + " num = f.write('" + $input + "')");return (`python("num")` > 0);}
 // ノード
-proc string[] getSelectedNodes() {return `ls -l -sl -typ "joint" -typ "transform"`;}proc string getParentNode(string $n) {string $parent;string $parents[] = `listRelatives -f -p $n`;if (`size $parents` > 0) $parent = $parents[0];return $parent;}
+/*1.0.0*/proc string[] getSelectedNodes() {return `ls -l -sl -typ "joint" -typ "transform"`;}proc string getParentNode(string $n) {string $parent;string $parents[] = `listRelatives -f -p $n`;if (`size $parents` > 0) $parent = $parents[0];return $parent;}
+// 数値
+/*1.0.0*/proc int isInRangeFloat(float $value, float $min, float $max) {return ($min <= $value && $value <= $max);}proc int isInRangeInt(int $value, int $min, int $max) {return ($min <= $value && $value <= $max);}
+// クォータニオン
+/*1.0.0*/proc int reverseRotateOrder(int $order) {int $reverseOrder[] = {5, 3, 4, 1, 2, 0};return $reverseOrder[$order];}proc float[] eulerToQuat(float $r[], int $order) {float $qx = 0.0;float $qy = 0.0;float $qz = 0.0;float $qw = 1.0;float $rx = `deg_to_rad $r[0]`;float $ry = `deg_to_rad $r[1]`;float $rz = `deg_to_rad $r[2]`;float $cx = cos(0.5 * $rx);float $cy = cos(0.5 * $ry);float $cz = cos(0.5 * $rz);float $sx = sin(0.5 * $rx);float $sy = sin(0.5 * $ry);float $sz = sin(0.5 * $rz);switch ($order) {case 0:$qx = $sx * $cy * $cz + $cx * $sy * $sz;$qy = $cx * $sy * $cz - $sx * $cy * $sz;$qz = $cx * $cy * $sz + $sx * $sy * $cz;$qw = $cx * $cy * $cz - $sx * $sy * $sz;break;case 1:$qx = $sx * $cy * $cz + $cx * $sy * $sz;$qy = $cx * $sy * $cz + $sx * $cy * $sz;$qz = $cx * $cy * $sz - $sx * $sy * $cz;$qw = $cx * $cy * $cz - $sx * $sy * $sz;break;case 2:$qx = $sx * $cy * $cz - $cx * $sy * $sz;$qy = $cx * $sy * $cz + $sx * $cy * $sz;$qz = $cx * $cy * $sz + $sx * $sy * $cz;$qw = $cx * $cy * $cz - $sx * $sy * $sz;break;case 3:$qx = $sx * $cy * $cz - $cx * $sy * $sz;$qy = $cx * $sy * $cz - $sx * $cy * $sz;$qz = $cx * $cy * $sz + $sx * $sy * $cz;$qw = $cx * $cy * $cz + $sx * $sy * $sz;break;case 4:$qx = $sx * $cy * $cz + $cx * $sy * $sz;$qy = $cx * $sy * $cz - $sx * $cy * $sz;$qz = $cx * $cy * $sz - $sx * $sy * $cz;$qw = $cx * $cy * $cz + $sx * $sy * $sz;break;case 5:$qx = $sx * $cy * $cz - $cx * $sy * $sz;$qy = $cx * $sy * $cz + $sx * $cy * $sz;$qz = $cx * $cy * $sz - $sx * $sy * $cz;$qw = $cx * $cy * $cz + $sx * $sy * $sz;break;default: break;}return {$qx, $qy, $qz, $qw};}proc float[] quatToEuler(float $q[], int $order) {float $rx = 0.0;float $ry = 0.0;float $rz = 0.0;float $qx = $q[0];float $qy = $q[1];float $qz = $q[2];float $qw = $q[3];float $sx;float $sy;float $sz;int $unlocked;switch ($order) {case 0:$sy = 2 * $qx * $qz + 2 * $qy * $qw;$unlocked = abs($sy) < 0.9999999;$rx = $unlocked ? atan2(-(2 * $qy * $qz - 2 * $qx * $qw), 2 * $qw * $qw + 2 * $qz * $qz - 1) : atan2(2 * $qy * $qz + 2 * $qx * $qw, 2 * $qw * $qw + 2 * $qy * $qy - 1);$ry = asin($sy);$rz = $unlocked ? atan2(-(2 * $qx * $qy - 2 * $qz * $qw), 2 * $qw * $qw + 2 * $qx * $qx - 1) : 0;break;case 1:$sz = 2 * $qx * $qy + 2 * $qz * $qw;$unlocked = abs($sz) < 0.9999999;$rx = $unlocked ? atan2(-(2 * $qy * $qz - 2 * $qx * $qw), 2 * $qw * $qw + 2 * $qy * $qy - 1) : 0;$ry = $unlocked ? atan2(-(2 * $qx * $qz - 2 * $qy * $qw), 2 * $qw * $qw + 2 * $qx * $qx - 1) : atan2(2 * $qx * $qz + 2 * $qy * $qw, 2 * $qw * $qw + 2 * $qz * $qz - 1);$rz = asin($sz);break;case 2:$sx = 2 * $qy * $qz + 2 * $qx * $qw;$unlocked = abs($sx) < 0.9999999;$rx = asin($sx);$ry = $unlocked ? atan2(-(2 * $qx * $qz - 2 * $qy * $qw), 2 * $qw * $qw + 2 * $qz * $qz - 1) : 0;$rz = $unlocked ? atan2(-(2 * $qx * $qy - 2 * $qz * $qw), 2 * $qw * $qw + 2 * $qy * $qy - 1) : atan2(2 * $qx * $qy + 2 * $qz * $qw, 2 * $qw * $qw + 2 * $qx * $qx - 1);break;case 3:$sz = -(2 * $qx * $qy - 2 * $qz * $qw);$unlocked = abs($sz) < 0.9999999;$rx = $unlocked ? atan2(2 * $qy * $qz + 2 * $qx * $qw, 2 * $qw * $qw + 2 * $qy * $qy - 1) : atan2(-(2 * $qy * $qz - 2 * $qx * $qw), 2 * $qw * $qw + 2 * $qz * $qz - 1);$ry = $unlocked ? atan2(2 * $qx * $qz + 2 * $qy * $qw, 2 * $qw * $qw + 2 * $qx * $qx - 1) : 0;$rz = asin($sz);break;case 4:$sx = -(2 * $qy * $qz - 2 * $qx * $qw);$unlocked = abs($sx) < 0.9999999;$rx = asin($sx);$ry = $unlocked ? atan2(2 * $qx * $qz + 2 * $qy * $qw, 2 * $qw * $qw + 2 * $qz * $qz - 1) : atan2(-(2 * $qx * $qz - 2 * $qy * $qw), 2 * $qw * $qw + 2 * $qx * $qx - 1);$rz = $unlocked ? atan2(2 * $qx * $qy + 2 * $qz * $qw, 2 * $qw * $qw + 2 * $qy * $qy - 1) : 0;break;case 5:$sy = -(2 * $qx * $qz - 2 * $qy * $qw);$unlocked = abs($sy) < 0.9999999;$rx = $unlocked ? atan2(2 * $qy * $qz + 2 * $qx * $qw, 2 * $qw * $qw + 2 * $qz * $qz - 1) : 0;$ry = asin($sy);$rz = $unlocked ? atan2(2 * $qx * $qy + 2 * $qz * $qw, 2 * $qw * $qw + 2 * $qx * $qx - 1) : atan2(-(2 * $qx * $qy - 2 * $qz * $qw), 2 * $qw * $qw + 2 * $qy * $qy - 1);break;default: break;}$rx = `rad_to_deg $rx`;$ry = `rad_to_deg $ry`;$rz = `rad_to_deg $rz`;return {$rx, $ry, $rz};}proc float[] angleAxisToQuat(float $degree, float $axis[]) {float $ha = `deg_to_rad $degree` * 0.5;float $s = sin($ha);float $qx = $axis[0] * $s;float $qy = $axis[1] * $s;float $qz = $axis[2] * $s;float $qw = cos($ha);return {$qx, $qy, $qz, $qw};}proc float[] quatAdd(float $q1[], float $q2[]) {float $q1x = $q1[0];float $q1y = $q1[1];float $q1z = $q1[2];float $q1w = $q1[3];float $q2x = $q2[0];float $q2y = $q2[1];float $q2z = $q2[2];float $q2w = $q2[3];float $qx = $q1x + $q2x;float $qy = $q1y + $q2y;float $qz = $q1z + $q2z;float $qw = $q1w + $q2w;return {$qx, $qy, $qz, $qw};}proc float[] quatSubtract(float $q1[], float $q2[]) {float $q1x = $q1[0];float $q1y = $q1[1];float $q1z = $q1[2];float $q1w = $q1[3];float $q2x = $q2[0];float $q2y = $q2[1];float $q2z = $q2[2];float $q2w = $q2[3];float $qx = $q1x - $q2x;float $qy = $q1y - $q2y;float $qz = $q1z - $q2z;float $qw = $q1w - $q2w;return {$qx, $qy, $qz, $qw};}proc float[] quatMultiply(float $q1[], float $q2[]) {float $q1x = $q1[0];float $q1y = $q1[1];float $q1z = $q1[2];float $q1w = $q1[3];float $q2x = $q2[0];float $q2y = $q2[1];float $q2z = $q2[2];float $q2w = $q2[3];float $qx = $q1x * $q2w + $q1w * $q2x + $q1y * $q2z - $q1z * $q2y;float $qy = $q1y * $q2w + $q1w * $q2y + $q1z * $q2x - $q1x * $q2z;float $qz = $q1z * $q2w + $q1w * $q2z + $q1x * $q2y - $q1y * $q2x;float $qw = $q1w * $q2w - $q1x * $q2x - $q1y * $q2y - $q1z * $q2z;return {$qx, $qy, $qz, $qw};}proc float[] quatInverse(float $q[]) {return {$q[0] * -1, $q[1] * -1, $q[2] * -1, $q[3]};}proc float[] rotateVectorByQuat(float $v[], float $q[]) {float $iq[] = quatInverse($q);float $vq[] = {$v[0], $v[1], $v[2], 0};$vq = quatMultiply(quatMultiply($q, $vq), $iq);return {$vq[0], $vq[1], $vq[2]};}proc float[] quatFlip(float $q[], float $axis[]) {float $flipQ[] = angleAxisToQuat(180.0, $axis);return quatMultiply($flipQ, $q);}
 // UIコントロール
-global string $nkUIControls[];proc nkUIAppendControls(string $controls[]) {global string $nkUIControls[];for ($control in $controls) {$nkUIControls[`size $nkUIControls`] = $control;}}proc nkUIRemoveControls(string $root, string $end) {global string $nkUIControls[];string $paths[];for ($control in $nkUIControls) {string $buffer[];int $depth = `tokenize $control "|" $buffer`;string $first = ($depth > 0) ? $buffer[0] : "";string $last = ($depth > 0) ? $buffer[$depth - 1] : "";int $shouldRemove = (!`size $end`) ? $first == $root : $first == $root && $last == $end;if ($shouldRemove) $paths[`size $paths`] = $control;}if (`size $paths` > 0) {$nkUIControls = stringArrayRemove($paths, $nkUIControls);}}proc string nkUIGetControl(string $root, string $end) {global string $nkUIControls[];string $path;for ($control in $nkUIControls) {string $buffer[];int $depth = `tokenize $control "|" $buffer`;string $first = ($depth > 0) ? $buffer[0] : "";string $last = ($depth > 0) ? $buffer[$depth - 1] : "";if ($first == $root && $last == $end) {$path = $control;break;}}return $path;}proc int[] checkBoxGrpGetEnable(string $control) {return `checkBoxGrp -q -en $control`;}proc checkBoxGrpSetEnable(int $enable, string $control) {checkBoxGrp -e -en $enable $control;}proc int[] checkBoxGrpGetValues(int $ncb, string $control) {$ncb = `clamp 1 4 $ncb`;int $values[];if ($ncb > 0) $values[0] = `checkBoxGrp -q -v1 $control`;if ($ncb > 1) $values[1] = `checkBoxGrp -q -v2 $control`;if ($ncb > 2) $values[2] = `checkBoxGrp -q -v3 $control`;if ($ncb > 3) $values[3] = `checkBoxGrp -q -v4 $control`;return $values;}proc checkBoxGrpSetValues(int $values[], string $control) {int $ncb = `size $values`;if ($ncb > 0) checkBoxGrp -e -v1 $values[0] $control;if ($ncb > 1) checkBoxGrp -e -v2 $values[1] $control;if ($ncb > 2) checkBoxGrp -e -v3 $values[2] $control;if ($ncb > 3) checkBoxGrp -e -v4 $values[3] $control;}proc int radioButtonGrpGetEnable(string $control) {return `radioButtonGrp -q -en $control`;}proc radioButtonGrpSetEnable(int $enable, string $control) {radioButtonGrp -e -en $enable $control;}proc int radioButtonGrpGetSelect(string $control) {return (`radioButtonGrp -q -sl $control` - 1);}proc radioButtonGrpSetSelect(int $index, string $control) {radioButtonGrp -e -sl ($index + 1) $control;}proc int textFieldGrpGetEnable(string $control) {return `textFieldGrp -q -en $control`;}proc textFieldGrpSetEnable(int $enable, string $control) {textFieldGrp -e -en $enable $control;}proc int textFieldGrpGetInsertionPosition(string $control) {return (`textFieldGrp -q -ip $control` - 1);}proc textFieldGrpSetInsertionPosition(int $position, string $control) {textFieldGrp -e -ip ($position + 1) $control;}proc string textFieldGrpGetText(string $control) {return `textFieldGrp -q -tx $control`;}proc textFieldGrpSetText(string $text, string $control) {textFieldGrp -e -tx $text $control;}proc textScrollListAppend(string $label, string $control) {textScrollList -e -a $label $control;}proc textScrollListAppendPosition(int $index, string $label, string $control) {textScrollList -e -ap ($index + 1) $label $control;}proc textScrollListRemoveAll(string $control) {textScrollList -e -ra $control;}proc textScrollListRemoveIndexedItem(int $index, string $control) {textScrollList -e -rii ($index + 1) $control;}proc textScrollListSetSelectIndexedItem(int $index, string $control) {textScrollList -e -sii ($index + 1) $control;}proc textScrollListSetSelectIndexedItems(int $indices[], string $control) {for ($i in $indices) {textScrollList -e -sii ($i + 1) $control;}}proc int[] textScrollListGetSelectIndexedItems(string $control) {int $indices[] = `textScrollList -q -sii $control`;for ($i = 0; $i < `size $indices`; $i++) $indices[$i] -= 1;return $indices;}proc int textScrollListGetSelectIndexedItem(string $control) {int $indices[] = textScrollListGetSelectIndexedItems($control);return ((`size $indices`) ? $indices[0] : -1);}proc string[] textScrollListGetSelectItems(string $control) {return `textScrollList -q -si $control`;}proc string textScrollListGetSelectItem(string $control) {string $items[] = textScrollListGetSelectItems($control);return ((`size $items`) ? $items[0] : "");}proc workspaceControlClose(string $control) {workspaceControl -e -cl $control;}proc int workspaceControlGetExists(string $control) {return `workspaceControl -q -ex $control`;}proc int workspaceControlGetFloating(string $control) {return `workspaceControl -q -fl $control`;}proc workspaceControlSetFloating(int $state, string $control) {workspaceControl -e -fl $state $control;}proc int workspaceControlGetVisible(string $control) {return `workspaceControl -q -vis $control`;}
+/*1.1.0*/proc int windowGetExists(string $control) {return `window -q -ex $control`;}proc int windowGetVisible(string $control) {return `window -q -vis $control`;}proc windowClose(string $control) {if (windowGetExists($control)) {deleteUI $control;}}proc windowPrefRemove(string $control) {if (windowGetExists($control)) windowClose($control);if (`windowPref -ex $control`) windowPref -r $control;}proc int[] checkBoxGrpGetEnable(string $control) {return `checkBoxGrp -q -en $control`;}proc checkBoxGrpSetEnable(int $enable, string $control) {checkBoxGrp -e -en $enable $control;}proc int[] checkBoxGrpGetValues(int $ncb, string $control) {$ncb = `clamp 1 4 $ncb`;int $values[];if ($ncb > 0) $values[0] = `checkBoxGrp -q -v1 $control`;if ($ncb > 1) $values[1] = `checkBoxGrp -q -v2 $control`;if ($ncb > 2) $values[2] = `checkBoxGrp -q -v3 $control`;if ($ncb > 3) $values[3] = `checkBoxGrp -q -v4 $control`;return $values;}proc checkBoxGrpSetValues(int $values[], string $control) {int $ncb = `size $values`;if ($ncb > 0) checkBoxGrp -e -v1 $values[0] $control;if ($ncb > 1) checkBoxGrp -e -v2 $values[1] $control;if ($ncb > 2) checkBoxGrp -e -v3 $values[2] $control;if ($ncb > 3) checkBoxGrp -e -v4 $values[3] $control;}proc int radioButtonGrpGetEnable(string $control) {return `radioButtonGrp -q -en $control`;}proc radioButtonGrpSetEnable(int $enable, string $control) {radioButtonGrp -e -en $enable $control;}proc int radioButtonGrpGetSelect(string $control) {return (`radioButtonGrp -q -sl $control` - 1);}proc radioButtonGrpSetSelect(int $index, string $control) {radioButtonGrp -e -sl ($index + 1) $control;}proc int textFieldGrpGetEnable(string $control) {return `textFieldGrp -q -en $control`;}proc textFieldGrpSetEnable(int $enable, string $control) {textFieldGrp -e -en $enable $control;}proc int textFieldGrpGetInsertionPosition(string $control) {return (`textFieldGrp -q -ip $control` - 1);}proc textFieldGrpSetInsertionPosition(int $position, string $control) {textFieldGrp -e -ip ($position + 1) $control;}proc string textFieldGrpGetText(string $control) {return `textFieldGrp -q -tx $control`;}proc textFieldGrpSetText(string $text, string $control) {textFieldGrp -e -tx $text $control;}proc textScrollListAppend(string $label, string $control) {textScrollList -e -a $label $control;}proc textScrollListAppendPosition(int $index, string $label, string $control) {textScrollList -e -ap ($index + 1) $label $control;}proc textScrollListRemoveAll(string $control) {textScrollList -e -ra $control;}proc textScrollListRemoveIndexedItem(int $index, string $control) {textScrollList -e -rii ($index + 1) $control;}proc textScrollListSetSelectIndexedItem(int $index, string $control) {textScrollList -e -sii ($index + 1) $control;}proc textScrollListSetSelectIndexedItems(int $indices[], string $control) {for ($i in $indices) {textScrollList -e -sii ($i + 1) $control;}}proc int[] textScrollListGetSelectIndexedItems(string $control) {int $indices[] = `textScrollList -q -sii $control`;for ($i = 0; $i < `size $indices`; $i++) $indices[$i] -= 1;return $indices;}proc int textScrollListGetSelectIndexedItem(string $control) {int $indices[] = textScrollListGetSelectIndexedItems($control);return ((`size $indices`) ? $indices[0] : -1);}proc string[] textScrollListGetSelectItems(string $control) {return `textScrollList -q -si $control`;}proc string textScrollListGetSelectItem(string $control) {string $items[] = textScrollListGetSelectItems($control);return ((`size $items`) ? $items[0] : "");}proc workspaceControlClose(string $control) {workspaceControl -e -cl $control;}proc int workspaceControlGetExists(string $control) {return `workspaceControl -q -ex $control`;}proc int workspaceControlGetFloating(string $control) {return `workspaceControl -q -fl $control`;}proc workspaceControlSetFloating(int $state, string $control) {workspaceControl -e -fl $state $control;}proc int workspaceControlGetVisible(string $control) {return `workspaceControl -q -vis $control`;}proc int isWorkspaceControl(string $control) {return `objectTypeUI $control` == "workspaceControl";}proc buildWorkspaceControl(string $workspaceControlName,string $mainProcName,string $buildProcName) {if (!workspaceControlGetExists($workspaceControlName)) {string $sourceFilename = getSourceFilename($mainProcName);string $uiScript = "if (!`exists " + $buildProcName + "`)" + " source \"" + $sourceFilename + "\"; " + $buildProcName + "();";string $nkSnippetWindow = `workspaceControl -dup false -fl true -l $mainProcName -rt false -ui $uiScript$workspaceControlName`;}}global string $nkUIControls[];proc nkUIAppendControls(string $controls[]) {global string $nkUIControls[];for ($control in $controls) {$nkUIControls[`size $nkUIControls`] = $control;}}proc nkUIRemoveControls(string $root, string $end) {global string $nkUIControls[];string $paths[];for ($control in $nkUIControls) {string $buffer[];int $depth = `tokenize $control "|" $buffer`;string $first = ($depth > 0) ? $buffer[0] : "";string $last = ($depth > 0) ? $buffer[$depth - 1] : "";int $shouldRemove = (!`size $end`) ? $first == $root : $first == $root && $last == $end;if ($shouldRemove) $paths[`size $paths`] = $control;}if (`size $paths` > 0) {$nkUIControls = stringArrayRemove($paths, $nkUIControls);}}proc string nkUIGetControl(string $root, string $end) {global string $nkUIControls[];string $path;for ($control in $nkUIControls) {string $buffer[];int $depth = `tokenize $control "|" $buffer`;string $first = ($depth > 0) ? $buffer[0] : "";string $last = ($depth > 0) ? $buffer[$depth - 1] : "";if ($first == $root && $last == $end) {$path = $control;break;}}return $path;}proc string nkUIGetParentableWindow(string $windowName) {string $window = nkUIGetControl($windowName, $windowName);if (isWorkspaceControl($window) && !workspaceControlGetFloating($window)) {$window = "MayaWindow";}return $window;}
 
 // /////////////////////////////////////////////////////////////////////////////
 // コアプロシージャ
@@ -639,11 +639,83 @@ proc float[] extractTransformValues(string $poseTransform) {
 // ポーズ
 // -----------------------------------------------------------------------------
 /*-
-@returns <>
+@returns <int>
 */
-proc clearPoses() {
+proc int clearPoses() {
+  // print("clearPoses\n"); // debug
   global string $nkPoseStackPoses[];
   clear $nkPoseStackPoses;
+  return true;
+}
+
+/*-
+@returns <int>
+*/
+proc int openPoses() {
+  // print("openPoses\n"); // debug
+  global string $nkPoseStackPoses[];
+  string $filenames[] = `fileDialog2
+      -cap "PoseStack - Open List"
+      -ds 2
+      -ff "*.posestack"
+      -fm 1`;
+  // print("  filenames:{\n    " + stringArrayToString($filenames, ",\n    ") + "\n  }\n"); // debug
+  if (`size $filenames` != 1) return false;
+  string $filename = $filenames[0];
+  // print("  filename:" + $filename + "\n"); // debug
+  string $lines[] = readAllLines($filename, "");
+  // print("  lines:{\n    " + stringArrayToString($lines, ",\n    ") + "\n  }\n"); // debug
+  if (!`size $lines`) return false;
+  $nkPoseStackPoses = $lines;
+  return true;
+}
+
+/*-
+@returns <int>
+*/
+proc int importPoses() {
+  // print("importPoses\n"); // debug
+  global string $nkPoseStackPoses[];
+  string $filenames[] = `fileDialog2
+      -cap "PoseStack - Import List"
+      -ds 2
+      -ff "*.posestack"
+      -fm 1`;
+  // print("  filenames:{\n    " + stringArrayToString($filenames, ",\n    ") + "\n  }\n"); // debug
+  if (`size $filenames` != 1) return false;
+  string $filename = $filenames[0];
+  // print("  filename:" + $filename + "\n"); // debug
+  string $lines[] = readAllLines($filename, "");
+  // print("  lines:{\n    " + stringArrayToString($lines, ",\n    ") + "\n  }\n"); // debug
+  if (!`size $lines`) return false;
+  for ($line in $lines) {
+    $nkPoseStackPoses[`size $nkPoseStackPoses`] = $line;
+  }
+  return true;
+}
+
+/*-
+@returns <>
+*/
+proc savePoses() {
+  // print("savePoses\n"); // debug
+  global string $nkPoseStackPoses[];
+  string $filenames[] = `fileDialog2
+      -cap "PoseStack - Save List As..."
+      -ds 2
+      -ff "*.posestack"
+      -fm 0`;
+  // print("  filenames:{\n    " + stringArrayToString($filenames, ",\n    ") + "\n  }\n"); // debug
+  if (`size $filenames` == 1) {
+    string $filename = $filenames[0];
+    // print("  filename:" + $filename + "\n"); // debug
+    string $saveText;
+    for ($pose in $nkPoseStackPoses) {
+      $saveText += $pose + "\n";
+    }
+    // print("  saveText:\"\n" + $saveText + "\n\"\n"); // debug
+    writeAllText($filename, "", $saveText);
+  }
 }
 
 /*-
@@ -1036,21 +1108,6 @@ proc initializePromptVariables() {
   $nkPoseStackPromptNeedUpdateInitSetting = {false, false, false};
 }
 
-// -----------------------------------------------------------------------------
-// UIコントロールイベント
-// -----------------------------------------------------------------------------
-/*-
-@returns <string>
-*/
-proc string getParentWindow() {
-  string $parentWindow = "MayaWindow";
-  string $nkPoseStackWindow = nkUIGetControl("nkPoseStackWindow", "nkPoseStackWindow");
-  if (workspaceControlGetFloating($nkPoseStackWindow)) {
-    $parentWindow = $nkPoseStackWindow;
-  }
-  return $parentWindow;
-}
-
 /*-
 @param $input <string>
 @returns <string>
@@ -1072,8 +1129,14 @@ proc string sanitizeText(string $input) {
 proc string makeNodeListLabel(int $index) {
   global string $nkPoseStackPromptNodes[];
   global string $nkPoseStackPromptPoseSettings[];
-  string $label = "[" + $nkPoseStackPromptPoseSettings[$index] + "] ";
-  $label += $nkPoseStackPromptNodes[$index];
+  string $label = "[" + $nkPoseStackPromptPoseSettings[$index] + "]";
+  string $buffer[];
+  int $depth = `tokenize $nkPoseStackPromptNodes[$index] "|" $buffer`;
+  if ($depth) {
+    $label += " |" + $buffer[0];
+    if ($depth == 2) $label += "|" + $buffer[1];
+    else if ($depth > 2) $label += "...|" + $buffer[$depth - 1];
+  }
   return $label;
 }
 
@@ -1257,6 +1320,39 @@ proc updateMirrorSettingUI(int $mirrorSetting[]) {
   }
 }
 
+/*-
+@returns <>
+*/
+proc updatePoseList() {
+  // print("updatePoseList\n"); // debug
+  string $poseList = nkUIGetControl("nkPoseStackWindow", "poseList");
+  int $poseIndex = textScrollListGetSelectIndexedItem($poseList);
+  // print("  poseIndex:" + $poseIndex + "\n"); // debug
+  string $poseNames[] = getPoseNames();
+  int $numPoseNames = `size $poseNames`;
+  textScrollListRemoveAll($poseList);
+  for ($poseName in $poseNames) {
+    textScrollListAppend($poseName, $poseList);
+  }
+}
+
+/*-
+@param $n <string>
+@returns <string>
+*/
+proc string makePoseName(string $n) {
+  string $poseName = $n;
+  string $buffer[];
+  int $depth = `tokenize $n "|" $buffer`;
+  if ($depth > 0) {
+    $poseName = (($depth > 1) ? $buffer[0] + "-" : "") + $buffer[$depth - 1];
+  }
+  return $poseName;
+}
+
+// -----------------------------------------------------------------------------
+// UIコントロールイベント
+// -----------------------------------------------------------------------------
 /*-
 @returns <>
 */
@@ -1501,36 +1597,6 @@ proc cancelButtonPressed() {
 /*-
 @returns <>
 */
-proc updatePoseList() {
-  // print("updatePoseList\n"); // debug
-  string $poseList = nkUIGetControl("nkPoseStackWindow", "poseList");
-  int $poseIndex = textScrollListGetSelectIndexedItem($poseList);
-  // print("  poseIndex:" + $poseIndex + "\n"); // debug
-  string $poseNames[] = getPoseNames();
-  int $numPoseNames = `size $poseNames`;
-  textScrollListRemoveAll($poseList);
-  for ($poseName in $poseNames) {
-    textScrollListAppend($poseName, $poseList);
-  }
-}
-
-/*-
-@param $n <string>
-@returns <string>
-*/
-proc string makePoseName(string $n) {
-  string $poseName = $n;
-  string $buffer[];
-  int $depth = `tokenize $n "|" $buffer`;
-  if ($depth > 0) {
-    $poseName = (($depth > 1) ? $buffer[0] + "-" : "") + $buffer[$depth - 1];
-  }
-  return $poseName;
-}
-
-/*-
-@returns <>
-*/
 proc nkPoseStackWindowClosed() {
   // print("nkPoseStackWindowClosed\n"); // debug
   nkUIRemoveControls("nkPoseStackWindow", "");
@@ -1539,22 +1605,57 @@ proc nkPoseStackWindowClosed() {
 /*-
 @returns <>
 */
-proc openMenuItemSelected() {
-  print("openMenuItemSelected\n");
+proc clearListMenuItemSelected() {
+  // print("clearListMenuItemSelected\n"); // debug
+  string $result = `confirmDialog
+      -b "OK" -b "Cancel"
+      -db "OK" -cb "Cancel"
+      -m "Are you sure?"
+      -p (nkUIGetParentableWindow("nkPoseStackWindow"))
+      -t "Clear List - nkPoseStack"`;
+  if ($result != "OK") return;
+  if (clearPoses()) {
+    updatePoseList();
+  }
 }
 
 /*-
 @returns <>
 */
-proc importMenuItemSelected() {
-  print("importMenuItemSelected\n");
+proc openListMenuItemSelected() {
+  // print("openListMenuItemSelected\n"); // debug
+  if (openPoses()) {
+    updatePoseList();
+  }
 }
 
 /*-
 @returns <>
 */
-proc saveAsMenuItemSelected() {
-  print("saveAsMenuItemSelected\n");
+proc importListMenuItemSelected() {
+  // print("importListMenuItemSelected\n"); // debug
+  if (importPoses()) {
+    updatePoseList();
+  }
+}
+
+/*-
+@returns <>
+*/
+proc saveListAsMenuItemSelected() {
+  // print("saveListAsMenuItemSelected\n"); // debug
+  savePoses();
+}
+
+/*-
+@returns <>
+*/
+proc resetWindowMenuItemSelected() {
+  // print("resetWindowMenuItemSelected\n"); // debug
+  string $nkPoseStackWindow = nkUIGetControl("nkPoseStackWindow", "nkPoseStackWindow");
+  // print("  nkPoseStackWindow:" + $nkPoseStackWindow + "\n"); // debug
+  windowPrefRemove($nkPoseStackWindow);
+  nkPoseStack();
 }
 
 /*-
@@ -1564,13 +1665,7 @@ proc quitMenuItemSelected() {
   // print("quitMenuItemSelected\n"); // debug
   string $nkPoseStackWindow = nkUIGetControl("nkPoseStackWindow", "nkPoseStackWindow");
   // print("  nkPoseStackWindow:" + $nkPoseStackWindow + "\n"); // debug
-  int $exists = workspaceControlGetExists($nkPoseStackWindow);
-  // print("    exists   :" + $exists + "\n"); // debug
-  if (!$exists) return;
-  int $isVisible = workspaceControlGetVisible($nkPoseStackWindow);
-  // print("    isVisible:" + $isVisible + "\n"); // debug
-  if (!$isVisible) return;
-  workspaceControlClose($nkPoseStackWindow);
+  windowClose($nkPoseStackWindow);
 }
 
 /*-
@@ -1583,10 +1678,10 @@ proc aboutMenuItemSelected() {
       -db "OK"
       -m (
         "nkPoseStack " + (nkPoseStackVersion())
-        + "\n\n(c) 2023 imaoki | MIT License | https://github.com/imaoki"
+        + "\n\nMIT License\nhttps://github.com/imaoki/nkPoseStack"
       )
-      -p (getParentWindow())
-      -t "About nkPoseStack";
+      -p (nkUIGetParentableWindow("nkPoseStackWindow"))
+      -t "nkPoseStack - About";
 }
 
 /*-
@@ -1625,7 +1720,7 @@ proc addPoseButtonPressed() {
   // print("  nkPoseStackPromptPoseSettings:{\n    " + stringArrayToString($nkPoseStackPromptPoseSettings, ",\n    ") + "\n  }\n"); // debug
 
   string $result = `layoutDialog
-      -p (getParentWindow())
+      -p (nkUIGetParentableWindow("nkPoseStackWindow"))
       -t "Add Pose"
       -ui "buildPromptWindow"`;
 
@@ -1650,23 +1745,6 @@ proc addPoseButtonPressed() {
   updatePoseList();
   string $poseList = nkUIGetControl("nkPoseStackWindow", "poseList");
   textScrollListSetSelectIndexedItem($numPoses - 1, $poseList);
-}
-
-/*-
-@returns <>
-*/
-proc deletePoseButtonPressed() {
-  // print("deletePoseButtonPressed\n"); // debug
-  string $poseList = nkUIGetControl("nkPoseStackWindow", "poseList");
-  int $poseIndex = textScrollListGetSelectIndexedItem($poseList);
-  // print("  poseIndex:" + $poseIndex + "\n"); // debug
-  if ($poseIndex == -1) return;
-  int $numPoses = deletePose($poseIndex);
-  updatePoseList();
-  if ($numPoses) {
-    if ($poseIndex > $numPoses - 1) $poseIndex = $numPoses - 1;
-    textScrollListSetSelectIndexedItem($poseIndex, $poseList);
-  }
 }
 
 /*-
@@ -1713,7 +1791,7 @@ proc editPoseButtonPressed() {
   // print("  nkPoseStackPromptPoseSettings:{\n    " + stringArrayToString($nkPoseStackPromptPoseSettings, ",\n    ") + "\n  }\n"); // debug
 
   string $result = `layoutDialog
-      -p (getParentWindow())
+      -p (nkUIGetParentableWindow("nkPoseStackWindow"))
       -t "Edit Pose"
       -ui "buildPromptWindow"`;
 
@@ -1757,44 +1835,6 @@ proc duplicatePoseButtonPressed() {
 /*-
 @returns <>
 */
-proc moveUpPoseButtonPressed() {
-  // print("moveUpPoseButtonPressed\n"); // debug
-  string $poseList = nkUIGetControl("nkPoseStackWindow", "poseList");
-  int $poseIndex = textScrollListGetSelectIndexedItem($poseList);
-  // print("  poseIndex:" + $poseIndex + "\n"); // debug
-  if ($poseIndex == -1) return;
-  int $newPoseIndex = moveUpPose($poseIndex);
-  if ($poseIndex == $newPoseIndex) return;
-  updatePoseList();
-  textScrollListSetSelectIndexedItem($newPoseIndex, $poseList);
-}
-
-/*-
-@returns <>
-*/
-proc moveDownPoseButtonPressed() {
-  // print("moveDownPoseButtonPressed\n"); // debug
-  string $poseList = nkUIGetControl("nkPoseStackWindow", "poseList");
-  int $poseIndex = textScrollListGetSelectIndexedItem($poseList);
-  // print("  poseIndex:" + $poseIndex + "\n"); // debug
-  if ($poseIndex == -1) return;
-  int $newPoseIndex = moveDownPose($poseIndex);
-  if ($poseIndex == $newPoseIndex) return;
-  updatePoseList();
-  textScrollListSetSelectIndexedItem($newPoseIndex, $poseList);
-}
-
-/*-
-@returns <>
-*/
-proc poseListDoubleClicked() {
-  // print("poseListDoubleClicked\n"); // debug
-  editPoseButtonPressed();
-}
-
-/*-
-@returns <>
-*/
 proc updatePoseButtonPressed() {
   // print("updatePoseButtonPressed\n"); // debug
   string $poseList = nkUIGetControl("nkPoseStackWindow", "poseList");
@@ -1833,6 +1873,61 @@ proc pasteButtonPressed(int $isOpposite) {
   // print("  nodes:{\n    " + (stringArrayToString($nodes, ",\n    ")) + "\n  }\n"); // debug
   if (!`size $nodes`) return;
   pastePose($poseIndex, $isOpposite, $nodes);
+}
+
+/*-
+@returns <>
+*/
+proc poseListDoubleClicked() {
+  // print("poseListDoubleClicked\n"); // debug
+  editPoseButtonPressed();
+}
+
+/*-
+@returns <>
+*/
+proc deletePoseButtonPressed() {
+  // print("deletePoseButtonPressed\n"); // debug
+  string $poseList = nkUIGetControl("nkPoseStackWindow", "poseList");
+  int $poseIndex = textScrollListGetSelectIndexedItem($poseList);
+  // print("  poseIndex:" + $poseIndex + "\n"); // debug
+  if ($poseIndex == -1) return;
+  int $numPoses = deletePose($poseIndex);
+  updatePoseList();
+  if ($numPoses) {
+    if ($poseIndex > $numPoses - 1) $poseIndex = $numPoses - 1;
+    textScrollListSetSelectIndexedItem($poseIndex, $poseList);
+  }
+}
+
+/*-
+@returns <>
+*/
+proc moveUpPoseButtonPressed() {
+  // print("moveUpPoseButtonPressed\n"); // debug
+  string $poseList = nkUIGetControl("nkPoseStackWindow", "poseList");
+  int $poseIndex = textScrollListGetSelectIndexedItem($poseList);
+  // print("  poseIndex:" + $poseIndex + "\n"); // debug
+  if ($poseIndex == -1) return;
+  int $newPoseIndex = moveUpPose($poseIndex);
+  if ($poseIndex == $newPoseIndex) return;
+  updatePoseList();
+  textScrollListSetSelectIndexedItem($newPoseIndex, $poseList);
+}
+
+/*-
+@returns <>
+*/
+proc moveDownPoseButtonPressed() {
+  // print("moveDownPoseButtonPressed\n"); // debug
+  string $poseList = nkUIGetControl("nkPoseStackWindow", "poseList");
+  int $poseIndex = textScrollListGetSelectIndexedItem($poseList);
+  // print("  poseIndex:" + $poseIndex + "\n"); // debug
+  if ($poseIndex == -1) return;
+  int $newPoseIndex = moveDownPose($poseIndex);
+  if ($poseIndex == $newPoseIndex) return;
+  updatePoseList();
+  textScrollListSetSelectIndexedItem($newPoseIndex, $poseList);
 }
 
 /*-
@@ -1905,22 +2000,24 @@ global proc nkPoseStackInvokeEvent(
       switch ($event) {
         case "c":
           switch ($control) {
-            // case "openMenuItem": openMenuItemSelected(); break;
-            // case "importMenuItem": importMenuItemSelected(); break;
-            // case "saveAsMenuItem": saveAsMenuItemSelected(); break;
+            case "clearListMenuItem": clearListMenuItemSelected(); break;
+            case "openListMenuItem": openListMenuItemSelected(); break;
+            case "importListMenuItem": importListMenuItemSelected(); break;
+            case "saveListAsMenuItem": saveListAsMenuItemSelected(); break;
+            case "resetWindowMenuItem": resetWindowMenuItemSelected(); break;
             case "quitMenuItem": quitMenuItemSelected(); break;
             case "aboutMenuItem": aboutMenuItemSelected(); break;
             case "addPoseButton": addPoseButtonPressed(); break;
-            case "deletePoseButton": deletePoseButtonPressed(); break;
             case "editPoseButton": editPoseButtonPressed(); break;
             case "duplicatePoseButton": duplicatePoseButtonPressed(); break;
-            case "moveUpPoseButton": moveUpPoseButtonPressed(); break;
-            case "moveDownPoseButton": moveDownPoseButtonPressed(); break;
             case "updatePoseButton": updatePoseButtonPressed(); break;
             case "selectSourceButton": selectButtonPressed(false); break;
             case "selectOppositeButton": selectButtonPressed(true); break;
             case "pasteSourceButton": pasteButtonPressed(false); break;
             case "pasteOppositeButton": pasteButtonPressed(true); break;
+            case "deletePoseButton": deletePoseButtonPressed(); break;
+            case "moveUpPoseButton": moveUpPoseButtonPressed(); break;
+            case "moveDownPoseButton": moveDownPoseButtonPressed(); break;
             default: break;
           }
           break;
@@ -1960,7 +2057,7 @@ global proc buildPromptWindow() {
         -l "Pose Name:"
         -tx $nkPoseStackPromptPoseName
         "poseNameText"`;
-    string $nodeList = `textScrollList -ams true -h 18 "nodeList"`;
+    string $nodeList = `textScrollList -ams true -h 44 "nodeList"`;
     string $poseSettingColumn = `columnLayout
         -adj true
         -rs 3
@@ -2156,8 +2253,9 @@ global proc buildPromptWindow() {
 /*-
 @returns <>
 */
-global proc nkPoseStackBuildMainWindow() {
-  // print("nkPoseStackBuildMainWindow\n"); // debug
+proc buildMainWindow() {
+  // print("buildMainWindow\n"); // debug
+  windowClose("nkPoseStackWindow");
 
   string $sourceDirname = getSourceDirname("nkPoseStack");
   string $iconDir;
@@ -2185,8 +2283,12 @@ global proc nkPoseStackBuildMainWindow() {
   // print("  pasteOppositeIcon :" + $pasteOppositeIcon + "\n"); // debug
   // print("  updateIcon        :" + $updateIcon + "\n"); // debug
 
-  string $nkPoseStackWindow = `setParent -q`;
-  // print("  nkPoseStackWindow:" + $nkPoseStackWindow + "\n"); // debug
+  string $nkPoseStackWindow = `window
+      -mxb false
+      -mnb false
+      -s true
+      -t "nkPoseStack"
+      "nkPoseStackWindow"`;
     string $outerForm = `formLayout "outerForm"`;
       string $menuBar = `menuBarLayout
           // -bgc 0.25 0.5 0.25
@@ -2194,17 +2296,25 @@ global proc nkPoseStackBuildMainWindow() {
         string $fileMenu = `menu
             -l "File"
             "fileMenu"`;
-          // string $openMenuItem = `menuItem
-          //     -l "Open"
-          //     "openMenuItem"`;
-          // string $importMenuItem = `menuItem
-          //     -l "Import"
-          //     "importMenuItem"`;
-          // menuItem -d true;
-          // string $saveAsMenuItem = `menuItem
-          //     -l "Save As"
-          //     "saveAsMenuItem"`;
-          // menuItem -d true;
+          string $clearListMenuItem = `menuItem
+              -l "Clear List"
+              "clearListMenuItem"`;
+          menuItem -d true;
+          string $openListMenuItem = `menuItem
+              -l "Open List"
+              "openListMenuItem"`;
+          string $importListMenuItem = `menuItem
+              -l "Import List"
+              "importListMenuItem"`;
+          menuItem -d true;
+          string $saveListAsMenuItem = `menuItem
+              -l "Save List As..."
+              "saveListAsMenuItem"`;
+          menuItem -d true;
+          string $resetWindowMenuItem = `menuItem
+              -l "Reset Window"
+              "resetWindowMenuItem"`;
+          menuItem -d true;
           string $quitMenuItem = `menuItem
               -l "Quit"
               "quitMenuItem"`;
@@ -2217,23 +2327,30 @@ global proc nkPoseStackBuildMainWindow() {
               "aboutMenuItem"`;
       setParent ..;
 
-      string $poseManipRow = `rowLayout
+      string $topToolRow = `rowLayout
+          -adj 12
           // -bgc 0.5 0.25 0.25
-          -nc 7
-          -adj 5
-          "poseManipRow"`;
+          -h 26
+          -nc 12
+          -rat 1 "bottom" 0
+          -rat 2 "bottom" 0
+          -rat 3 "bottom" 0
+          -rat 4 "bottom" 0
+          -rat 5 "bottom" 0
+          -rat 6 "bottom" 0
+          -rat 7 "bottom" 0
+          -rat 8 "bottom" 0
+          -rat 9 "bottom" 0
+          -rat 10 "bottom" 0
+          -rat 11 "bottom" 0
+          -rat 12 "bottom" 0
+          "topToolRow"`;
         string $addPoseButton = `iconTextButton
             -ann "Add"
             // -bgc 0.25 0.5 0.5
             -i $addIcon
             -w 23
             "addPoseButton"`;
-        string $deletePoseButton = `iconTextButton
-            -ann "Delete"
-            // -bgc 0.25 0.5 0.5
-            -i $deleteIcon
-            -w 23
-            "deletePoseButton"`;
         string $editPoseButton = `iconTextButton
             -ann "Edit"
             // -bgc 0.25 0.5 0.5
@@ -2246,7 +2363,56 @@ global proc nkPoseStackBuildMainWindow() {
             -i $duplicateIcon
             -w 23
             "duplicatePoseButton"`;
+        separator -h 24 -st "single" -vis true;
+        string $updatePoseButton = `iconTextButton
+            -ann "Update"
+            // -bgc 0.25 0.5 0.5
+            -i $updateIcon
+            -w 23
+            "updatePoseButton"`;
+        separator -h 24 -st "single" -vis true;
+        string $selectSourceButton = `iconTextButton
+            -ann "Select Source"
+            // -bgc 0.25 0.5 0.5
+            -i $selectSourceIcon
+            -w 23
+            "selectSourceButton"`;
+        string $selectOppositeButton = `iconTextButton
+            -ann "Select Opposite"
+            // -bgc 0.25 0.5 0.5
+            -i $selectOppositeIcon
+            -w 23
+            "selectOppositeButton"`;
+        separator -h 24 -st "single" -vis true;
+        string $pasteSourceButton = `iconTextButton
+            -ann "As Is Paste"
+            // -bgc 0.25 0.5 0.5
+            -i $pasteSourceIcon
+            -w 23
+            "pasteSourceButton"`;
+        string $pasteOppositeButton = `iconTextButton
+            -ann "Mirror Paste"
+            // -bgc 0.25 0.5 0.5
+            -i $pasteOppositeIcon
+            -w 23
+            "pasteOppositeButton"`;
         separator -st "none" -vis false;
+      setParent ..;
+
+      string $poseList = `textScrollList -ams false -h 44 "poseList"`;
+
+      string $bottomToolRow = `rowLayout
+          -adj 1
+          // -bgc 0.5 0.25 0.25
+          -nc 4
+          "bottomToolRow"`;
+        separator -st "none" -vis false;
+        string $deletePoseButton = `iconTextButton
+            -ann "Delete"
+            // -bgc 0.25 0.5 0.5
+            -i $deleteIcon
+            -w 23
+            "deletePoseButton"`;
         string $moveUpPoseButton = `iconTextButton
             -ann "Move Up"
             // -bgc 0.25 0.5 0.5
@@ -2260,108 +2426,71 @@ global proc nkPoseStackBuildMainWindow() {
             -w 23
             "moveDownPoseButton"`;
       setParent ..;
-
-      string $poseList = `textScrollList -ams false -h 18 "poseList"`;
-
-      string $nodeManipRow = `rowLayout
-          // -bgc 0.5 0.25 0.25
-          -nc 7
-          -adj 2
-          "nodeManipRow"`;
-        string $updatePoseButton = `iconTextButton
-            -ann "Update"
-            // -bgc 0.25 0.5 0.5
-            -i $updateIcon
-            -w 23
-            "updatePoseButton"`;
-        separator -st "none" -vis false;
-        string $selectSourceButton = `iconTextButton
-            -ann "Select Source"
-            // -bgc 0.25 0.5 0.5
-            -i $selectSourceIcon
-            -w 23
-            "selectSourceButton"`;
-        string $selectOppositeButton = `iconTextButton
-            -ann "Select Opposite"
-            // -bgc 0.25 0.5 0.5
-            -i $selectOppositeIcon
-            -w 23
-            "selectOppositeButton"`;
-        separator -st "none" -vis false -w 23;
-        string $pasteSourceButton = `iconTextButton
-            -ann "As Is Paste"
-            // -bgc 0.25 0.5 0.5
-            -i $pasteSourceIcon
-            -w 23
-            "pasteSourceButton"`;
-        string $pasteOppositeButton = `iconTextButton
-            -ann "Mirror Paste"
-            // -bgc 0.25 0.5 0.5
-            -i $pasteOppositeIcon
-            -w 23
-            "pasteOppositeButton"`;
-      setParent ..;
     setParent ..;
 
   formLayout -e
       -af $menuBar "top" 0
       -af $menuBar "left" 0
       -af $menuBar "right" 0
-      -ac $poseManipRow "top" 0 $menuBar
-      -af $poseManipRow "left" 5
-      -af $poseManipRow "right" 5
-      -ac $poseList "top" 5 $poseManipRow
+      -ac $topToolRow "top" 0 $menuBar
+      -af $topToolRow "left" 5
+      -af $topToolRow "right" 5
+      -ac $poseList "top" 5 $topToolRow
       -af $poseList "left" 5
       -af $poseList "right" 5
-      -ac $poseList "bottom" 5 $nodeManipRow
-      -af $nodeManipRow "left" 5
-      -af $nodeManipRow "right" 5
-      -af $nodeManipRow "bottom" 5
+      -ac $poseList "bottom" 5 $bottomToolRow
+      -af $bottomToolRow "left" 5
+      -af $bottomToolRow "right" 5
+      -af $bottomToolRow "bottom" 5
       $outerForm;
 
-  workspaceControl -e -cc "nkPoseStackInvokeEvent(\"nkPoseStackWindow\", \"cc\", \"nkPoseStackWindow\");" $nkPoseStackWindow;
-  // menuItem -e -c "nkPoseStackInvokeEvent(\"nkPoseStackWindow\", \"c\", \"openMenuItem\");" $openMenuItem;
-  // menuItem -e -c "nkPoseStackInvokeEvent(\"nkPoseStackWindow\", \"c\", \"importMenuItem\");" $importMenuItem;
-  // menuItem -e -c "nkPoseStackInvokeEvent(\"nkPoseStackWindow\", \"c\", \"saveAsMenuItem\");" $saveAsMenuItem;
+  window -e -cc "nkPoseStackInvokeEvent(\"nkPoseStackWindow\", \"cc\", \"nkPoseStackWindow\");" $nkPoseStackWindow;
+  menuItem -e -c "nkPoseStackInvokeEvent(\"nkPoseStackWindow\", \"c\", \"clearListMenuItem\");" $clearListMenuItem;
+  menuItem -e -c "nkPoseStackInvokeEvent(\"nkPoseStackWindow\", \"c\", \"openListMenuItem\");" $openListMenuItem;
+  menuItem -e -c "nkPoseStackInvokeEvent(\"nkPoseStackWindow\", \"c\", \"importListMenuItem\");" $importListMenuItem;
+  menuItem -e -c "nkPoseStackInvokeEvent(\"nkPoseStackWindow\", \"c\", \"saveListAsMenuItem\");" $saveListAsMenuItem;
+  menuItem -e -c "nkPoseStackInvokeEvent(\"nkPoseStackWindow\", \"c\", \"resetWindowMenuItem\");" $resetWindowMenuItem;
   menuItem -e -c "nkPoseStackInvokeEvent(\"nkPoseStackWindow\", \"c\", \"quitMenuItem\");" $quitMenuItem;
   menuItem -e -c "nkPoseStackInvokeEvent(\"nkPoseStackWindow\", \"c\", \"aboutMenuItem\");" $aboutMenuItem;
   iconTextButton -e -c "nkPoseStackInvokeEvent(\"nkPoseStackWindow\", \"c\", \"addPoseButton\");" $addPoseButton;
-  iconTextButton -e -c "nkPoseStackInvokeEvent(\"nkPoseStackWindow\", \"c\", \"deletePoseButton\");" $deletePoseButton;
   iconTextButton -e -c "nkPoseStackInvokeEvent(\"nkPoseStackWindow\", \"c\", \"editPoseButton\");" $editPoseButton;
   iconTextButton -e -c "nkPoseStackInvokeEvent(\"nkPoseStackWindow\", \"c\", \"duplicatePoseButton\");" $duplicatePoseButton;
-  iconTextButton -e -c "nkPoseStackInvokeEvent(\"nkPoseStackWindow\", \"c\", \"moveUpPoseButton\");" $moveUpPoseButton;
-  iconTextButton -e -c "nkPoseStackInvokeEvent(\"nkPoseStackWindow\", \"c\", \"moveDownPoseButton\");" $moveDownPoseButton;
-  textScrollList -e -dcc "nkPoseStackInvokeEvent(\"nkPoseStackWindow\", \"dcc\", \"poseList\");" $poseList;
   iconTextButton -e -c "nkPoseStackInvokeEvent(\"nkPoseStackWindow\", \"c\", \"updatePoseButton\");" $updatePoseButton;
   iconTextButton -e -c "nkPoseStackInvokeEvent(\"nkPoseStackWindow\", \"c\", \"selectSourceButton\");" $selectSourceButton;
   iconTextButton -e -c "nkPoseStackInvokeEvent(\"nkPoseStackWindow\", \"c\", \"selectOppositeButton\");" $selectOppositeButton;
   iconTextButton -e -c "nkPoseStackInvokeEvent(\"nkPoseStackWindow\", \"c\", \"pasteSourceButton\");" $pasteSourceButton;
   iconTextButton -e -c "nkPoseStackInvokeEvent(\"nkPoseStackWindow\", \"c\", \"pasteOppositeButton\");" $pasteOppositeButton;
+  textScrollList -e -dcc "nkPoseStackInvokeEvent(\"nkPoseStackWindow\", \"dcc\", \"poseList\");" $poseList;
+  iconTextButton -e -c "nkPoseStackInvokeEvent(\"nkPoseStackWindow\", \"c\", \"deletePoseButton\");" $deletePoseButton;
+  iconTextButton -e -c "nkPoseStackInvokeEvent(\"nkPoseStackWindow\", \"c\", \"moveUpPoseButton\");" $moveUpPoseButton;
+  iconTextButton -e -c "nkPoseStackInvokeEvent(\"nkPoseStackWindow\", \"c\", \"moveDownPoseButton\");" $moveDownPoseButton;
 
   // print("  " + $nkPoseStackWindow + "\n"); // debug
   // print("  " + $outerForm + "\n"); // debug
   // print("  " + $menuBar + "\n"); // debug
   // print("  " + $fileMenu + "\n"); // debug
-  // // print("  " + $openMenuItem + "\n"); // debug
-  // // print("  " + $importMenuItem + "\n"); // debug
-  // // print("  " + $saveAsMenuItem + "\n"); // debug
+  // print("  " + $clearListMenuItem + "\n"); // debug
+  // print("  " + $openListMenuItem + "\n"); // debug
+  // print("  " + $importListMenuItem + "\n"); // debug
+  // print("  " + $saveListAsMenuItem + "\n"); // debug
+  // print("  " + $resetWindowMenuItem + "\n"); // debug
   // print("  " + $quitMenuItem + "\n"); // debug
   // print("  " + $helpMenu + "\n"); // debug
   // print("  " + $aboutMenuItem + "\n"); // debug
-  // print("  " + $poseManipRow + "\n"); // debug
+  // print("  " + $topToolRow + "\n"); // debug
+  // print("  " + $bottomToolRow + "\n"); // debug
   // print("  " + $addPoseButton + "\n"); // debug
-  // print("  " + $deletePoseButton + "\n"); // debug
   // print("  " + $editPoseButton + "\n"); // debug
   // print("  " + $duplicatePoseButton + "\n"); // debug
-  // print("  " + $moveUpPoseButton + "\n"); // debug
-  // print("  " + $moveDownPoseButton + "\n"); // debug
-  // print("  " + $poseList + "\n"); // debug
-  // print("  " + $nodeManipRow + "\n"); // debug
+  // print("  " + $updatePoseButton + "\n"); // debug
   // print("  " + $selectSourceButton + "\n"); // debug
   // print("  " + $selectOppositeButton + "\n"); // debug
   // print("  " + $pasteSourceButton + "\n"); // debug
   // print("  " + $pasteOppositeButton + "\n"); // debug
-  // print("  " + $updatePoseButton + "\n"); // debug
+  // print("  " + $poseList + "\n"); // debug
+  // print("  " + $deletePoseButton + "\n"); // debug
+  // print("  " + $moveUpPoseButton + "\n"); // debug
+  // print("  " + $moveDownPoseButton + "\n"); // debug
 
   nkUIAppendControls({
     $nkPoseStackWindow,
@@ -2369,30 +2498,9 @@ global proc nkPoseStackBuildMainWindow() {
   });
 
   updatePoseList();
-}
 
-/*-
-@returns <>
-*/
-proc buildMainWorkspaceControl() {
-  // print("buildMainWorkspaceControl\n"); // debug
-  int $exists = workspaceControlGetExists("nkPoseStackWindow");
-  // print("  exists:" + $exists + "\n"); // debug
-  if (!$exists) {
-    string $sourceFilename = getSourceFilename("nkPoseStack");
-    string $uiScript = "if (!`exists nkPoseStackBuildMainWindow`)"
-        + " source \"" + $sourceFilename + "\";"
-        + " nkPoseStackBuildMainWindow();";
-    // print("  uiScript:" + $uiScript + "\n"); // debug
-    string $nkPoseStackWindow = `workspaceControl
-        -dup false
-        -fl true
-        -l "nkPoseStack"
-        -mw 260
-        -rt false
-        -ui $uiScript
-        "nkPoseStackWindow"`;
-  }
+  setFocus $nkPoseStackWindow;
+  showWindow $nkPoseStackWindow;
 }
 
 // -----------------------------------------------------------------------------
@@ -2412,7 +2520,7 @@ proc buildMainWorkspaceControl() {
 */
 proc initialize() {
   initializeInitSettingVariables();
-  buildMainWorkspaceControl();
+  buildMainWindow();
   // registerScriptJob();
 }
 
@@ -2420,7 +2528,7 @@ proc initialize() {
 @returns <string>
 */
 global proc string nkPoseStackVersion() {
-  return "3.4.0";
+  return "3.5.0";
 }
 
 /*-
