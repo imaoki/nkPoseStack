@@ -23,17 +23,17 @@
 @var <string[]>
 ```ebnf
             pose = '"' , pose_name , "=" , pose_transforms , '"' ;
-       pose_name = { any_char - "=" } ;
+       pose_name = { any_char - illegal_char }+ ;
  pose_transforms = { pose_transform }+ ;
   pose_transform = transform_header , transform_values , ";" ;
 transform_header = transform_node , "[" , pose_setting , "]" ;
-  transform_node = [ "|" ] , node_name , { "|" , node_name } ;
-       node_name = letter , { letter | digit | "_" } ;
+  transform_node = "|" , node_name , { "|" , node_name } ;
+       node_name = ( letter | "_" ) , { letter | digit | "_" } ;
     pose_setting = paste_setting , "/" , select_setting , "/" , mirror_setting ;
    paste_setting = bool , "," , bool , "," , bool ;
   select_setting = select_pattern , "," , select_pattern ;
   mirror_setting = axis , "," , axis , "," , axis , "," , bool , "," , bool ;
-  select_pattern = { letter | digit | "_" }+ ;
+  select_pattern = { letter | digit | "_" | "|" }+ ;
             axis = ? 0-2 ? ;
             bool = ? 0-1 ? ;
 transform_values = t , "," , q , "," , s , "," , h ;
@@ -44,6 +44,7 @@ transform_values = t , "," , q , "," , s , "," , h ;
           number = [ "-" ] , ( integer | real ) ;
            digit = ? 0-9 ? ;
           letter = ? a-zA-Z ? ;
+    illegal_char = "=" | ";" | "[" | "]" | "/" | "," ;
         any_char = ? Any visible characters ? ;
 ```
 */
@@ -1367,7 +1368,7 @@ proc poseNameTextChanged() {
     int $position = textFieldGrpGetInsertionPosition($poseNameText);
     // print("  position:" + $position + "\n"); // debug
     if (!$numNewText) {
-      $newText = "_";
+      $newText = $nkPoseStackPromptPoseName;
       $position = -1;
     }
     textFieldGrpSetText($newText, $poseNameText);
@@ -2528,7 +2529,7 @@ proc initialize() {
 @returns <string>
 */
 global proc string nkPoseStackVersion() {
-  return "3.5.0";
+  return "3.5.1";
 }
 
 /*-
