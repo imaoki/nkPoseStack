@@ -458,7 +458,7 @@ proc float[] mirrorTransform(
 @param $mirrorSetting <int[5]>
 @returns <string>
 */
-proc string buildPoseSetting(
+proc string makePoseSetting(
   int $pasteSetting[],
   string $selectSetting[],
   int $mirrorSetting[]
@@ -474,7 +474,7 @@ proc string buildPoseSetting(
 @param $poseTransforms <string[]>
 @returns <string>
 */
-proc string buildPose(
+proc string makePose(
   string $poseName,
   string $poseTransforms[]
 ) {
@@ -770,7 +770,7 @@ proc int addPose(
   global string $nkPoseStackPoses[];
   string $poseTransforms[] = makePoseTransforms($nodes, $poseSettings);
   // print("  poseTransforms:{\n    " + (stringArrayToString($poseTransforms, ",\n    ")) + "\n  }\n"); // debug
-  string $pose = buildPose(
+  string $pose = makePose(
     $poseName,
     $poseTransforms
   );
@@ -830,7 +830,7 @@ proc editPose(int $poseIndex, string $poseName, string $poseSettings[]) {
   }
   // print("  newPoseTransforms:{\n    " + (stringArrayToString($newPoseTransforms, ",\n    ")) + "\n  }\n"); // debug
 
-  string $newPose = buildPose(
+  string $newPose = makePose(
     $poseName,
     $newPoseTransforms
   );
@@ -924,7 +924,7 @@ proc updatePose(int $poseIndex) {
   string $newPoseTransforms[] = makePoseTransforms($nodes, $poseSettings);
   // print("  newPoseTransforms:{\n    " + (stringArrayToString($newPoseTransforms, ",\n    ")) + "\n  }\n"); // debug
 
-  string $newPose = buildPose(
+  string $newPose = makePose(
     $poseName,
     $newPoseTransforms
   );
@@ -1242,7 +1242,7 @@ proc updatePoseSettings(int $id) {
       default: break;
     }
 
-    $nkPoseStackPromptPoseSettings[$nodeIndex] = buildPoseSetting(
+    $nkPoseStackPromptPoseSettings[$nodeIndex] = makePoseSetting(
       $newPasteSetting, $newSelectSetting, $newMirrorSetting
     );
   }
@@ -1710,7 +1710,7 @@ proc addPoseButtonPressed() {
   $nkPoseStackPromptPoseName = makePoseName($nodes[0]);
   $nkPoseStackPromptNodes = $nodes;
   for ($i = 0; $i < $numNodes; $i++) {
-    $nkPoseStackPromptPoseSettings[$i] = buildPoseSetting(
+    $nkPoseStackPromptPoseSettings[$i] = makePoseSetting(
       $nkPoseStackInitPasteSetting,
       $nkPoseStackInitSelectSetting,
       $nkPoseStackInitMirrorSetting
@@ -2529,7 +2529,7 @@ proc initialize() {
 @returns <string>
 */
 global proc string nkPoseStackVersion() {
-  return "3.5.1";
+  return "3.5.2";
 }
 
 /*-
