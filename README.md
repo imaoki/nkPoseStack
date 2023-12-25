@@ -37,10 +37,10 @@ Maya 2022.5 / Windows 10
 01. `nkPoseStackIcons`ディレクトリと`nkPoseStack.mel`をスクリプトディレクトリにコピー
 
     英語版
-    : `%MAYA_APP_DIR%\<version>\scripts`
+    :   `%MAYA_APP_DIR%\<version>\scripts`
 
     日本語版
-    : `%MAYA_APP_DIR%\<version>\ja_JP\scripts`
+    :   `%MAYA_APP_DIR%\<version>\ja_JP\scripts`
 
 02. Mayaを再起動
 
@@ -76,10 +76,10 @@ nkPoseStack;
 編集ウィンドウには二つのモードがあります。
 
 追加モード
-: メインウィンドウの`Add`ボタンを押すと現在選択しているノードを対象とした追加モードになります。
+:   メインウィンドウの`Add`ボタンを押すと現在選択しているノードを対象とした追加モードになります。
 
 編集モード
-: メインウィンドウの`Edit`ボタンを押すと現在ポーズリストで選択しているポーズの編集モードになります。
+:   メインウィンドウの`Edit`ボタンを押すと現在ポーズリストで選択しているポーズの編集モードになります。
 
 ### 設定方法
 
