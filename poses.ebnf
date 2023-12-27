@@ -1,0 +1,49 @@
+           poses = { pose , "\n" } ;
+
+            pose = pose_name , "=" , pose_transforms ;
+
+       pose_name = { any_char - illegal_char }+ ;
+
+ pose_transforms = { pose_transform }+ ;
+
+  pose_transform = transform_header , transform_values , ";" ;
+
+transform_header = transform_node , "[" , pose_setting , "]" ;
+
+  transform_node = "|" , node_name , { "|" , node_name } ;
+
+       node_name = ( letter | "_" ) , { letter | digit | "_" } ;
+
+    pose_setting = paste_setting , "/" , select_setting , "/" , mirror_setting ;
+
+   paste_setting = bool , "," , bool , "," , bool ;
+
+  select_setting = select_pattern , "," , select_pattern ;
+
+  mirror_setting = axis , "," , axis , "," , axis , "," , bool , "," , bool ;
+
+  select_pattern = { letter | digit | "_" | "|" }+ ;
+
+            axis = ? 0-2 ? ;
+
+            bool = ? 0-1 ? ;
+
+transform_values = t , "," , q , "," , s , "," , h ;
+
+               t = number , "," , number , "," , number ;
+
+               q = number , "," , number , "," , number , "," , number ;
+
+               s = number , "," , number , "," , number ;
+
+               h = number , "," , number , "," , number ;
+
+          number = [ "-" ] , ( integer | real ) ;
+
+           digit = ? 0-9 ? ;
+
+          letter = ? a-zA-Z ? ;
+
+    illegal_char = "=" | ";" | "[" | "]" | "/" | "," ;
+
+        any_char = ? Any visible characters ? ;
