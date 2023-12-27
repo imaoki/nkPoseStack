@@ -6,7 +6,7 @@
 // 配列
 /*1.0.0*/proc int minFloatArrayCount(float $a[], float $b[]) {int $numA = `size $a`;int $numB = `size $b`;return `min $numA $numB`;}proc int minIntArrayCount(int $a[], int $b[]) {int $numA = `size $a`;int $numB = `size $b`;return `min $numA $numB`;}proc int minStringArrayCount(string $a[], string $b[]) {int $numA = `size $a`;int $numB = `size $b`;return `min $numA $numB`;}
 // ファイル
-/*1.0.0*/proc string escapeStringForPythonAtFile(string $input) {string $escapedText;int $size = `size $input`;for ($i = 1; $i <= $size; $i++) {string $c = `substring $input $i $i`;switch ($c) {case "\\": $escapedText += "\\\\"; break;case "'": $escapedText += "\\'"; break;case "\n": $escapedText += "\\n"; break;case "\r": $escapedText += "\\r"; break;default: $escapedText += $c; break;}}return $escapedText;}proc string getSourceFilename(string $procName) {string $filename;string $thisIs = `whatIs $procName`;string $pattern1 = "^Mel procedure found in: *";string $pattern2 = "^Script found in: *";if (`match $pattern1 $thisIs` != "") {$filename = `substitute $pattern1 $thisIs ""`;}else if (`match $pattern2 $thisIs` != "") {$filename = `substitute $pattern2 $thisIs ""`;}return $filename;}proc string getSourceDirname(string $procName) {return dirname(getSourceFilename($procName));}proc int existsDirname(string $dirname) {return `filetest -d $dirname`;}proc int existsFilename(string $filename) {return `filetest -f $filename`;}proc string[] getDirnames(string $dirname) {string $subDirnames[];string $filenames[] = `getFileList -fld $dirname`;for ($i = 0; $i < `size $filenames`; $i++) {string $subDirname = $dirname + "/" + $filenames[$i];if (existsDirname($subDirname)) {$subDirnames[`size $subDirnames`] = $subDirname;}}$subDirnames = `sort $subDirnames`;return $subDirnames;}proc string[] getFilenames(string $dirname, string $filenamePattern) {string $filenames[] = `getFileList -fs $filenamePattern -fld $dirname`;for ($i = 0; $i < `size $filenames`; $i++) {$filenames[$i] = $dirname + "/" + $filenames[$i];}$filenames = `sort $filenames`;return $filenames;}proc string[] readAllLines(string $filename, string $encoding) {if (!`size $encoding`) $encoding = "utf-8";string $lines[];if (existsFilename($filename)) {python("with open('" + $filename + "', 'r', encoding='" + $encoding + "') as f:" + " lines = tuple(s.rstrip() for s in f.readlines())");$lines = `python("lines")`;}return $lines;}proc string readAllText(string $filename, string $encoding) {if (!`size $encoding`) $encoding = "utf-8";string $text;if (existsFilename($filename)) {python("with open('" + $filename + "', 'r', encoding='" + $encoding + "') as f: text = f.read()");$text = `python("text")`;}return $text;}proc int writeAllText(string $filename, string $encoding, string $input) {string $dirname = dirname($filename);if (!existsDirname($dirname)) return false;$input = escapeStringForPythonAtFile($input);if (!`size $encoding`) $encoding = "utf-8";python("with open('" + $filename + "', 'w', encoding='" + $encoding + "') as f:" + " num = f.write('" + $input + "')");return (`python("num")` > 0);}
+/*1.1.0*/proc string escapeStringForPythonAtFile(string $input) {string $escapedText;int $size = `size $input`;for ($i = 1; $i <= $size; $i++) {string $c = `substring $input $i $i`;switch ($c) {case "\\": $escapedText += "\\\\"; break;case "'": $escapedText += "\\'"; break;case "\n": $escapedText += "\\n"; break;case "\r": $escapedText += "\\r"; break;default: $escapedText += $c; break;}}return $escapedText;}proc string getSourceFilename(string $procName) {string $filename;string $thisIs = `whatIs $procName`;string $pattern1 = "^Mel procedure found in: *";string $pattern2 = "^Script found in: *";if (`match $pattern1 $thisIs` != "") {$filename = `substitute $pattern1 $thisIs ""`;}else if (`match $pattern2 $thisIs` != "") {$filename = `substitute $pattern2 $thisIs ""`;}return $filename;}proc string getSourceDirname(string $procName) {return dirname(getSourceFilename($procName));}proc int existsDirname(string $dirname) {return `filetest -d $dirname`;}proc int existsFilename(string $filename) {return `filetest -f $filename`;}proc string[] getDirnames(string $dirname) {string $subDirnames[];string $filenames[] = `getFileList -fld $dirname`;for ($i = 0; $i < `size $filenames`; $i++) {string $subDirname = $dirname + "/" + $filenames[$i];if (existsDirname($subDirname)) {$subDirnames[`size $subDirnames`] = $subDirname;}}$subDirnames = `sort $subDirnames`;return $subDirnames;}proc string[] getFilenames(string $dirname, string $filenamePattern) {string $filenames[] = `getFileList -fs $filenamePattern -fld $dirname`;for ($i = 0; $i < `size $filenames`; $i++) {$filenames[$i] = $dirname + "/" + $filenames[$i];}$filenames = `sort $filenames`;return $filenames;}proc string getOpenFilename(string $caption, string $fileFilter) {string $filename;string $filenames[] = `fileDialog2 -cap $caption -ds 2 -ff $fileFilter -fm 1`;if (`size $filenames`) $filename = $filenames[0];return $filename;}proc string getSaveFilename(string $caption, string $fileFilter) {string $filename;string $filenames[] = `fileDialog2 -cap $caption -ds 2 -ff $fileFilter -fm 0`;if (`size $filenames`) $filename = $filenames[0];return $filename;}proc string[] readAllLines(string $filename, string $encoding) {if (!`size $encoding`) $encoding = "utf-8";string $lines[];if (existsFilename($filename)) {python("with open('" + $filename + "', 'r', encoding='" + $encoding + "') as f:" + " lines = tuple(s.rstrip() for s in f.readlines())");$lines = `python("lines")`;}return $lines;}proc string readAllText(string $filename, string $encoding) {if (!`size $encoding`) $encoding = "utf-8";string $text;if (existsFilename($filename)) {python("with open('" + $filename + "', 'r', encoding='" + $encoding + "') as f: text = f.read()");$text = `python("text")`;}return $text;}proc int writeAllText(string $filename, string $encoding, string $input) {string $dirname = dirname($filename);if (!existsDirname($dirname)) return false;$input = escapeStringForPythonAtFile($input);if (!`size $encoding`) $encoding = "utf-8";python("with open('" + $filename + "', 'w', encoding='" + $encoding + "') as f:" + " num = f.write('" + $input + "')");return (`python("num")` > 0);}
 // ノード
 /*1.0.0*/proc string[] getSelectedNodes() {return `ls -l -sl -typ "joint" -typ "transform"`;}proc string getParentNode(string $n) {string $parent;string $parents[] = `listRelatives -f -p $n`;if (`size $parents` > 0) $parent = $parents[0];return $parent;}
 // 数値
@@ -21,37 +21,6 @@
 // /////////////////////////////////////////////////////////////////////////////
 // ドメイン
 // /////////////////////////////////////////////////////////////////////////////
-/*-
-@var <string[]>
-```ebnf
-            pose = '"' , pose_name , "=" , pose_transforms , '"' ;
-       pose_name = { any_char - illegal_char }+ ;
- pose_transforms = { pose_transform }+ ;
-  pose_transform = transform_header , transform_values , ";" ;
-transform_header = transform_node , "[" , pose_setting , "]" ;
-  transform_node = "|" , node_name , { "|" , node_name } ;
-       node_name = ( letter | "_" ) , { letter | digit | "_" } ;
-    pose_setting = paste_setting , "/" , select_setting , "/" , mirror_setting ;
-   paste_setting = bool , "," , bool , "," , bool ;
-  select_setting = select_pattern , "," , select_pattern ;
-  mirror_setting = axis , "," , axis , "," , axis , "," , bool , "," , bool ;
-  select_pattern = { letter | digit | "_" | "|" }+ ;
-            axis = ? 0-2 ? ;
-            bool = ? 0-1 ? ;
-transform_values = t , "," , q , "," , s , "," , h ;
-               t = number , "," , number , "," , number ;
-               q = number , "," , number , "," , number , "," , number ;
-               s = number , "," , number , "," , number ;
-               h = number , "," , number , "," , number ;
-          number = [ "-" ] , ( integer | real ) ;
-           digit = ? 0-9 ? ;
-          letter = ? a-zA-Z ? ;
-    illegal_char = "=" | ";" | "[" | "]" | "/" | "," ;
-        any_char = ? Any visible characters ? ;
-```
-*/
-global string $nkPoseStackPoses[];
-
 /*-
 @var <boolean[3]>
 */
@@ -90,370 +59,26 @@ proc initializeInitParameters() {
 }
 
 // -----------------------------------------------------------------------------
-// トランスフォーム
-// -----------------------------------------------------------------------------
-/*-
-@param $n <string>
-@param $poseSetting <string>
-@returns <string>
-*/
-proc string makeTransformHeader(string $n, string $poseSetting) {
-  return ($n + "[" + $poseSetting + "]");
-}
-
-/*-
-@param $n <string>
-@returns <float[13]>
-*/
-proc float[] makeTransformValues(string $n) {
-  // print("makeTransformValues\n"); // debug
-  // print("  n:" + $n + "\n"); // debug
-  float $values[] = {
-    0, 0, 0,
-    0, 0, 0, 1,
-    1, 1, 1,
-    0, 0, 0
-  };
-  string $type = `nodeType $n`;
-  if ($type == "transform" || $type == "joint") {
-    float $t[] = `getAttr ($n + ".translate")`;
-    float $r[] = `getAttr ($n + ".rotate")`;
-    float $s[] = `getAttr ($n + ".scale")`;
-    float $h[] = `getAttr ($n + ".shear")`;
-    // print("  t :{" + floatArrayToString($t, ", ") + "}\n"); // debug
-    // print("  r :{" + floatArrayToString($r, ", ") + "}\n"); // debug
-    // print("  s :{" + floatArrayToString($s, ", ") + "}\n"); // debug
-    // print("  h :{" + floatArrayToString($h, ", ") + "}\n"); // debug
-
-    int $o = `getAttr ($n + ".rotateOrder")`;
-    $o = reverseRotateOrder($o);
-    int $oXYZ = reverseRotateOrder(0);
-
-    float $rq[] = eulerToQuat($r, $o);
-
-    float $ra[] = `getAttr ($n + ".rotateAxis")`;
-    $ra = eulerToQuat($ra, $oXYZ);
-
-    float $jo[] = {0, 0, 0, 1};
-    if (`attributeQuery -n $n -ex "jointOrient"`) {
-      $jo = `getAttr ($n + ".jointOrient")`;
-      $jo = eulerToQuat($jo, $oXYZ);
-    }
-
-    float $q[] = quatMultiply($jo, quatMultiply($ra, $rq));
-
-    // print("  o :" + $o + "\n"); // debug
-    // print("  rq:{" + floatArrayToString($rq, ", ") + "}\n"); // debug
-    // print("  ra:{" + floatArrayToString($ra, ", ") + "}\n"); // debug
-    // print("  jo:{" + floatArrayToString($jo, ", ") + "}\n"); // debug
-    // print("  q :{" + floatArrayToString($q, ", ") + "}\n"); // debug
-
-    $values = {
-      $t[0], $t[1], $t[2],
-      $q[0], $q[1], $q[2], $q[3],
-      $s[0], $s[1], $s[2],
-      $h[0], $h[1], $h[2]
-    };
-  }
-  return $values;
-}
-
-/*-
-@param $header <string>
-@param $values <float[]>
-@returns <string>
-*/
-proc string makePoseTransform(string $header, float $values[]) {
-  return ($header + floatArrayToString($values, ",") + ";");
-}
-
-/*-
-@param $nodes <string[]>
-@param $poseSettings <string[]>
-@returns <string[]>
-*/
-proc string[] makePoseTransforms(string $nodes[], string $poseSettings[]) {
-  // print("makePoseTransforms\n"); // debug
-  // print("  nodes       :{\n    " + stringArrayToString($nodes, ",\n    ") + "\n  }\n"); // debug
-  // print("  poseSettings:{\n    " + stringArrayToString($poseSettings, ",\n    ") + "\n  }\n"); // debug
-  string $poseTransforms[];
-  int $numTransforms = minStringArrayCount($nodes, $poseSettings);
-  for ($i = 0; $i < $numTransforms; $i++) {
-    string $n = $nodes[$i];
-    // print("  n:" + $n + "\n"); // debug
-    string $header = makeTransformHeader($n, $poseSettings[$i]);
-    float $values[] = makeTransformValues($n);
-    string $poseTransform = makePoseTransform($header, $values);
-    // print("    poseTransform:" + $poseTransform + "\n"); // debug
-    $poseTransforms[$i] = $poseTransform;
-  }
-  return $poseTransforms;
-}
-
-/*-
-@param $n <string>
-@param $m <float[12]>
-@param $shouldSetT <boolean>
-@param $shouldSetR <boolean>
-@param $shouldSetS <boolean>
-@returns <>
-*/
-proc setTransformAttributes(
-  string $n,
-  float $m[],
-  int $shouldApplyT,
-  int $shouldApplyR,
-  int $shouldApplyS
-) {
-  // print("setTransformAttributes\n"); // debug
-  // print("  n           :" + $n + "\n"); // debug
-  // print("  m           :{" + floatArrayToString($m, ", ") + "}\n"); // debug
-  // print("  shouldApplyT:" + $shouldApplyT + "\n"); // debug
-  // print("  shouldApplyR:" + $shouldApplyR + "\n"); // debug
-  // print("  shouldApplyS:" + $shouldApplyS + "\n"); // debug
-  if (`objExists $n` && `size $m` == 12) {
-    float $t[] = {$m[0], $m[1], $m[2]};
-    float $r[] = {$m[3], $m[4], $m[5]};
-    float $s[] = {$m[6], $m[7], $m[8]};
-    float $h[] = {$m[9], $m[10], $m[11]};
-    // print("  t:{" + floatArrayToString($t, ", ") + "}\n"); // debug
-    // print("  r:{" + floatArrayToString($r, ", ") + "}\n"); // debug
-    // print("  s:{" + floatArrayToString($s, ", ") + "}\n"); // debug
-    // print("  h:{" + floatArrayToString($h, ", ") + "}\n"); // debug
-
-    string $tx = $n + ".tx";
-    string $ty = $n + ".ty";
-    string $tz = $n + ".tz";
-    string $rx = $n + ".rx";
-    string $ry = $n + ".ry";
-    string $rz = $n + ".rz";
-    string $sx = $n + ".sx";
-    string $sy = $n + ".sy";
-    string $sz = $n + ".sz";
-
-    if ($shouldApplyT) {
-      if (!`getAttr -l $tx`) setAttr $tx $t[0];
-      if (!`getAttr -l $ty`) setAttr $ty $t[1];
-      if (!`getAttr -l $tz`) setAttr $tz $t[2];
-    }
-    if ($shouldApplyR) {
-      if (!`getAttr -l $rx`) setAttr $rx $r[0];
-      if (!`getAttr -l $ry`) setAttr $ry $r[1];
-      if (!`getAttr -l $rz`) setAttr $rz $r[2];
-    }
-    if ($shouldApplyS) {
-      if (!`getAttr -l $sx`) setAttr $sx $s[0];
-      if (!`getAttr -l $sy`) setAttr $sy $s[1];
-      if (!`getAttr -l $sz`) setAttr $sz $s[2];
-    }
-  }
-}
-
-/*-
-@param $n <string>
-@param $m <float[13]>
-@returns <float[12]>
-*/
-proc float[] asIsTransform(string $n, float $m[]) {
-  // print("asIsTransform\n"); // debug
-  // print("  n :" + $n + "\n"); // debug
-  // print("  m :{" + floatArrayToString($m, ", ") + "}\n"); // debug
-
-  float $t[] = {$m[0], $m[1], $m[2]};
-  float $q[] = {$m[3], $m[4], $m[5], $m[6]};
-  float $s[] = {$m[7], $m[8], $m[9]};
-  float $h[] = {$m[10], $m[11], $m[12]};
-  // print("  t :{" + floatArrayToString($t, ", ") + "}\n"); // debug
-  // print("  q :{" + floatArrayToString($q, ", ") + "}\n"); // debug
-  // print("  s :{" + floatArrayToString($s, ", ") + "}\n"); // debug
-  // print("  h :{" + floatArrayToString($h, ", ") + "}\n"); // debug
-
-  int $o = `getAttr ($n + ".rotateOrder")`;
-  $o = reverseRotateOrder($o);
-  int $oXYZ = reverseRotateOrder(0);
-
-  float $ra[] = `getAttr ($n + ".rotateAxis")`;
-  $ra = quatInverse(eulerToQuat($ra, $oXYZ));
-
-  float $jo[] = {0, 0, 0, 1};
-  if (`attributeQuery -n $n -ex "jointOrient"`) {
-    $jo = `getAttr ($n + ".jointOrient")`;
-    $jo = quatInverse(eulerToQuat($jo, $oXYZ));
-  }
-
-  float $rq[] = quatMultiply($jo, quatMultiply($ra, $q));
-  float $r[] = quatToEuler($rq, $o);
-
-  // print("  o :" + $o + "\n"); // debug
-  // print("  q :{" + floatArrayToString($q, ", ") + "}\n"); // debug
-  // print("  ra:{" + floatArrayToString($ra, ", ") + "}\n"); // debug
-  // print("  jo:{" + floatArrayToString($jo, ", ") + "}\n"); // debug
-  // print("  rq:{" + floatArrayToString($rq, ", ") + "}\n"); // debug
-  // print("  r :{" + floatArrayToString($r, ", ") + "}\n"); // debug
-
-  float $values[] = {
-    $t[0], $t[1], $t[2],
-    $r[0], $r[1], $r[2],
-    $s[0], $s[1], $s[2],
-    $h[0], $h[1], $h[2]
-  };
-  // print("  values:{" + floatArrayToString($values, ", ") + "}\n"); // debug
-
-  return $values;
-}
-
-/*-
-@param $n <string>
-@param $m <float[13]>
-@param $hasCommonParent <boolean>
-@param $mirrorAxis <int>
-@param $primaryAxis <int>
-@param $secondaryAxis <int>
-@param $invertPrimaryAxis <boolean>
-@param $invertSecondaryAxis <boolean>
-@returns <float[12]>
-*/
-proc float[] mirrorTransform(
-  string $n,
-  float $m[],
-  int $hasCommonParent,
-  int $mirrorAxis,
-  int $primaryAxis,
-  int $secondaryAxis,
-  int $invertPrimaryAxis,
-  int $invertSecondaryAxis
-) {
-  // print("mirrorTransform\n"); // debug
-  // print("  n                  :" + $n + "\n"); // debug
-  // print("  m                  :{" + floatArrayToString($m, ", ") + "}\n"); // debug
-  // print("  hasCommonParent    :" + $hasCommonParent + "\n"); // debug
-  // print("  mirrorAxis         :" + $mirrorAxis + "\n"); // debug
-  // print("  primaryAxis        :" + $primaryAxis + "\n"); // debug
-  // print("  secondaryAxis      :" + $secondaryAxis + "\n"); // debug
-  // print("  invertPrimaryAxis  :" + $invertPrimaryAxis + "\n"); // debug
-  // print("  invertSecondaryAxis:" + $invertSecondaryAxis + "\n"); // debug
-
-  float $t[] = {$m[0], $m[1], $m[2]};
-  float $q[] = {$m[3], $m[4], $m[5], $m[6]};
-  float $s[] = {$m[7], $m[8], $m[9]};
-  float $h[] = {$m[10], $m[11], $m[12]};
-  // print("  t :{" + floatArrayToString($t, ", ") + "}\n"); // debug
-  // print("  q :{" + floatArrayToString($q, ", ") + "}\n"); // debug
-  // print("  s :{" + floatArrayToString($s, ", ") + "}\n"); // debug
-  // print("  h :{" + floatArrayToString($h, ", ") + "}\n"); // debug
-
-  // 位置のミラーリング
-  if ($hasCommonParent) {
-    $t[$mirrorAxis] *= -1;
-  }
-  else {
-    if ($invertPrimaryAxis) $t[$primaryAxis] *= -1;
-    if ($invertSecondaryAxis) $t[$secondaryAxis] *= -1;
-    if ($invertPrimaryAxis == $invertSecondaryAxis) {
-      // 第三の軸を反転
-      int $usedAxis[];
-      $usedAxis[$primaryAxis] = 1;
-      $usedAxis[$secondaryAxis] = 1;
-      int $i;
-      for ($i = 0; $i < 3; $i++) if (!$usedAxis[$i]) break;
-      $t[$i] *= -1;
-    }
-  }
-
-  // 回転のミラーリング
-  int $o = `getAttr ($n + ".rotateOrder")`;
-  $o = reverseRotateOrder($o);
-  int $oXYZ = reverseRotateOrder(0);
-
-  float $ra[] = `getAttr ($n + ".rotateAxis")`;
-  $ra = quatInverse(eulerToQuat($ra, $oXYZ));
-
-  float $jo[] = {0, 0, 0, 1};
-  if (`attributeQuery -n $n -ex "jointOrient"`) {
-    $jo = `getAttr ($n + ".jointOrient")`;
-    $jo = quatInverse(eulerToQuat($jo, $oXYZ));
-  }
-
-  float $mq[] = $q;
-  $mq[$mirrorAxis] *= -1;
-  $mq[3] *= -1;
-  float $cq[] = quatMultiply($jo, quatMultiply($ra, $mq));
-
-  // print("  o :" + $o + "\n"); // debug
-  // print("  q :{" + floatArrayToString($q, ", ") + "}\n"); // debug
-  // print("  ra:{" + floatArrayToString($ra, ", ") + "}\n"); // debug
-  // print("  jo:{" + floatArrayToString($jo, ", ") + "}\n"); // debug
-  // print("  mq:{" + floatArrayToString($mq, ", ") + "}\n"); // debug
-
-  // ソースとターゲットの親が異なる場合は親ノードの反転をリセットしておく
-  if (!$hasCommonParent) {
-    if ($mirrorAxis == $primaryAxis || $mirrorAxis == $secondaryAxis) {
-      float $flipAxis[] = {0, 0, 0};
-      if ($mirrorAxis == $primaryAxis) {
-        $flipAxis[$secondaryAxis] = 1;
-      }
-      else if ($mirrorAxis == $secondaryAxis) {
-        $flipAxis[$primaryAxis] = 1;
-      }
-      $cq = quatFlip($cq, $flipAxis);
-    }
-    if ($invertPrimaryAxis) {
-      float $flipAxis[] = {0, 0, 0};
-      $flipAxis[$secondaryAxis] = 1;
-      $cq = quatFlip($cq, $flipAxis);
-    }
-    if ($invertSecondaryAxis) {
-      float $flipAxis[] = {0, 0, 0};
-      $flipAxis[$primaryAxis] = 1;
-      $cq = quatFlip($cq, $flipAxis);
-    }
-  }
-
-  // プライマリとセカンダリを対称化するための反転
-  if ($mirrorAxis == $primaryAxis || $mirrorAxis == $secondaryAxis) {
-    float $flipAxis[] = {0, 0, 0};
-    if ($mirrorAxis == $primaryAxis) {
-      $flipAxis[$secondaryAxis] = 1;
-    }
-    else if ($mirrorAxis == $secondaryAxis) {
-      $flipAxis[$primaryAxis] = 1;
-    }
-    $flipAxis = rotateVectorByQuat($flipAxis, $cq);
-    $cq = quatFlip($cq, $flipAxis);
-  }
-
-  // 任意の反転
-  if ($invertPrimaryAxis) {
-    float $flipAxis[] = {0, 0, 0};
-    $flipAxis[$secondaryAxis] = 1;
-    $flipAxis = rotateVectorByQuat($flipAxis, $cq);
-    $cq = quatFlip($cq, $flipAxis);
-  }
-  if ($invertSecondaryAxis) {
-    float $flipAxis[] = {0, 0, 0};
-    $flipAxis[$primaryAxis] = 1;
-    $flipAxis = rotateVectorByQuat($flipAxis, $cq);
-    $cq = quatFlip($cq, $flipAxis);
-  }
-
-  float $r[] = quatToEuler($cq, $o);
-  // print("  cq:{" + floatArrayToString($cq, ", ") + "}\n"); // debug
-  // print("  r :{" + floatArrayToString($r, ", ") + "}\n"); // debug
-
-  float $values[] = {
-    $t[0], $t[1], $t[2],
-    $r[0], $r[1], $r[2],
-    $s[0], $s[1], $s[2],
-    $h[0], $h[1], $h[2]
-  };
-  // print("  values:{" + floatArrayToString($values, ", ") + "}\n"); // debug
-
-  return $values;
-}
-
-// -----------------------------------------------------------------------------
 // データ変換
 // -----------------------------------------------------------------------------
+/*-
+@param $values <string[]>
+@returns <string>
+*/
+proc string serialize(string $values[]) {
+  return (stringArrayToString($values, "\n") + "\n");
+}
+
+/*-
+@param $input <string>
+@returns <string[]>
+*/
+proc string[] deserialize(string $input) {
+  string $lines[];
+  tokenize $input "\n" $lines;
+  return $lines;
+}
+
 /*-
 @param $pasteSetting <boolean[3]>
 @param $selectSetting <string[2]>
@@ -639,6 +264,575 @@ proc float[] extractTransformValues(string $poseTransform) {
 }
 
 // -----------------------------------------------------------------------------
+// トランスフォーム
+// -----------------------------------------------------------------------------
+/*-
+@param $n <string>
+@param $poseSetting <string>
+@returns <string>
+*/
+proc string makeTransformHeader(string $n, string $poseSetting) {
+  return ($n + "[" + $poseSetting + "]");
+}
+
+/*-
+@param $n <string>
+@returns <float[13]>
+*/
+proc float[] makeTransformValues(string $n) {
+  // print("makeTransformValues\n"); // debug
+  // print("  n:" + $n + "\n"); // debug
+  float $values[] = {
+    0, 0, 0,
+    0, 0, 0, 1,
+    1, 1, 1,
+    0, 0, 0
+  };
+
+  string $type = `nodeType $n`;
+  if (!($type == "transform" || $type == "joint")) return $values;
+
+  float $t[] = `getAttr ($n + ".translate")`;
+  float $r[] = `getAttr ($n + ".rotate")`;
+  float $s[] = `getAttr ($n + ".scale")`;
+  float $h[] = `getAttr ($n + ".shear")`;
+  // print("  t :{" + floatArrayToString($t, ", ") + "}\n"); // debug
+  // print("  r :{" + floatArrayToString($r, ", ") + "}\n"); // debug
+  // print("  s :{" + floatArrayToString($s, ", ") + "}\n"); // debug
+  // print("  h :{" + floatArrayToString($h, ", ") + "}\n"); // debug
+
+  int $o = `getAttr ($n + ".rotateOrder")`;
+  $o = reverseRotateOrder($o);
+  int $oXYZ = reverseRotateOrder(0);
+
+  float $rq[] = eulerToQuat($r, $o);
+
+  float $ra[] = `getAttr ($n + ".rotateAxis")`;
+  $ra = eulerToQuat($ra, $oXYZ);
+
+  float $jo[] = {0, 0, 0, 1};
+  if (`attributeQuery -n $n -ex "jointOrient"`) {
+    $jo = `getAttr ($n + ".jointOrient")`;
+    $jo = eulerToQuat($jo, $oXYZ);
+  }
+
+  float $q[] = quatMultiply($jo, quatMultiply($ra, $rq));
+
+  // print("  o :" + $o + "\n"); // debug
+  // print("  rq:{" + floatArrayToString($rq, ", ") + "}\n"); // debug
+  // print("  ra:{" + floatArrayToString($ra, ", ") + "}\n"); // debug
+  // print("  jo:{" + floatArrayToString($jo, ", ") + "}\n"); // debug
+  // print("  q :{" + floatArrayToString($q, ", ") + "}\n"); // debug
+
+  $values = {
+    $t[0], $t[1], $t[2],
+    $q[0], $q[1], $q[2], $q[3],
+    $s[0], $s[1], $s[2],
+    $h[0], $h[1], $h[2]
+  };
+  return $values;
+}
+
+/*-
+@param $header <string>
+@param $values <float[]>
+@returns <string>
+*/
+proc string makePoseTransform(string $header, float $values[]) {
+  return ($header + floatArrayToString($values, ",") + ";");
+}
+
+/*-
+@param $nodes <string[]>
+@param $poseSettings <string[]>
+@returns <string[]>
+*/
+proc string[] makePoseTransforms(string $nodes[], string $poseSettings[]) {
+  // print("makePoseTransforms\n"); // debug
+  // print("  nodes       :{\n    " + stringArrayToString($nodes, ",\n    ") + "\n  }\n"); // debug
+  // print("  poseSettings:{\n    " + stringArrayToString($poseSettings, ",\n    ") + "\n  }\n"); // debug
+  string $poseTransforms[];
+  int $numTransforms = minStringArrayCount($nodes, $poseSettings);
+  for ($i = 0; $i < $numTransforms; $i++) {
+    string $n = $nodes[$i];
+    // print("  n:" + $n + "\n"); // debug
+    string $header = makeTransformHeader($n, $poseSettings[$i]);
+    float $values[] = makeTransformValues($n);
+    string $poseTransform = makePoseTransform($header, $values);
+    // print("    poseTransform:" + $poseTransform + "\n"); // debug
+    $poseTransforms[$i] = $poseTransform;
+  }
+  return $poseTransforms;
+}
+
+/*-
+@param $n <string>
+@param $m <float[12]>
+@param $shouldSetT <boolean>
+@param $shouldSetR <boolean>
+@param $shouldSetS <boolean>
+@returns <>
+*/
+proc setTransformAttributes(
+  string $n,
+  float $m[],
+  int $shouldApplyT,
+  int $shouldApplyR,
+  int $shouldApplyS
+) {
+  // print("setTransformAttributes\n"); // debug
+  // print("  n           :" + $n + "\n"); // debug
+  // print("  m           :{" + floatArrayToString($m, ", ") + "}\n"); // debug
+  // print("  shouldApplyT:" + $shouldApplyT + "\n"); // debug
+  // print("  shouldApplyR:" + $shouldApplyR + "\n"); // debug
+  // print("  shouldApplyS:" + $shouldApplyS + "\n"); // debug
+  if (!(`objExists $n` && `size $m` == 12)) return;
+
+  float $t[] = {$m[0], $m[1], $m[2]};
+  float $r[] = {$m[3], $m[4], $m[5]};
+  float $s[] = {$m[6], $m[7], $m[8]};
+  float $h[] = {$m[9], $m[10], $m[11]};
+  // print("  t:{" + floatArrayToString($t, ", ") + "}\n"); // debug
+  // print("  r:{" + floatArrayToString($r, ", ") + "}\n"); // debug
+  // print("  s:{" + floatArrayToString($s, ", ") + "}\n"); // debug
+  // print("  h:{" + floatArrayToString($h, ", ") + "}\n"); // debug
+
+  string $tx = $n + ".tx";
+  string $ty = $n + ".ty";
+  string $tz = $n + ".tz";
+  string $rx = $n + ".rx";
+  string $ry = $n + ".ry";
+  string $rz = $n + ".rz";
+  string $sx = $n + ".sx";
+  string $sy = $n + ".sy";
+  string $sz = $n + ".sz";
+
+  if ($shouldApplyT) {
+    if (!`getAttr -l $tx`) setAttr $tx $t[0];
+    if (!`getAttr -l $ty`) setAttr $ty $t[1];
+    if (!`getAttr -l $tz`) setAttr $tz $t[2];
+  }
+  if ($shouldApplyR) {
+    if (!`getAttr -l $rx`) setAttr $rx $r[0];
+    if (!`getAttr -l $ry`) setAttr $ry $r[1];
+    if (!`getAttr -l $rz`) setAttr $rz $r[2];
+  }
+  if ($shouldApplyS) {
+    if (!`getAttr -l $sx`) setAttr $sx $s[0];
+    if (!`getAttr -l $sy`) setAttr $sy $s[1];
+    if (!`getAttr -l $sz`) setAttr $sz $s[2];
+  }
+}
+
+/*-
+@param $n <string>
+@param $m <float[13]>
+@returns <float[12]>
+*/
+proc float[] asIsTransform(string $n, float $m[]) {
+  // print("asIsTransform\n"); // debug
+  // print("  n :" + $n + "\n"); // debug
+  // print("  m :{" + floatArrayToString($m, ", ") + "}\n"); // debug
+  float $t[] = {$m[0], $m[1], $m[2]};
+  float $q[] = {$m[3], $m[4], $m[5], $m[6]};
+  float $s[] = {$m[7], $m[8], $m[9]};
+  float $h[] = {$m[10], $m[11], $m[12]};
+  // print("  t :{" + floatArrayToString($t, ", ") + "}\n"); // debug
+  // print("  q :{" + floatArrayToString($q, ", ") + "}\n"); // debug
+  // print("  s :{" + floatArrayToString($s, ", ") + "}\n"); // debug
+  // print("  h :{" + floatArrayToString($h, ", ") + "}\n"); // debug
+
+  int $o = `getAttr ($n + ".rotateOrder")`;
+  $o = reverseRotateOrder($o);
+  int $oXYZ = reverseRotateOrder(0);
+
+  float $ra[] = `getAttr ($n + ".rotateAxis")`;
+  $ra = quatInverse(eulerToQuat($ra, $oXYZ));
+
+  float $jo[] = {0, 0, 0, 1};
+  if (`attributeQuery -n $n -ex "jointOrient"`) {
+    $jo = `getAttr ($n + ".jointOrient")`;
+    $jo = quatInverse(eulerToQuat($jo, $oXYZ));
+  }
+
+  float $rq[] = quatMultiply($jo, quatMultiply($ra, $q));
+  float $r[] = quatToEuler($rq, $o);
+
+  // print("  o :" + $o + "\n"); // debug
+  // print("  q :{" + floatArrayToString($q, ", ") + "}\n"); // debug
+  // print("  ra:{" + floatArrayToString($ra, ", ") + "}\n"); // debug
+  // print("  jo:{" + floatArrayToString($jo, ", ") + "}\n"); // debug
+  // print("  rq:{" + floatArrayToString($rq, ", ") + "}\n"); // debug
+  // print("  r :{" + floatArrayToString($r, ", ") + "}\n"); // debug
+
+  float $values[] = {
+    $t[0], $t[1], $t[2],
+    $r[0], $r[1], $r[2],
+    $s[0], $s[1], $s[2],
+    $h[0], $h[1], $h[2]
+  };
+  // print("  values:{" + floatArrayToString($values, ", ") + "}\n"); // debug
+  return $values;
+}
+
+/*-
+@param $n <string>
+@param $m <float[13]>
+@param $hasCommonParent <boolean>
+@param $mirrorAxis <int>
+@param $primaryAxis <int>
+@param $secondaryAxis <int>
+@param $invertPrimaryAxis <boolean>
+@param $invertSecondaryAxis <boolean>
+@returns <float[12]>
+*/
+proc float[] mirrorTransform(
+  string $n,
+  float $m[],
+  int $hasCommonParent,
+  int $mirrorAxis,
+  int $primaryAxis,
+  int $secondaryAxis,
+  int $invertPrimaryAxis,
+  int $invertSecondaryAxis
+) {
+  // print("mirrorTransform\n"); // debug
+  // print("  n                  :" + $n + "\n"); // debug
+  // print("  m                  :{" + floatArrayToString($m, ", ") + "}\n"); // debug
+  // print("  hasCommonParent    :" + $hasCommonParent + "\n"); // debug
+  // print("  mirrorAxis         :" + $mirrorAxis + "\n"); // debug
+  // print("  primaryAxis        :" + $primaryAxis + "\n"); // debug
+  // print("  secondaryAxis      :" + $secondaryAxis + "\n"); // debug
+  // print("  invertPrimaryAxis  :" + $invertPrimaryAxis + "\n"); // debug
+  // print("  invertSecondaryAxis:" + $invertSecondaryAxis + "\n"); // debug
+  float $t[] = {$m[0], $m[1], $m[2]};
+  float $q[] = {$m[3], $m[4], $m[5], $m[6]};
+  float $s[] = {$m[7], $m[8], $m[9]};
+  float $h[] = {$m[10], $m[11], $m[12]};
+  // print("  t :{" + floatArrayToString($t, ", ") + "}\n"); // debug
+  // print("  q :{" + floatArrayToString($q, ", ") + "}\n"); // debug
+  // print("  s :{" + floatArrayToString($s, ", ") + "}\n"); // debug
+  // print("  h :{" + floatArrayToString($h, ", ") + "}\n"); // debug
+
+  // 位置のミラーリング
+  if ($hasCommonParent) {
+    $t[$mirrorAxis] *= -1;
+  }
+  else {
+    if ($invertPrimaryAxis) $t[$primaryAxis] *= -1;
+    if ($invertSecondaryAxis) $t[$secondaryAxis] *= -1;
+    if ($invertPrimaryAxis == $invertSecondaryAxis) {
+      // 第三の軸を反転
+      int $usedAxis[];
+      $usedAxis[$primaryAxis] = 1;
+      $usedAxis[$secondaryAxis] = 1;
+      int $i;
+      for ($i = 0; $i < 3; $i++) if (!$usedAxis[$i]) break;
+      $t[$i] *= -1;
+    }
+  }
+
+  // 回転のミラーリング
+  int $o = `getAttr ($n + ".rotateOrder")`;
+  $o = reverseRotateOrder($o);
+  int $oXYZ = reverseRotateOrder(0);
+
+  float $ra[] = `getAttr ($n + ".rotateAxis")`;
+  $ra = quatInverse(eulerToQuat($ra, $oXYZ));
+
+  float $jo[] = {0, 0, 0, 1};
+  if (`attributeQuery -n $n -ex "jointOrient"`) {
+    $jo = `getAttr ($n + ".jointOrient")`;
+    $jo = quatInverse(eulerToQuat($jo, $oXYZ));
+  }
+
+  float $mq[] = $q;
+  $mq[$mirrorAxis] *= -1;
+  $mq[3] *= -1;
+  float $cq[] = quatMultiply($jo, quatMultiply($ra, $mq));
+
+  // print("  o :" + $o + "\n"); // debug
+  // print("  q :{" + floatArrayToString($q, ", ") + "}\n"); // debug
+  // print("  ra:{" + floatArrayToString($ra, ", ") + "}\n"); // debug
+  // print("  jo:{" + floatArrayToString($jo, ", ") + "}\n"); // debug
+  // print("  mq:{" + floatArrayToString($mq, ", ") + "}\n"); // debug
+
+  // ソースとターゲットの親が異なる場合は親ノードの反転をリセットしておく
+  if (!$hasCommonParent) {
+    if ($mirrorAxis == $primaryAxis || $mirrorAxis == $secondaryAxis) {
+      float $flipAxis[] = {0, 0, 0};
+      if ($mirrorAxis == $primaryAxis) {
+        $flipAxis[$secondaryAxis] = 1;
+      }
+      else if ($mirrorAxis == $secondaryAxis) {
+        $flipAxis[$primaryAxis] = 1;
+      }
+      $cq = quatFlip($cq, $flipAxis);
+    }
+    if ($invertPrimaryAxis) {
+      float $flipAxis[] = {0, 0, 0};
+      $flipAxis[$secondaryAxis] = 1;
+      $cq = quatFlip($cq, $flipAxis);
+    }
+    if ($invertSecondaryAxis) {
+      float $flipAxis[] = {0, 0, 0};
+      $flipAxis[$primaryAxis] = 1;
+      $cq = quatFlip($cq, $flipAxis);
+    }
+  }
+
+  // プライマリとセカンダリを対称化するための反転
+  if ($mirrorAxis == $primaryAxis || $mirrorAxis == $secondaryAxis) {
+    float $flipAxis[] = {0, 0, 0};
+    if ($mirrorAxis == $primaryAxis) {
+      $flipAxis[$secondaryAxis] = 1;
+    }
+    else if ($mirrorAxis == $secondaryAxis) {
+      $flipAxis[$primaryAxis] = 1;
+    }
+    $flipAxis = rotateVectorByQuat($flipAxis, $cq);
+    $cq = quatFlip($cq, $flipAxis);
+  }
+
+  // 任意の反転
+  if ($invertPrimaryAxis) {
+    float $flipAxis[] = {0, 0, 0};
+    $flipAxis[$secondaryAxis] = 1;
+    $flipAxis = rotateVectorByQuat($flipAxis, $cq);
+    $cq = quatFlip($cq, $flipAxis);
+  }
+  if ($invertSecondaryAxis) {
+    float $flipAxis[] = {0, 0, 0};
+    $flipAxis[$primaryAxis] = 1;
+    $flipAxis = rotateVectorByQuat($flipAxis, $cq);
+    $cq = quatFlip($cq, $flipAxis);
+  }
+
+  float $r[] = quatToEuler($cq, $o);
+  // print("  cq:{" + floatArrayToString($cq, ", ") + "}\n"); // debug
+  // print("  r :{" + floatArrayToString($r, ", ") + "}\n"); // debug
+
+  float $values[] = {
+    $t[0], $t[1], $t[2],
+    $r[0], $r[1], $r[2],
+    $s[0], $s[1], $s[2],
+    $h[0], $h[1], $h[2]
+  };
+  // print("  values:{" + floatArrayToString($values, ", ") + "}\n"); // debug
+  return $values;
+}
+
+// -----------------------------------------------------------------------------
+// スクリプトノード
+// -----------------------------------------------------------------------------
+/*-
+@param $n <string>
+@returns <int>
+*/
+proc int isValidScriptNode(string $n) {
+  return (`objExists $n` && `attributeQuery -n $n -ex "psd"`);
+}
+
+/*-
+@returns <string>
+*/
+proc string getScriptNode() {
+  string $n;
+  if (`objExists "nkPoseStackData"`) {
+    string $nodes[] = `ls -l "nkPoseStackData"`;
+    if (`size $nodes` == 1) {
+      $n = $nodes[0];
+    }
+  }
+  return $n;
+}
+
+/*-
+@returns <string>
+*/
+proc string createScriptNode() {
+  // print("createScriptNode\n"); // debug
+  string $n = `scriptNode -n "nkPoseStackData"`;
+  addAttr -dt "string" -ln "nkPoseStackData" -nn "PoseStack Data" -sn "psd" $n;
+  return $n;
+}
+
+/*-
+@returns <>
+*/
+proc deleteScriptNode() {
+  // print("deleteScriptNode\n"); // debug
+  string $n = getScriptNode();
+  if (`objExists $n`) delete $n;
+}
+
+/*-
+@param $n <string>
+@returns <string>
+*/
+proc string getPoseStackDataAttr(string $n) {
+  string $value;
+  if (isValidScriptNode($n)) {
+    $value = `getAttr ($n + ".psd")`;
+  }
+  return $value;
+}
+
+/*-
+@param $n <string>
+@param $value <string>
+@returns <>
+*/
+proc setPoseStackDataAttr(string $n, string $value) {
+  if (isValidScriptNode($n)) {
+    setAttr ($n + ".psd") -typ "string" $value;
+  }
+}
+
+/*-
+@returns <string[]>
+*/
+proc string[] readAttrPoses() {
+  // print("readAttrPoses\n"); // debug
+  string $poses[];
+  string $n = getScriptNode();
+  if (isValidScriptNode($n)) {
+    $poses = deserialize(getPoseStackDataAttr($n));
+  }
+  return $poses;
+}
+
+/*-
+@param $poses <string[]>
+@returns <int> ポーズ総数。失敗した場合は`0`を返す。
+*/
+proc int appendAttrPoses(string $poses[]) {
+  // print("appendAttrPoses\n"); // debug
+  // print("  poses:{\n    " + stringArrayToString($poses, ",\n    ") + "\n  }\n"); // debug
+  if (!`size $poses`) return 0;
+
+  string $n = getScriptNode();
+  if (!`objExists $n`) $n = createScriptNode();
+  if (!isValidScriptNode($n)) return 0;
+
+  string $newPoses[] = deserialize(getPoseStackDataAttr($n));
+  for ($pose in $poses) {
+    $newPoses[`size $newPoses`] = $pose;
+  }
+  setPoseStackDataAttr($n, serialize($newPoses));
+  return `size $newPoses`;
+}
+
+/*-
+@param $poses <string[]>
+@returns <int> ポーズ総数。失敗した場合は`0`を返す。
+*/
+proc int writeAttrPoses(string $poses[]) {
+  // print("writeAttrPoses\n"); // debug
+  // print("  poses:{\n    " + stringArrayToString($poses, ",\n    ") + "\n  }\n"); // debug
+  if (!`size $poses`) {
+    deleteScriptNode();
+    return 0;
+  }
+
+  string $n = getScriptNode();
+  if (!`objExists $n`) $n = createScriptNode();
+  if (!isValidScriptNode($n)) return 0;
+
+  setPoseStackDataAttr($n, serialize($poses));
+  return `size $poses`;
+}
+
+/*-
+@param $index <int>
+@param $pose <string>
+@returns <int> ポーズ総数。失敗した場合は`0`を返す。
+*/
+proc int insertPose(int $index, string $pose) {
+  // print("insertPose\n"); // debug
+  // print("  index:" + $index + "\n"); // debug
+  // print("  pose :" + $pose + "\n"); // debug
+  int $numPoses;
+  if (!`size $pose`) return 0;
+
+  string $n = getScriptNode();
+  if (!isValidScriptNode($n)) return 0;
+
+  string $poses[] = deserialize(getPoseStackDataAttr($n));
+  stringArrayInsertAtIndex($index, $poses, $pose);
+  setPoseStackDataAttr($n, serialize($poses));
+  return `size $poses`;
+}
+
+/*-
+@param $fromIndex <int>
+@param $destIndex <int>
+@param $pose <string>
+@returns <int> ポーズ総数。失敗した場合は`0`を返す。
+*/
+proc int movePose(int $fromIndex, int $destIndex, string $pose) {
+  // print("movePose\n"); // debug
+  // print("  fromIndex:" + $fromIndex + "\n"); // debug
+  // print("  destIndex:" + $destIndex + "\n"); // debug
+  // print("  pose     :" + $pose + "\n"); // debug
+  if (!`size $pose`) return 0;
+
+  string $n = getScriptNode();
+  if (!isValidScriptNode($n)) return 0;
+
+  string $poses[] = deserialize(getPoseStackDataAttr($n));
+  stringArrayRemoveAtIndex($fromIndex, $poses);
+  stringArrayInsertAtIndex($destIndex, $poses, $pose);
+  setPoseStackDataAttr($n, serialize($poses));
+  return `size $poses`;
+}
+
+/*-
+@param $index <int>
+@returns <int> ポーズ総数。失敗した場合は`0`を返す。
+*/
+proc int removePose(int $index) {
+  // print("removePose\n"); // debug
+  // print("  index:" + $index + "\n"); // debug
+  string $n = getScriptNode();
+  if (!isValidScriptNode($n)) return 0;
+
+  string $poses[] = deserialize(getPoseStackDataAttr($n));
+  if (!isInRangeInt($index, 0, `size $poses` - 1)) return 0;
+
+  stringArrayRemoveAtIndex($index, $poses);
+  if (!`size $poses`) {
+    deleteScriptNode();
+    return 0;
+  }
+
+  setPoseStackDataAttr($n, serialize($poses));
+  return `size $poses`;
+}
+
+/*-
+@param $index <int>
+@param $pose <string>
+@returns <int> ポーズ総数。失敗した場合は`0`を返す。
+*/
+proc int replacePose(int $index, string $pose) {
+  // print("replacePose\n"); // debug
+  // print("  index:" + $index + "\n"); // debug
+  // print("  pose :" + $pose + "\n"); // debug
+  if (!`size $pose`) return 0;
+
+  string $n = getScriptNode();
+  if (!isValidScriptNode($n)) return 0;
+
+  string $poses[] = deserialize(getPoseStackDataAttr($n));
+  if (isInRangeInt($index, 0, `size $poses` - 1)) return 0;
+
+  $poses[$index] = $pose;
+  setPoseStackDataAttr($n, serialize($poses));
+  return `size $poses`;
+}
+
+// -----------------------------------------------------------------------------
 // ポーズ
 // -----------------------------------------------------------------------------
 /*-
@@ -646,8 +840,7 @@ proc float[] extractTransformValues(string $poseTransform) {
 */
 proc int clearPoses() {
   // print("clearPoses\n"); // debug
-  global string $nkPoseStackPoses[];
-  clear $nkPoseStackPoses;
+  deleteScriptNode();
   notifyInt("nkPoseStackPosesClear", -1);
   return true;
 }
@@ -657,20 +850,15 @@ proc int clearPoses() {
 */
 proc int openPoses() {
   // print("openPoses\n"); // debug
-  global string $nkPoseStackPoses[];
-  string $filenames[] = `fileDialog2
-      -cap "Open List - nkPoseStack"
-      -ds 2
-      -ff "*.posestack"
-      -fm 1`;
-  // print("  filenames:{\n    " + stringArrayToString($filenames, ",\n    ") + "\n  }\n"); // debug
-  if (`size $filenames` != 1) return false;
-  string $filename = $filenames[0];
+  string $filename = getOpenFilename("Open - nkPoseStack", "*.posestack");
   // print("  filename:" + $filename + "\n"); // debug
-  string $lines[] = readAllLines($filename, "");
-  // print("  lines:{\n    " + stringArrayToString($lines, ",\n    ") + "\n  }\n"); // debug
-  if (!`size $lines`) return false;
-  $nkPoseStackPoses = $lines;
+  if (!existsFilename($filename)) return false;
+
+  string $poses[] = deserialize(readAllText($filename, ""));
+  // print("  poses:{\n    " + stringArrayToString($poses, ",\n    ") + "\n  }\n"); // debug
+  if (!`size $poses`) return false;
+
+  writeAttrPoses($poses);
   notifyInt("nkPoseStackPosesOpen", -1);
   return true;
 }
@@ -680,22 +868,15 @@ proc int openPoses() {
 */
 proc int importPoses() {
   // print("importPoses\n"); // debug
-  global string $nkPoseStackPoses[];
-  string $filenames[] = `fileDialog2
-      -cap "Import List - nkPoseStack"
-      -ds 2
-      -ff "*.posestack"
-      -fm 1`;
-  // print("  filenames:{\n    " + stringArrayToString($filenames, ",\n    ") + "\n  }\n"); // debug
-  if (`size $filenames` != 1) return false;
-  string $filename = $filenames[0];
+  string $filename = getOpenFilename("Import - nkPoseStack", "*.posestack");
   // print("  filename:" + $filename + "\n"); // debug
-  string $lines[] = readAllLines($filename, "");
-  // print("  lines:{\n    " + stringArrayToString($lines, ",\n    ") + "\n  }\n"); // debug
-  if (!`size $lines`) return false;
-  for ($line in $lines) {
-    $nkPoseStackPoses[`size $nkPoseStackPoses`] = $line;
-  }
+  if (!existsFilename($filename)) return false;
+
+  string $poses[] = deserialize(readAllText($filename, ""));
+  // print("  poses:{\n    " + stringArrayToString($poses, ",\n    ") + "\n  }\n"); // debug
+  if (!`size $poses`) return false;
+
+  appendAttrPoses($poses);
   notifyInt("nkPoseStackPosesImport", -1);
   return true;
 }
@@ -705,53 +886,24 @@ proc int importPoses() {
 */
 proc savePoses() {
   // print("savePoses\n"); // debug
-  global string $nkPoseStackPoses[];
-  string $filenames[] = `fileDialog2
-      -cap "Save List As... - nkPoseStack"
-      -ds 2
-      -ff "*.posestack"
-      -fm 0`;
-  // print("  filenames:{\n    " + stringArrayToString($filenames, ",\n    ") + "\n  }\n"); // debug
-  if (`size $filenames` == 1) {
-    string $filename = $filenames[0];
-    // print("  filename:" + $filename + "\n"); // debug
-    string $saveText;
-    for ($pose in $nkPoseStackPoses) {
-      $saveText += $pose + "\n";
-    }
-    // print("  saveText:\"\n" + $saveText + "\n\"\n"); // debug
-    writeAllText($filename, "", $saveText);
-  }
-}
+  string $n = getScriptNode();
+  if (!isValidScriptNode($n)) return;
 
-/*-
-@returns <int>
-*/
-proc int getNumPoses() {
-  global string $nkPoseStackPoses[];
-  return `size $nkPoseStackPoses`;
-}
+  string $filename = getSaveFilename("Save List As... - nkPoseStack", "*.posestack");
+  // print("  filename:" + $filename + "\n"); // debug
+  if (!`size $filename`) return;
 
-/*-
-@param $poseIndex <int> 基数`0`の整数。
-@returns <string>
-*/
-proc string getPose(int $poseIndex) {
-  global string $nkPoseStackPoses[];
-  string $pose;
-  if (isInRangeInt($poseIndex, 0, getNumPoses() - 1)) {
-    $pose = $nkPoseStackPoses[$poseIndex];
-  }
-  return $pose;
+  writeAllText($filename, "", getPoseStackDataAttr($n));
 }
 
 /*-
 @returns <string[]>
 */
 proc string[] getPoseNames() {
-  global string $nkPoseStackPoses[];
+  // print("getPoseNames\n"); // debug
   string $poseNames[];
-  for ($pose in $nkPoseStackPoses) {
+  string $poses[] = readAttrPoses();
+  for ($pose in $poses) {
     $poseNames[`size $poseNames`] = extractPoseName($pose);
   }
   return $poseNames;
@@ -761,7 +913,7 @@ proc string[] getPoseNames() {
 @param $poseName <string>
 @param $nodes <string[]>
 @param $poseSettings <string[]>
-@returns <int> 追加後のポーズ数。
+@returns <int> ポーズ総数。失敗した場合は`0`を返す。
 */
 proc int addPose(
   string $poseName,
@@ -772,34 +924,38 @@ proc int addPose(
   // print("  poseName    :" + $poseName + "\n"); // debug
   // print("  nodes       :{\n    " + stringArrayToString($nodes, ",\n    ") + "\n  }\n"); // debug
   // print("  poseSettings:{\n    " + stringArrayToString($poseSettings, ",\n    ") + "\n  }\n"); // debug
-  global string $nkPoseStackPoses[];
   string $poseTransforms[] = makePoseTransforms($nodes, $poseSettings);
   // print("  poseTransforms:{\n    " + (stringArrayToString($poseTransforms, ",\n    ")) + "\n  }\n"); // debug
+  if (!`size $poseTransforms`) return 0;
+
   string $pose = makePose(
     $poseName,
     $poseTransforms
   );
   // print("  pose:" + $pose + "\n"); // debug
-  $nkPoseStackPoses[(getNumPoses())] = $pose;
-  int $numPoses = getNumPoses();
+  if (!`size $pose`) return 0;
+
+  int $numPoses = appendAttrPoses({$pose});
   notifyInt("nkPoseStackPosesAdd", $numPoses - 1);
   return $numPoses;
 }
 
 /*-
-@param $poseIndex <int> 基数`0`の整数。
+@param $index <int> 基数`0`の整数。
 @param $poseName <string>
 @param $poseSettings <string[]>
 @returns <>
 */
-proc editPose(int $poseIndex, string $poseName, string $poseSettings[]) {
+proc editPose(int $index, string $poseName, string $poseSettings[]) {
   // print("editPose\n"); // debug
-  // print("  poseIndex   :" + $poseIndex + "\n"); // debug
+  // print("  index       :" + $index + "\n"); // debug
   // print("  poseName    :" + $poseName + "\n"); // debug
   // print("  poseSettings:{\n    " + stringArrayToString($poseSettings, ",\n    ") + "\n  }\n"); // debug
-  global string $nkPoseStackPoses[];
+  string $poses[] = readAttrPoses();
+  if (!isInRangeInt($index, 0, `size $poses` - 1)) return;
 
-  string $pose = getPose($poseIndex);
+  string $pose = $poses[$index];
+  // print("  pose:" + $pose + "\n"); // debug
   if (!`size $pose`) return;
 
   string $poseTransforms[] = extractPoseTransforms($pose);
@@ -828,38 +984,46 @@ proc editPose(int $poseIndex, string $poseName, string $poseSettings[]) {
     $newPoseTransforms
   );
   // print("  newPose:" + $newPose + "\n"); // debug
-  $nkPoseStackPoses[$poseIndex] = $newPose;
-  notifyInt("nkPoseStackPosesEdit", $poseIndex);
+  if (!`size $newPose`) return;
+
+  replacePose($index, $newPose);
+  notifyInt("nkPoseStackPosesEdit", $index);
 }
 
 /*-
-@param $poseIndex <int> 基数`0`の整数。
+@param $index <int> 基数`0`の整数。
 @returns <int> 複製先のポーズインデックス。基数は`0`。
 */
-proc int duplicatePose(int $poseIndex) {
+proc int duplicatePose(int $index) {
   // print("duplicatePose\n"); // debug
-  // print("  poseIndex:" + $poseIndex + "\n"); // debug
-  global string $nkPoseStackPoses[];
-  if (!isInRangeInt($poseIndex, 0, getNumPoses() - 1)) return $poseIndex;
-  string $pose = getPose($poseIndex);
-  if (!`size $pose`) return $poseIndex;
-  int $newPoseIndex = $poseIndex + 1;
-  // print("  newPoseIndex:" + $newPoseIndex + "\n"); // debug
-  stringArrayInsertAtIndex($newPoseIndex, $nkPoseStackPoses, $pose);
-  notifyInt("nkPoseStackPosesDuplicate", $newPoseIndex);
-  return $newPoseIndex;
+  // print("  index:" + $index + "\n"); // debug
+  string $poses[] = readAttrPoses();
+  if (!isInRangeInt($index, 0, `size $poses` - 1)) return $index;
+
+  string $pose = $poses[$index];
+  // print("  pose:" + $pose + "\n"); // debug
+  if (!`size $pose`) return $index;
+
+  int $newIndex = $index + 1;
+  // print("  newIndex:" + $newIndex + "\n"); // debug
+  insertPose($newIndex, $pose);
+
+  notifyInt("nkPoseStackPosesDuplicate", $newIndex);
+  return $newIndex;
 }
 
 /*-
-@param $poseIndex <int> 基数`0`の整数。
+@param $index <int> 基数`0`の整数。
 @returns <>
 */
-proc updatePose(int $poseIndex) {
+proc updatePose(int $index) {
   // print("updatePose\n"); // debug
-  // print("  poseIndex:" + $poseIndex + "\n"); // debug
-  global string $nkPoseStackPoses[];
+  // print("  index:" + $index + "\n"); // debug
+  string $poses[] = readAttrPoses();
+  if (!isInRangeInt($index, 0, `size $poses` - 1)) return;
 
-  string $pose = getPose($poseIndex);
+  string $pose = $poses[$index];
+  // print("  pose:" + $pose + "\n"); // debug
   if (!`size $pose`) return;
 
   string $poseName = extractPoseName($pose);
@@ -888,21 +1052,25 @@ proc updatePose(int $poseIndex) {
     $newPoseTransforms
   );
   // print("  newPose:" + $newPose + "\n"); // debug
-  $nkPoseStackPoses[$poseIndex] = $newPose;
-  notifyInt("nkPoseStackPosesUpdate", $poseIndex);
+  if (!`size $newPose`) return;
+
+  replacePose($index, $newPose);
+  notifyInt("nkPoseStackPosesUpdate", $index);
 }
 
 /*-
-@param $poseIndex <int> 基数`0`の整数。
+@param $index <int> 基数`0`の整数。
 @param $isOpposite <boolean>
 @returns <>
 */
-proc selectNodes(int $poseIndex, int $isOpposite) {
+proc selectNodes(int $index, int $isOpposite) {
   // print("selectNodes\n"); // debug
-  // print("  poseIndex :" + $poseIndex + "\n"); // debug
+  // print("  index     :" + $index + "\n"); // debug
   // print("  isOpposite:" + $isOpposite + "\n"); // debug
+  string $poses[] = readAttrPoses();
+  if (!isInRangeInt($index, 0, `size $poses` - 1)) return;
 
-  string $pose = getPose($poseIndex);
+  string $pose = $poses[$index];
   // print("  pose:" + $pose + "\n"); // debug
   if (!`size $pose`) return;
 
@@ -954,20 +1122,22 @@ proc selectNodes(int $poseIndex, int $isOpposite) {
 }
 
 /*-
-@param $poseIndex <int> 基数`0`の整数。
+@param $index <int> 基数`0`の整数。
 @param $isOpposite <boolean>
 @param $targetNodes <string[]>
 @returns <>
 */
-proc pastePose(int $poseIndex, int $isOpposite, string $targetNodes[]) {
+proc pastePose(int $index, int $isOpposite, string $targetNodes[]) {
   // print("pastePose\n"); // debug
-  // print("  poseIndex  :" + $poseIndex + "\n"); // debug
+  // print("  index      :" + $index + "\n"); // debug
   // print("  isOpposite :" + $isOpposite + "\n"); // debug
   // print("  targetNodes:{\n    " + stringArrayToString($targetNodes, ",\n    ") + "\n  }\n"); // debug
-
   if (!`size $targetNodes`) return;
 
-  string $pose = getPose($poseIndex);
+  string $poses[] = readAttrPoses();
+  if (!isInRangeInt($index, 0, `size $poses` - 1)) return;
+
+  string $pose = $poses[$index];
   // print("  pose:" + $pose + "\n"); // debug
   if (!`size $pose`) return;
 
@@ -1026,64 +1196,66 @@ proc pastePose(int $poseIndex, int $isOpposite, string $targetNodes[]) {
 }
 
 /*-
-@param $poseIndex <int> 基数`0`の整数。
+@param $index <int> 基数`0`の整数。
 @returns <int> 削除後のポーズ数。
 */
-proc int deletePose(int $poseIndex) {
+proc int deletePose(int $index) {
   // print("deletePose\n"); // debug
-  // print("  poseIndex:" + $poseIndex + "\n"); // debug
-  global string $nkPoseStackPoses[];
-  if (isInRangeInt($poseIndex, 0, getNumPoses() - 1)) {
-    stringArrayRemoveAtIndex($poseIndex, $nkPoseStackPoses);
-  }
-  int $numPoses = getNumPoses();
-  int $nextPoseIndex = $poseIndex;
+  // print("  index:" + $index + "\n"); // debug
+  int $numPoses = removePose($index);
+  int $nextIndex = $index;
   if ($numPoses) {
-    if ($nextPoseIndex > $numPoses - 1) $nextPoseIndex = $numPoses - 1;
+    if ($nextIndex > $numPoses - 1) $nextIndex = $numPoses - 1;
   }
   else {
-    $nextPoseIndex = -1;
+    $nextIndex = -1;
   }
-  notifyInt("nkPoseStackPosesDelete", $nextPoseIndex);
+  notifyInt("nkPoseStackPosesDelete", $nextIndex);
   return $numPoses;
 }
 
 /*-
-@param $poseIndex <int> 基数`0`の整数。
+@param $index <int> 基数`0`の整数。
 @returns <int> 移動後のポーズインデックス。基数は`0`。
 */
-proc int moveUpPose(int $poseIndex) {
+proc int moveUpPose(int $index) {
   // print("moveUpPose\n"); // debug
-  // print("  poseIndex:" + $poseIndex + "\n"); // debug
-  global string $nkPoseStackPoses[];
-  if (!isInRangeInt($poseIndex, 1, getNumPoses() - 1)) return $poseIndex;
-  string $pose = getPose($poseIndex);
-  if (!`size $pose`) return $poseIndex;
-  int $newPoseIndex = $poseIndex - 1;
-  // print("  newPoseIndex:" + $newPoseIndex + "\n"); // debug
-  stringArrayRemoveAtIndex($poseIndex, $nkPoseStackPoses);
-  stringArrayInsertAtIndex($newPoseIndex, $nkPoseStackPoses, $pose);
-  notifyInt("nkPoseStackPosesMoveUp", $newPoseIndex);
-  return $newPoseIndex;
+  // print("  index:" + $index + "\n"); // debug
+  string $poses[] = readAttrPoses();
+  if (!isInRangeInt($index, 1, `size $poses` - 1)) return $index;
+
+  string $pose = $poses[$index];
+  // print("  pose:" + $pose + "\n"); // debug
+  if (!`size $pose`) return $index;
+
+  int $newIndex = $index - 1;
+  // print("  newIndex:" + $newIndex + "\n"); // debug
+  movePose($index, $newIndex, $pose);
+
+  notifyInt("nkPoseStackPosesMoveUp", $newIndex);
+  return $newIndex;
 }
 
 /*-
-@param $poseIndex <int> 基数`0`の整数。
+@param $index <int> 基数`0`の整数。
 @returns <int> 移動後のポーズインデックス。基数は`0`。
 */
-proc int moveDownPose(int $poseIndex) {
+proc int moveDownPose(int $index) {
   // print("moveDownPose\n"); // debug
-  // print("  poseIndex:" + $poseIndex + "\n"); // debug
-  global string $nkPoseStackPoses[];
-  if (!isInRangeInt($poseIndex, 0, getNumPoses() - 2)) return $poseIndex;
-  string $pose = getPose($poseIndex);
-  if (!`size $pose`) return $poseIndex;
-  int $newPoseIndex = $poseIndex + 1;
-  // print("  newPoseIndex:" + $newPoseIndex + "\n"); // debug
-  stringArrayRemoveAtIndex($poseIndex, $nkPoseStackPoses);
-  stringArrayInsertAtIndex($newPoseIndex, $nkPoseStackPoses, $pose);
-  notifyInt("nkPoseStackPosesMoveDown", $newPoseIndex);
-  return $newPoseIndex;
+  // print("  index:" + $index + "\n"); // debug
+  string $poses[] = readAttrPoses();
+  if (!isInRangeInt($index, 0, `size $poses` - 2)) return $index;
+
+  string $pose = $poses[$index];
+  // print("  pose:" + $pose + "\n"); // debug
+  if (!`size $pose`) return $index;
+
+  int $newIndex = $index + 1;
+  // print("  newIndex:" + $newIndex + "\n"); // debug
+  movePose($index, $newIndex, $pose);
+
+  notifyInt("nkPoseStackPosesMoveDown", $newIndex);
+  return $newIndex;
 }
 
 // /////////////////////////////////////////////////////////////////////////////
@@ -1352,12 +1524,12 @@ proc updateMirrorSettingUI(int $mirrorSetting[]) {
 }
 
 /*-
-@param $poseIndex <int>
+@param $index <int>
 @returns <>
 */
-proc updatePoseList(int $poseIndex) {
+proc updatePoseList(int $index) {
   // print("updatePoseList\n"); // debug
-  // print("  poseIndex:" + $poseIndex + "\n"); // debug
+  // print("  index:" + $index + "\n"); // debug
   string $poseList = getUIControl("nkPoseStackWindow", "poseList");
   string $poseNames[] = getPoseNames();
   int $numPoseNames = `size $poseNames`;
@@ -1365,8 +1537,8 @@ proc updatePoseList(int $poseIndex) {
   for ($poseName in $poseNames) {
     eString("textScrollList", "-a", $poseName, $poseList);
   }
-  if (isInRangeInt($poseIndex, 0, $numPoseNames - 1)) {
-    eIndex("textScrollList", "-sii", $poseIndex, $poseList);
+  if (isInRangeInt($index, 0, $numPoseNames - 1)) {
+    eIndex("textScrollList", "-sii", $index, $poseList);
   }
 }
 
@@ -1882,12 +2054,16 @@ proc editPoseButtonPressed() {
   initializeEditorParameters();
 
   string $poseList = getUIControl("nkPoseStackWindow", "poseList");
-  int $poseIndex = qFirstIndex("textScrollList", "-sii", $poseList);
-  // print("  poseIndex:" + $poseIndex + "\n"); // debug
-  string $pose = getPose($poseIndex);
+  int $index = qFirstIndex("textScrollList", "-sii", $poseList);
+  // print("  index:" + $index + "\n"); // debug
+
+  string $poses[] = readAttrPoses();
+  if (!isInRangeInt($index, 0, `size $poses` - 1)) return;
+
+  string $pose = $poses[$index];
   if (!`size $pose`) return;
 
-  $nkPoseStackEditorPoseIndex = $poseIndex;
+  $nkPoseStackEditorPoseIndex = $index;
   $nkPoseStackEditorPoseName = extractPoseName($pose);
 
   string $poseTransforms[] = extractPoseTransforms($pose);
@@ -1917,10 +2093,10 @@ proc editPoseButtonPressed() {
 proc duplicatePoseButtonPressed() {
   // print("duplicatePoseButtonPressed\n"); // debug
   string $poseList = getUIControl("nkPoseStackWindow", "poseList");
-  int $poseIndex = qFirstIndex("textScrollList", "-sii", $poseList);
-  // print("  poseIndex:" + $poseIndex + "\n"); // debug
-  if ($poseIndex == -1) return;
-  duplicatePose($poseIndex);
+  int $index = qFirstIndex("textScrollList", "-sii", $poseList);
+  // print("  index:" + $index + "\n"); // debug
+  if ($index == -1) return;
+  duplicatePose($index);
 }
 
 /*-
@@ -1929,10 +2105,10 @@ proc duplicatePoseButtonPressed() {
 proc updatePoseButtonPressed() {
   // print("updatePoseButtonPressed\n"); // debug
   string $poseList = getUIControl("nkPoseStackWindow", "poseList");
-  int $poseIndex = qFirstIndex("textScrollList", "-sii", $poseList);
-  // print("  poseIndex:" + $poseIndex + "\n"); // debug
-  if ($poseIndex == -1) return;
-  updatePose($poseIndex);
+  int $index = qFirstIndex("textScrollList", "-sii", $poseList);
+  // print("  index:" + $index + "\n"); // debug
+  if ($index == -1) return;
+  updatePose($index);
 }
 
 /*-
@@ -1943,10 +2119,10 @@ proc selectButtonPressed(int $isOpposite) {
   // print("selectButtonPressed\n"); // debug
   // print("  isOpposite:" + $isOpposite + "\n"); // debug
   string $poseList = getUIControl("nkPoseStackWindow", "poseList");
-  int $poseIndex = qFirstIndex("textScrollList", "-sii", $poseList);
-  // print("  poseIndex:" + $poseIndex + "\n"); // debug
-  if ($poseIndex == -1) return;
-  selectNodes($poseIndex, $isOpposite);
+  int $index = qFirstIndex("textScrollList", "-sii", $poseList);
+  // print("  index:" + $index + "\n"); // debug
+  if ($index == -1) return;
+  selectNodes($index, $isOpposite);
 }
 
 /*-
@@ -1957,13 +2133,13 @@ proc pasteButtonPressed(int $isOpposite) {
   // print("pasteButtonPressed\n"); // debug
   // print("  isOpposite:" + $isOpposite + "\n"); // debug
   string $poseList = getUIControl("nkPoseStackWindow", "poseList");
-  int $poseIndex = qFirstIndex("textScrollList", "-sii", $poseList);
-  // print("  poseIndex:" + $poseIndex + "\n"); // debug
-  if ($poseIndex == -1) return;
+  int $index = qFirstIndex("textScrollList", "-sii", $poseList);
+  // print("  index:" + $index + "\n"); // debug
+  if ($index == -1) return;
   string $nodes[] = getSelectedNodes();
   // print("  nodes:{\n    " + (stringArrayToString($nodes, ",\n    ")) + "\n  }\n"); // debug
   if (!`size $nodes`) return;
-  pastePose($poseIndex, $isOpposite, $nodes);
+  pastePose($index, $isOpposite, $nodes);
 }
 
 /*-
@@ -1980,10 +2156,10 @@ proc poseListDoubleClicked() {
 proc deletePoseButtonPressed() {
   // print("deletePoseButtonPressed\n"); // debug
   string $poseList = getUIControl("nkPoseStackWindow", "poseList");
-  int $poseIndex = qFirstIndex("textScrollList", "-sii", $poseList);
-  // print("  poseIndex:" + $poseIndex + "\n"); // debug
-  if ($poseIndex == -1) return;
-  deletePose($poseIndex);
+  int $index = qFirstIndex("textScrollList", "-sii", $poseList);
+  // print("  index:" + $index + "\n"); // debug
+  if ($index == -1) return;
+  deletePose($index);
 }
 
 /*-
@@ -1992,10 +2168,10 @@ proc deletePoseButtonPressed() {
 proc moveUpPoseButtonPressed() {
   // print("moveUpPoseButtonPressed\n"); // debug
   string $poseList = getUIControl("nkPoseStackWindow", "poseList");
-  int $poseIndex = qFirstIndex("textScrollList", "-sii", $poseList);
-  // print("  poseIndex:" + $poseIndex + "\n"); // debug
-  if ($poseIndex == -1) return;
-  moveUpPose($poseIndex);
+  int $index = qFirstIndex("textScrollList", "-sii", $poseList);
+  // print("  index:" + $index + "\n"); // debug
+  if ($index == -1) return;
+  moveUpPose($index);
 }
 
 /*-
@@ -2004,10 +2180,10 @@ proc moveUpPoseButtonPressed() {
 proc moveDownPoseButtonPressed() {
   // print("moveDownPoseButtonPressed\n"); // debug
   string $poseList = getUIControl("nkPoseStackWindow", "poseList");
-  int $poseIndex = qFirstIndex("textScrollList", "-sii", $poseList);
-  // print("  poseIndex:" + $poseIndex + "\n"); // debug
-  if ($poseIndex == -1) return;
-  moveDownPose($poseIndex);
+  int $index = qFirstIndex("textScrollList", "-sii", $poseList);
+  // print("  index:" + $index + "\n"); // debug
+  if ($index == -1) return;
+  moveDownPose($index);
 }
 
 // -----------------------------------------------------------------------------
@@ -2641,20 +2817,20 @@ global proc nkPoseStackEventController(
 }
 
 // -----------------------------------------------------------------------------
-// ドメインイベントハンドラ
+// ドメインオブザーバ
 // -----------------------------------------------------------------------------
 /*-
-@param $poseIndex <int>
+@param $index <int>
 @returns <>
 */
-global proc nkPoseStackPosesChanged(int $poseIndex) {
+global proc nkPoseStackPosesChanged(int $index) {
   // print("nkPoseStackPosesChanged\n"); // debug
-  // print("  poseIndex:" + $poseIndex + "\n"); // debug
-  updatePoseList($poseIndex);
+  // print("  index:" + $index + "\n"); // debug
+  updatePoseList($index);
 }
 
 // -----------------------------------------------------------------------------
-// システムイベントハンドラ
+// システムオブザーバ
 // -----------------------------------------------------------------------------
 
 // -----------------------------------------------------------------------------
@@ -2679,7 +2855,7 @@ proc initialize() {
 @returns <string>
 */
 global proc string nkPoseStackVersion() {
-  return "3.7.0";
+  return "3.8.0";
 }
 
 /*-
