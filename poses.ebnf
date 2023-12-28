@@ -4,9 +4,9 @@
 
        pose_name = { any_char - illegal_char }+ ;
 
- pose_transforms = { pose_transform }+ ;
+ pose_transforms = { pose_transform , ";" }+ ;
 
-  pose_transform = transform_header , transform_values , ";" ;
+  pose_transform = transform_header , transform_values ;
 
 transform_header = transform_node , "[" , pose_setting , "]" ;
 
