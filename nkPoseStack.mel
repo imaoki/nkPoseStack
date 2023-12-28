@@ -5,6 +5,8 @@
 // /////////////////////////////////////////////////////////////////////////////
 // 配列
 /*1.0.0*/proc int minFloatArrayCount(float $a[], float $b[]) {int $numA = `size $a`;int $numB = `size $b`;return `min $numA $numB`;}proc int minIntArrayCount(int $a[], int $b[]) {int $numA = `size $a`;int $numB = `size $b`;return `min $numA $numB`;}proc int minStringArrayCount(string $a[], string $b[]) {int $numA = `size $a`;int $numB = `size $b`;return `min $numA $numB`;}
+// アサーション
+/*1.0.0*/proc string assertTrue(int $a) {return ($a == true) ? "" : ("Assert: expected 1, got " + $a);}proc string assertFalse(int $a) {return ($a == false) ? "" : ("Assert: expected 0, got " + $a);}proc string assertFloatEqual(float $e, float $a, float $t) {return (`abs ($e - $a)` <= $t) ? "" : ("Assert: expected " + $e + ", got " + $a);}proc string assertFloatNotEqual(float $e, float $a, float $t) {return (`abs ($e - $a)` > $t) ? "" : ("Assert: expected " + $e + ", got " + $a);}proc string assertIntEqual(int $e, int $a) {return ($a == $e) ? "" : ("Assert: expected " + $e + ", got " + $a);}proc string assertIntNotEqual(int $e, int $a) {return ($a != $e) ? "" : ("Assert: expected " + $e + ", got " + $a);}proc string assertStringEqual(string $e, string $a) {return ($a == $e) ? "" : ("Assert: expected " + $e + ", got " + $a);}proc string assertStringNotEqual(string $e, string $a) {return ($a != $e) ? "" : ("Assert: expected " + $e + ", got " + $a);}proc string assertFloatArrayEqual(float $es[], float $as[], float $t) {int $numAs = `size $as`;int $isEqual = $numAs == `size $es`;if ($isEqual) {for ($i = 0; $i < $numAs; $i++) {$isEqual = `abs ($es[$i] - $as[$i])` <= $t;if (!$isEqual) break;}}return ($isEqual) ? "" : ("Assert: expected {" + floatArrayToString($es, ", ") + "}, got {" + floatArrayToString($as, ", ") + "}");}proc string assertIntArrayEqual(int $es[], int $as[]) {int $numAs = `size $as`;int $isEqual = $numAs == `size $es`;if ($isEqual) {for ($i = 0; $i < $numAs; $i++) {$isEqual = $as[$i] == $es[$i];if (!$isEqual) break;}}return ($isEqual) ? "" : ("Assert: expected {" + intArrayToString($es, ", ") + "}, got {" + intArrayToString($as, ", ") + "}");}proc string assertStringArrayEqual(string $es[], string $as[]) {int $numAs = `size $as`;int $isEqual = $numAs == `size $es`;if ($isEqual) {for ($i = 0; $i < $numAs; $i++) {$isEqual = $as[$i] == $es[$i];if (!$isEqual) break;}}return ($isEqual) ? "" : ("Assert: expected {" + stringArrayToString($es, ", ") + "}, got {" + stringArrayToString($as, ", ") + "}");}
 // ファイル
 /*1.1.0*/proc string escapeStringForPythonAtFile(string $input) {string $escapedText;int $size = `size $input`;for ($i = 1; $i <= $size; $i++) {string $c = `substring $input $i $i`;switch ($c) {case "\\": $escapedText += "\\\\"; break;case "'": $escapedText += "\\'"; break;case "\n": $escapedText += "\\n"; break;case "\r": $escapedText += "\\r"; break;default: $escapedText += $c; break;}}return $escapedText;}proc string getSourceFilename(string $procName) {string $filename;string $thisIs = `whatIs $procName`;string $pattern1 = "^Mel procedure found in: *";string $pattern2 = "^Script found in: *";if (`match $pattern1 $thisIs` != "") {$filename = `substitute $pattern1 $thisIs ""`;}else if (`match $pattern2 $thisIs` != "") {$filename = `substitute $pattern2 $thisIs ""`;}return $filename;}proc string getSourceDirname(string $procName) {return dirname(getSourceFilename($procName));}proc int existsDirname(string $dirname) {return `filetest -d $dirname`;}proc int existsFilename(string $filename) {return `filetest -f $filename`;}proc string[] getDirnames(string $dirname) {string $subDirnames[];string $filenames[] = `getFileList -fld $dirname`;for ($i = 0; $i < `size $filenames`; $i++) {string $subDirname = $dirname + "/" + $filenames[$i];if (existsDirname($subDirname)) {$subDirnames[`size $subDirnames`] = $subDirname;}}$subDirnames = `sort $subDirnames`;return $subDirnames;}proc string[] getFilenames(string $dirname, string $filenamePattern) {string $filenames[] = `getFileList -fs $filenamePattern -fld $dirname`;for ($i = 0; $i < `size $filenames`; $i++) {$filenames[$i] = $dirname + "/" + $filenames[$i];}$filenames = `sort $filenames`;return $filenames;}proc string getOpenFilename(string $caption, string $fileFilter) {string $filename;string $filenames[] = `fileDialog2 -cap $caption -ds 2 -ff $fileFilter -fm 1`;if (`size $filenames`) $filename = $filenames[0];return $filename;}proc string getSaveFilename(string $caption, string $fileFilter) {string $filename;string $filenames[] = `fileDialog2 -cap $caption -ds 2 -ff $fileFilter -fm 0`;if (`size $filenames`) $filename = $filenames[0];return $filename;}proc string[] readAllLines(string $filename, string $encoding) {if (!`size $encoding`) $encoding = "utf-8";string $lines[];if (existsFilename($filename)) {python("with open('" + $filename + "', 'r', encoding='" + $encoding + "') as f:" + " lines = tuple(s.rstrip() for s in f.readlines())");$lines = `python("lines")`;}return $lines;}proc string readAllText(string $filename, string $encoding) {if (!`size $encoding`) $encoding = "utf-8";string $text;if (existsFilename($filename)) {python("with open('" + $filename + "', 'r', encoding='" + $encoding + "') as f: text = f.read()");$text = `python("text")`;}return $text;}proc int writeAllText(string $filename, string $encoding, string $input) {string $dirname = dirname($filename);if (!existsDirname($dirname)) return false;$input = escapeStringForPythonAtFile($input);if (!`size $encoding`) $encoding = "utf-8";python("with open('" + $filename + "', 'w', encoding='" + $encoding + "') as f:" + " num = f.write('" + $input + "')");return (`python("num")` > 0);}
 // ノード
@@ -2895,4 +2897,82 @@ global proc nkPoseStack() {
 /*
 eval ("source \"" + `getenv "MAYA_APP_DIR"` + "/dev/nkPoseStack/nkPoseStack.mel\"");
 nkPoseStack;
+*/
+
+// /////////////////////////////////////////////////////////////////////////////
+// テスト
+// /////////////////////////////////////////////////////////////////////////////
+/*-
+@param $rotateOrder <int> 回転順序。`0`から`5`の値。既定値は`0`。
+@param $isOpposite <boolean> ミラーするかどうか。既定値は`false`。
+@param $pasteSetting <int[]> 貼り付け先アトリビュート。TRSの順。既定値は`{1, 1, 0}`。
+@returns <>
+*/
+global proc nkPoseStackPastePoseTest(
+  int $rotateOrder,
+  int $isOpposite,
+  int $pasteSetting[]
+) {
+  string $testFilename = `getenv "MAYA_APP_DIR"` + "/dev/nkPoseStack/test/2022-mirror-transform-test.ma";
+  file -f -op "v=0;"  -iv  -typ "mayaAscii" -o $testFilename;
+
+  // int $rotateOrder = 0;
+
+  // ミラー軸:{0, 1, 2}
+  int $axisFlags[] = {0, 1, 2};
+  // 対称化平面:{0, 1, 2, 3, 4, 5}
+  int $planeFlags[] = {0, 1, 2, 3, 4, 5};
+  // 対称化階層:{0, 1, 2}
+  int $depthFlags[] = {0, 1, 2};
+
+  // int $isOpposite = 0;
+  // int $pasteSetting[] = {1, 1, 0};
+
+  string $selectSetting[] = {"_L", "_R"};
+  int $mirrorSetting[] = {0, 0, 1, 0, 0};
+
+  string $roNames[] = {"XYZ", "YZX", "ZXY", "XZY", "YXZ", "ZYX"};
+  string $axisNames[] = {"X", "Y", "Z"};
+  string $planeNames[] = {"XY", "XZ", "YX", "YZ", "ZX", "ZY"};
+  int $mirrorAxes[] = {0, 1, 2};
+  int $primaryAxes[] = {0, 0, 1, 1, 2, 2};
+  int $secondaryAxes[] = {1, 2, 0, 2, 0, 1};
+
+  for ($i = 0; $i < `size $axisFlags`; $i++) {
+    int $axisIndex = $axisFlags[$i];
+    $mirrorSetting[0] = $mirrorAxes[$axisIndex];
+    for ($j = 0; $j < `size $planeFlags`; $j++) {
+      int $planeIndex = $planeFlags[$j];
+      $mirrorSetting[1] = $primaryAxes[$planeIndex];
+      $mirrorSetting[2] = $secondaryAxes[$planeIndex];
+
+      string $poseSetting = makePoseSetting(
+        $pasteSetting, $selectSetting, $mirrorSetting
+      );
+
+      string $baseName = "|" + $axisNames[$axisIndex] + "|ROOT";
+      string $nL = $baseName;
+      string $nR = $baseName;
+      for ($k = 0; $k < `size $depthFlags`; $k++) {
+        clearPoses();
+
+        int $depthIndex = $depthFlags[$k] + 1;
+        $nL += "|" + $planeNames[$planeIndex] + "_L" + $depthIndex;
+        $nR += "|" + $planeNames[$planeIndex] + "_R" + $depthIndex;
+
+        setAttr ($nL + ".rotateOrder") $rotateOrder;
+        select -r $nL;
+        addPose("a", {$nL}, {$poseSetting});
+
+        setAttr ($nR + ".rotateOrder") $rotateOrder;
+        select -r $nR;
+        pastePose(0, $isOpposite, {$nR});
+      }
+    }
+  }
+}
+
+/*
+eval ("source \"" + `getenv "MAYA_APP_DIR"` + "/dev/nkPoseStack/nkPoseStack.mel\"");
+nkPoseStackPastePoseTest(0, 0, {1, 1, 0});
 */
