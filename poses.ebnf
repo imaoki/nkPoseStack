@@ -1,3 +1,8 @@
+(*! © 2023 imaoki | MIT License | https://github.com/imaoki *)
+            file = pose_version , "\n" , poses ;
+
+    pose_version = digit , "." , digit , "." digit ;
+
            poses = { pose , "\n" } ;
 
             pose = pose_name , "=" , pose_transforms ;
@@ -44,6 +49,6 @@ transform_values = t , "," , q , "," , s , "," , h ;
 
           letter = ? a-zA-Z ? ;
 
-    illegal_char = "=" | ";" | "[" | "]" | "/" | "," ;
+    illegal_char = "!" | "=" | ";" | "[" | "]" | "/" | "," ;
 
         any_char = ? Any visible characters ? ;
