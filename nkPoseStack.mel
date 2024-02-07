@@ -767,20 +767,6 @@ proc string mergeScriptNodes(string $nodes[]) {
   return $mergedNode;
 }
 
-// /*-
-// @returns <string>
-// */
-// proc string getScriptNode() {
-//   string $n;
-//   if (`objExists "nkPoseStackData"`) {
-//     string $nodes[] = `ls -l "nkPoseStackData"`;
-//     if (`size $nodes` == 1) {
-//       $n = $nodes[0];
-//     }
-//   }
-//   return $n;
-// }
-
 /*-
 @returns <string[]>
 */
@@ -831,15 +817,6 @@ proc string getEditableScriptNode(string $nodes[]) {
   }
 }
 
-// /*-
-// @returns <>
-// */
-// proc deleteScriptNode() {
-//   // print("deleteScriptNode\n"); // debug
-//   string $n = getScriptNode();
-//   if (`objExists $n`) delete $n;
-// }
-
 /*-
 @returns <>
 */
@@ -870,10 +847,6 @@ proc string[] readAttrPoses(string $nodes[]) {
   // print("readAttrPoses\n"); // debug
   // print("  nodes:{\n    " + stringArrayToString($nodes, ",\n    ") + "\n  }\n"); // debug
   string $poses[];
-  // string $n = getScriptNode();
-  // if (isValidScriptNode($n)) {
-  //   $poses = deserialize(getPoseStackDataAttr($n));
-  // }
   if (!`size $nodes`) $nodes = getScriptNodes();
   for ($n in $nodes) {
     if (!isValidScriptNode($n)) continue;
@@ -899,16 +872,6 @@ proc int appendAttrPoses(string $poses[]) {
   // print("  poses:{\n    " + stringArrayToString($poses, ",\n    ") + "\n  }\n"); // debug
   if (!`size $poses`) return false;
 
-  // string $n = getScriptNode();
-  // if (!`objExists $n`) $n = createScriptNode();
-  // if (!isValidScriptNode($n)) return 0;
-
-  // string $newPoses[] = deserialize(getPoseStackDataAttr($n));
-  // for ($pose in $poses) {
-  //   $newPoses[`size $newPoses`] = $pose;
-  // }
-  // setPoseStackDataAttr($n, serialize($newPoses));
-
   string $editableNode = getEditableScriptNode({});
   if (!isValidScriptNode($editableNode)) $editableNode = createScriptNode();
   if (!isValidScriptNode($editableNode)) return false;
@@ -919,7 +882,6 @@ proc int appendAttrPoses(string $poses[]) {
   $newPoses = stringArrayCatenate($newPoses, $poses);
   // print("  newPoses:{\n    " + stringArrayToString($newPoses, ",\n    ") + "\n  }\n"); // debug
   setPoseStackDataAttr($editableNode, serialize($newPoses));
-
   return true;
 }
 
@@ -935,11 +897,6 @@ proc int writeAttrPoses(string $poses[]) {
     deleteScriptNodes();
     return true;
   }
-
-  // string $n = getScriptNode();
-  // if (!`objExists $n`) $n = createScriptNode();
-  // if (!isValidScriptNode($n)) return 0;
-  // setPoseStackDataAttr($n, serialize($poses));
 
   string $editableNode = getEditableScriptNode({});
   if (!isValidScriptNode($editableNode)) $editableNode = createScriptNode();
@@ -981,15 +938,7 @@ proc int insertPose(int $index, string $pose) {
   // print("  pose :" + $pose + "\n"); // debug
   if (!`size $pose`) return false;
 
-  // string $n = getScriptNode();
-  // if (!isValidScriptNode($n)) return 0;
-
-  // string $poses[] = deserialize(getPoseStackDataAttr($n));
-  // stringArrayInsertAtIndex($index, $poses, $pose);
-  // setPoseStackDataAttr($n, serialize($poses));
-
   string $nodes[] = getScriptNodes();
-
   string $editableNode = getEditableScriptNode($nodes);
   if (!isValidScriptNode($editableNode)) $editableNode = createScriptNode();
   if (!isValidScriptNode($editableNode)) return false;
@@ -1002,10 +951,7 @@ proc int insertPose(int $index, string $pose) {
   // print("  poses:{\n    " + stringArrayToString($poses, ",\n    ") + "\n  }\n"); // debug
   // print("  indexOffset:" + $indexOffset + "\n"); // debug
   // print("  index      :" + $index + "\n"); // debug
-  // if ($index < 0) return false;
   if ($index < 0) $index = 0;
-
-  // string $poses[] = deserialize(getPoseStackDataAttr($editableNode));
   if (!stringArrayInsertAtIndex($index, $poses, $pose)) return false;
 
   setPoseStackDataAttr($editableNode, serialize($poses));
@@ -1022,25 +968,13 @@ proc int movePose(int $fromIndex, int $destIndex) {
   // print("movePose\n"); // debug
   // print("  fromIndex:" + $fromIndex + "\n"); // debug
   // print("  destIndex:" + $destIndex + "\n"); // debug
-
   if ($fromIndex == $destIndex) return false;
 
-  // string $n = getScriptNode();
-  // if (!isValidScriptNode($n)) return 0;
-
-  // string $poses[] = deserialize(getPoseStackDataAttr($n));
-  // stringArrayRemoveAtIndex($fromIndex, $poses);
-  // stringArrayInsertAtIndex($destIndex, $poses, $pose);
-  // setPoseStackDataAttr($n, serialize($poses));
-
   string $nodes[] = getScriptNodes();
-
   string $editableNode = getEditableScriptNode($nodes);
-  // if (!isValidScriptNode($editableNode)) $editableNode = createScriptNode();
   if (!isValidScriptNode($editableNode)) return false;
   // print("  editableNode:" + $editableNode + "\n"); // debug
 
-  // string $poses[] = deserialize(getPoseStackDataAttr($editableNode));
   if (!`size $nodes`) $nodes = {$editableNode};
   string $poses[];
   int $indexOffset = makeEditablePoses($nodes, $poses);
@@ -1082,31 +1016,10 @@ proc int removePose(int $index) {
   // print("removePose\n"); // debug
   // print("  index:" + $index + "\n"); // debug
 
-  // if ($index < 0) return false;
-
-  // string $n = getScriptNode();
-  // if (!isValidScriptNode($n)) return 0;
-
-  // string $poses[] = deserialize(getPoseStackDataAttr($n));
-  // if (!isInRangeInt($index, 0, `size $poses` - 1)) return 0;
-
-  // stringArrayRemoveAtIndex($index, $poses);
-  // if (!`size $poses`) {
-  //   deleteScriptNode();
-  //   return 0;
-  // }
-
-  // setPoseStackDataAttr($n, serialize($poses));
-
   string $nodes[] = getScriptNodes();
-
   string $editableNode = getEditableScriptNode($nodes);
-  // if (!isValidScriptNode($editableNode)) $editableNode = createScriptNode();
   if (!isValidScriptNode($editableNode)) return false;
   // print("  editableNode:" + $editableNode + "\n"); // debug
-
-  // string $poses[] = deserialize(getPoseStackDataAttr($editableNode));
-  // if (!isInRangeInt($index, 0, `size $poses` - 1)) return false;
 
   if (!`size $nodes`) $nodes = {$editableNode};
   string $poses[];
@@ -1139,24 +1052,10 @@ proc int replacePose(int $index, string $pose) {
   // print("  pose :" + $pose + "\n"); // debug
   if (!`size $pose`) return 0;
 
-  // string $n = getScriptNode();
-  // if (!isValidScriptNode($n)) return 0;
-
-  // string $poses[] = deserialize(getPoseStackDataAttr($n));
-  // if (!isInRangeInt($index, 0, `size $poses` - 1)) return 0;
-
-  // $poses[$index] = $pose;
-  // setPoseStackDataAttr($n, serialize($poses));
-
   string $nodes[] = getScriptNodes();
-
   string $editableNode = getEditableScriptNode($nodes);
-  // if (!isValidScriptNode($editableNode)) $editableNode = createScriptNode();
   if (!isValidScriptNode($editableNode)) return false;
   // print("  editableNode:" + $editableNode + "\n"); // debug
-
-  // string $poses[] = deserialize(getPoseStackDataAttr($editableNode));
-  // if (!isInRangeInt($index, 0, `size $poses` - 1)) return false;
 
   if (!`size $nodes`) $nodes = {$editableNode};
   string $poses[];
@@ -1180,9 +1079,7 @@ proc int replacePose(int $index, string $pose) {
 */
 proc int clearPoses() {
   // print("clearPoses\n"); // debug
-  // deleteScriptNode();
   deleteScriptNodes();
-  // notifyInt("nkPoseStackPosesClear", -1);
   notifyString("nkPoseStackPosesCleared", "none");
   return true;
 }
@@ -1207,7 +1104,7 @@ proc int openPoses(string $filename) {
   if (!`size $poses`) return false;
 
   if (!writeAttrPoses($poses)) return false;
-  // notifyInt("nkPoseStackPosesOpen", -1);
+
   notifyString("nkPoseStackPosesOpened", "none");
   return true;
 }
@@ -1232,7 +1129,7 @@ proc int importPoses(string $filename) {
   if (!`size $poses`) return false;
 
   if (!appendAttrPoses($poses)) return false;
-  // notifyInt("nkPoseStackPosesImport", -1);
+
   notifyString("nkPoseStackPosesImported", "none");
   return true;
 }
@@ -1244,9 +1141,6 @@ proc int importPoses(string $filename) {
 proc int savePoses(string $filename) {
   // print("savePoses\n"); // debug
   // print("  filename:" + $filename + "\n"); // debug
-  // string $n = getScriptNode();
-  // if (!isValidScriptNode($n)) return false;
-
   string $editableNode = getEditableScriptNode({});
   if (!isValidScriptNode($editableNode)) return false;
 
@@ -1290,7 +1184,6 @@ proc string[] getPoseNames() {
 | int     | secondary_axis       |
 | boolean | invertPrimary_axis   |
 | boolean | invertSecondary_axis |
-// @returns <int> ポーズ総数。失敗した場合は`0`を返す。
 @returns <boolean> 成功した場合は`true`、失敗した場合は`false`。
 */
 proc int addPose(
@@ -1310,11 +1203,8 @@ proc int addPose(
   // print("  pose:" + $pose + "\n"); // debug
   if (!`size $pose`) return false;
 
-  // int $numPoses = appendAttrPoses({$pose});
-  // notifyInt("nkPoseStackPosesAdd", $numPoses - 1);
-  // return $numPoses;
   if (!appendAttrPoses({$pose})) return false;
-  // notifyInt("nkPoseStackPosesAdd", -1);
+
   notifyString("nkPoseStackPoseAdded", "last");
   return true;
 }
@@ -1363,14 +1253,13 @@ proc int editPose(int $index, string $poseName, string $poseSettings[]) {
   if (!`size $newPose`) return false;
 
   if (!replacePose($index, $newPose)) return false;
-  // notifyInt("nkPoseStackPosesEdit", $index);
+
   notifyString("nkPoseStackPoseEdited", "keepIndex");
   return true;
 }
 
 /*-
 @param $index <int> 基数`0`の整数。
-// @returns <int> 複製先のポーズインデックス。基数は`0`。
 @returns <boolean> 成功した場合は`true`、失敗した場合は`false`。
 @remarks リファレンスポーズの場合はリストの最後に複製される。
 */
@@ -1397,7 +1286,6 @@ proc int duplicatePose(int $index) {
   }
   if (!insertPose($newIndex, $pose)) return false;
 
-  // notifyInt("nkPoseStackPosesDuplicate", $newIndex);
   notifyString("nkPoseStackPoseDuplicated", $selectionMode);
   return true;
 }
@@ -1452,7 +1340,7 @@ proc int updatePose(int $index) {
   if (!`size $newPose`) return false;
 
   if (!replacePose($index, $newPose)) return false;
-  // notifyInt("nkPoseStackPosesUpdate", $index);
+
   notifyString("nkPoseStackPoseUpdated", "keepIndex");
   return true;
 }
@@ -1603,7 +1491,6 @@ proc int pastePose(int $index, int $isOpposite, string $targetNodes[]) {
 
 /*-
 @param $index <int> 基数`0`の整数。
-// @returns <int> 削除後のポーズ数。
 @returns <boolean> 成功した場合は`true`、失敗した場合は`false`。
 */
 proc int deletePose(int $index) {
@@ -1611,14 +1498,6 @@ proc int deletePose(int $index) {
   // print("  index:" + $index + "\n"); // debug
   if (!removePose($index)) return false;
 
-  // int $nextIndex = $index;
-  // if ($numPoses) {
-  //   if ($nextIndex > $numPoses - 1) $nextIndex = $numPoses - 1;
-  // }
-  // else {
-  //   $nextIndex = -1;
-  // }
-  // // notifyInt("nkPoseStackPosesDelete", $nextIndex);
   string $poses[] = readAttrPoses({});
   int $numPoses = `size $poses`;
   string $selectionMode = "none";
@@ -1631,61 +1510,26 @@ proc int deletePose(int $index) {
 
 /*-
 @param $index <int> 基数`0`の整数。
-// @returns <int> 移動後のポーズインデックス。基数は`0`。
 @returns <boolean> 成功した場合は`true`、失敗した場合は`false`。
 */
 proc int movePrevPose(int $index) {
   // print("movePrevPose\n"); // debug
   // print("  index:" + $index + "\n"); // debug
-
-  // string $poses[] = readAttrPoses({});
-  // // int $firstEditableIndex;
-  // // for ($i = 0; $i < `size $poses`; $i++) {
-  // //   if (`gmatch $poses[$i] "!*"`) {
-  // //     $firstEditableIndex = $i + 1;
-  // //     break;
-  // //   }
-  // // }
-  // if (!isInRangeInt($index, 1, `size $poses` - 1)) return $index;
-
-  // string $pose = $poses[$index];
-  // // print("  pose:" + $pose + "\n"); // debug
-  // if (!`size $pose`) return $index;
-
-  // int $newIndex = $index - 1;
-  // // print("  newIndex:" + $newIndex + "\n"); // debug
-  // // movePose($index, $newIndex, $pose);
-  // movePose($index, $newIndex);
   if (!movePose($index, $index - 1)) return false;
 
-  // notifyInt("nkPoseStackPosesMoveUp", $newIndex);
   notifyString("nkPoseStackPoseMovedPrev", "prev");
   return true;
 }
 
 /*-
 @param $index <int> 基数`0`の整数。
-// @returns <int> 移動後のポーズインデックス。基数は`0`。
 @returns <boolean> 成功した場合は`true`、失敗した場合は`false`。
 */
 proc int moveNextPose(int $index) {
   // print("moveNextPose\n"); // debug
   // print("  index:" + $index + "\n"); // debug
-
-  // string $poses[] = readAttrPoses({});
-  // if (!isInRangeInt($index, 0, `size $poses` - 2)) return $index;
-
-  // string $pose = $poses[$index];
-  // // print("  pose:" + $pose + "\n"); // debug
-  // if (!`size $pose`) return $index;
-
-  // int $newIndex = $index + 1;
-  // // print("  newIndex:" + $newIndex + "\n"); // debug
-  // // movePose($index, $newIndex, $pose);
-  // movePose($index, $newIndex);
   if (!movePose($index, $index + 1)) return false;
 
-  // notifyInt("nkPoseStackPosesMoveDown", $newIndex);
   notifyString("nkPoseStackPoseMovedNext", "next");
   return true;
 }
@@ -4949,17 +4793,12 @@ global proc nkPoseStackPastePoseTest(
 
   print("nkPoseStackPastePoseTest start\n");
 
-  // int $rotateOrder = 0;
-
   // ミラー軸:{0, 1, 2}
   int $axisFlags[] = {0, 1, 2};
   // 対称化平面:{0, 1, 2, 3, 4, 5}
   int $planeFlags[] = {0, 1, 2, 3, 4, 5};
   // 対称化階層:{0, 1, 2}
   int $depthFlags[] = {0, 1, 2};
-
-  // int $isOpposite = 0;
-  // int $pasteSetting[] = {1, 1, 0};
 
   string $selectSetting[] = {"_L", "_R"};
   int $mirrorSetting[] = {0, 0, 1, 0, 0};
