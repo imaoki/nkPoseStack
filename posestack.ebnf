@@ -1,54 +1,83 @@
 (*! © 2023 imaoki | MIT License | https://github.com/imaoki *)
-            file = pose_version , "\n" , poses ;
+                 file = pose_version , "\n" , poses ;
 
-    pose_version = digit , "." , digit , "." digit ;
+         pose_version = { digit }+ ;
 
-           poses = { pose , "\n" } ;
+                poses = { pose , "\n" } ;
 
-            pose = pose_name , "=" , pose_transforms ;
+                 pose = pose_name , "=" , pose_transforms ;
 
-       pose_name = { any_char - illegal_char }+ ;
+            pose_name = { any_char - illegal_char }+ ;
 
- pose_transforms = { pose_transform , ";" }+ ;
+      pose_transforms = { pose_transform , ";" }+ ;
 
-  pose_transform = transform_header , transform_values ;
+       pose_transform = transform_header , transform_values ;
 
-transform_header = transform_node , "[" , pose_setting , "]" ;
+     transform_header = transform_node , "[" , pose_setting , "]" ;
 
-  transform_node = "|" , node_name , { "|" , node_name } ;
+       transform_node = "|" , node_name , { "|" , node_name } ;
 
-       node_name = ( letter | "_" ) , { letter | digit | "_" } ;
+            node_name = ( letter | "_" ) , { letter | digit | "_" } ;
 
-    pose_setting = paste_setting , "/" , select_setting , "/" , mirror_setting ;
+         pose_setting = paste_setting , "/"
+                      , select_setting , "/"
+                      , mirror_setting ;
 
-   paste_setting = bool , "," , bool , "," , bool ;
+        paste_setting = paste_x , "," , paste_y , "," , paste_z ;
 
-  select_setting = select_pattern , "," , select_pattern ;
+              paste_x = boolean ;
 
-  mirror_setting = axis , "," , axis , "," , axis , "," , bool , "," , bool ;
+              paste_y = boolean ;
 
-  select_pattern = { letter | digit | "_" | "|" }+ ;
+              paste_z = boolean ;
 
-            axis = ? 0-2 ? ;
+       select_setting = select_a , "," , select_b ;
 
-            bool = ? 0-1 ? ;
+             select_a = select_pattern ;
 
-transform_values = t , "," , q , "," , s , "," , h ;
+             select_b = select_pattern ;
 
-               t = number , "," , number , "," , number ;
+       select_pattern = { letter | digit | "_" | "|" }+ ;
 
-               q = number , "," , number , "," , number , "," , number ;
+       mirror_setting = mirror_axis
+                      , "," , primary_axis
+                      , "," , secondary_axis
+                      , "," , invertPrimary_axis
+                      , "," , invertSecondary_axis ;
 
-               s = number , "," , number , "," , number ;
+          mirror_axis = axis ;
 
-               h = number , "," , number , "," , number ;
+         primary_axis = axis ;
 
-          number = [ "-" ] , ( integer | real ) ;
+       secondary_axis = axis ;
 
-           digit = ? 0-9 ? ;
+  invert_primary_axis = boolean ;
 
-          letter = ? a-zA-Z ? ;
+invert_secondary_axis = boolean ;
 
-    illegal_char = "!" | "=" | ";" | "[" | "]" | "/" | "," ;
+                 axis = "0" | "1" | "2" ;
 
-        any_char = ? Any visible characters ? ;
+              boolean = "0" | "1" ;
+
+     transform_values = translate
+                      , "," , quaternion
+                      , "," , scale
+                      , "," , shear ;
+
+            translate = number , "," , number , "," , number ;
+
+           quaternion = number , "," , number , "," , number , "," , number ;
+
+                scale = number , "," , number , "," , number ;
+
+                shear = number , "," , number , "," , number ;
+
+               number = [ "-" ] , ( integer | real ) ;
+
+                digit = ? 0-9 ? ;
+
+               letter = ? a-zA-Z ? ;
+
+         illegal_char = "!" | "=" | ";" | "[" | "]" | "/" | "," ;
+
+             any_char = ? Any visible characters ? ;
