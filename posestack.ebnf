@@ -31,11 +31,11 @@
 
               paste_z = boolean ;
 
-       select_setting = select_a , "," , select_b ;
+       select_setting = select_pattern_a , "," , select_pattern_b ;
 
-             select_a = select_pattern ;
+     select_pattern_a = select_pattern ;
 
-             select_b = select_pattern ;
+     select_pattern_b = select_pattern ;
 
        select_pattern = { letter | digit | "_" | "|" }+ ;
 
