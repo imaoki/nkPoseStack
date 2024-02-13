@@ -6,17 +6,19 @@
 // 配列
 /*1.0.0*/proc int minFloatArrayCount(float $a[], float $b[]) {int $numA = `size $a`;int $numB = `size $b`;return `min $numA $numB`;}proc int minIntArrayCount(int $a[], int $b[]) {int $numA = `size $a`;int $numB = `size $b`;return `min $numA $numB`;}proc int minStringArrayCount(string $a[], string $b[]) {int $numA = `size $a`;int $numB = `size $b`;return `min $numA $numB`;}
 // アサーション
-/*1.0.0*/proc string assertTrue(int $a) {return ($a == true) ? "" : ("Assert: expected 1, got " + $a);}proc string assertFalse(int $a) {return ($a == false) ? "" : ("Assert: expected 0, got " + $a);}proc string assertFloatEqual(float $e, float $a, float $t) {return (`abs ($e - $a)` <= $t) ? "" : ("Assert: expected " + $e + ", got " + $a);}proc string assertFloatNotEqual(float $e, float $a, float $t) {return (`abs ($e - $a)` > $t) ? "" : ("Assert: expected " + $e + ", got " + $a);}proc string assertIntEqual(int $e, int $a) {return ($a == $e) ? "" : ("Assert: expected " + $e + ", got " + $a);}proc string assertIntNotEqual(int $e, int $a) {return ($a != $e) ? "" : ("Assert: expected " + $e + ", got " + $a);}proc string assertStringEqual(string $e, string $a) {return ($a == $e) ? "" : ("Assert: expected " + $e + ", got " + $a);}proc string assertStringNotEqual(string $e, string $a) {return ($a != $e) ? "" : ("Assert: expected " + $e + ", got " + $a);}proc string assertFloatArrayEqual(float $es[], float $as[], float $t) {int $numAs = `size $as`;int $isEqual = $numAs == `size $es`;if ($isEqual) {for ($i = 0; $i < $numAs; $i++) {$isEqual = `abs ($es[$i] - $as[$i])` <= $t;if (!$isEqual) break;}}return ($isEqual) ? "" : ("Assert: expected {" + floatArrayToString($es, ", ") + "}, got {" + floatArrayToString($as, ", ") + "}");}proc string assertIntArrayEqual(int $es[], int $as[]) {int $numAs = `size $as`;int $isEqual = $numAs == `size $es`;if ($isEqual) {for ($i = 0; $i < $numAs; $i++) {$isEqual = $as[$i] == $es[$i];if (!$isEqual) break;}}return ($isEqual) ? "" : ("Assert: expected {" + intArrayToString($es, ", ") + "}, got {" + intArrayToString($as, ", ") + "}");}proc string assertStringArrayEqual(string $es[], string $as[]) {int $numAs = `size $as`;int $isEqual = $numAs == `size $es`;if ($isEqual) {for ($i = 0; $i < $numAs; $i++) {$isEqual = $as[$i] == $es[$i];if (!$isEqual) break;}}return ($isEqual) ? "" : ("Assert: expected {" + stringArrayToString($es, ", ") + "}, got {" + stringArrayToString($as, ", ") + "}");}
+/*1.1.0*/proc string assertTrue(int $a) {return ($a == true) ? "" : ("Assert: expected 1, got " + $a);}proc string assertFalse(int $a) {return ($a == false) ? "" : ("Assert: expected 0, got " + $a);}proc string assertFloatEqual(float $e, float $a, float $t) {return (`abs ($e - $a)` <= $t) ? "" : ("Assert: expected " + $e + ", got " + $a);}proc string assertFloatNotEqual(float $e, float $a, float $t) {return (`abs ($e - $a)` > $t) ? "" : ("Assert: expected " + $e + ", got " + $a);}proc string assertIntEqual(int $e, int $a) {return ($a == $e) ? "" : ("Assert: expected " + $e + ", got " + $a);}proc string assertIntNotEqual(int $e, int $a) {return ($a != $e) ? "" : ("Assert: expected " + $e + ", got " + $a);}proc string assertStringEqual(string $e, string $a) {return ($a == $e) ? "" : ("Assert: expected " + $e + ", got " + $a);}proc string assertStringNotEqual(string $e, string $a) {return ($a != $e) ? "" : ("Assert: expected " + $e + ", got " + $a);}proc string assertFloatArrayEqual(float $es[], float $as[], float $t) {int $numAs = `size $as`;int $isEqual = $numAs == `size $es`;if ($isEqual) {for ($i = 0; $i < $numAs; $i++) {$isEqual = `abs ($es[$i] - $as[$i])` <= $t;if (!$isEqual) break;}}return ($isEqual) ? "" : ("Assert: expected {" + floatArrayToString($es, ", ") + "}, got {" + floatArrayToString($as, ", ") + "}");}proc string assertIntArrayEqual(int $es[], int $as[]) {int $numAs = `size $as`;int $isEqual = $numAs == `size $es`;if ($isEqual) {for ($i = 0; $i < $numAs; $i++) {$isEqual = $as[$i] == $es[$i];if (!$isEqual) break;}}return ($isEqual) ? "" : ("Assert: expected {" + intArrayToString($es, ", ") + "}, got {" + intArrayToString($as, ", ") + "}");}proc string assertStringArrayEqual(string $es[], string $as[]) {int $numAs = `size $as`;int $isEqual = $numAs == `size $es`;if ($isEqual) {for ($i = 0; $i < $numAs; $i++) {$isEqual = $as[$i] == $es[$i];if (!$isEqual) break;}}return ($isEqual) ? "" : ("Assert: expected {" + stringArrayToString($es, ", ") + "}, got {" + stringArrayToString($as, ", ") + "}");}proc testNewScene() {file -f -new;}proc testOpenScene(string $filename) {file -f -op "v=0;"  -iv  -typ "mayaAscii" -pmt false -o $filename;}
 // ファイル
 /*1.5.2*/proc string escapeStringForPythonAtFile(string $input) {string $escapedText;int $size = `size $input`;for ($i = 1; $i <= $size; $i++) {string $c = `substring $input $i $i`;switch ($c) {case "\\": $escapedText += "\\\\"; break;case "'": $escapedText += "\\'"; break;case "\n": $escapedText += "\\n"; break;case "\r": $escapedText += "\\r"; break;default: $escapedText += $c; break;}}return $escapedText;}proc int isValidFilename(string $input) {return (`match "[:\?\"\*/\\<>\|\n\r\t]" $input` == "");}proc string escapeInvalidFileNameChars(string $input, string $replacement) {string $pattern = escapeStringForPythonAtFile("[:\?\"\*/\\<>\|\n\r\t]");$input = escapeStringForPythonAtFile($input);$replacement = escapeStringForPythonAtFile($replacement);python("import re");string $result = `python("re.sub(r'" + $pattern + "', '" + $replacement + "', '" + $input + "')")`;return $result;}proc string getSourceFilename(string $procName) {string $filename;string $thisIs = `whatIs $procName`;string $pattern1 = "^Mel procedure found in: *";string $pattern2 = "^Script found in: *";if (`match $pattern1 $thisIs` != "") {$filename = `substitute $pattern1 $thisIs ""`;}else if (`match $pattern2 $thisIs` != "") {$filename = `substitute $pattern2 $thisIs ""`;}return $filename;}proc string getSourceDirname(string $procName) {return dirname(getSourceFilename($procName));}proc int existsDirname(string $dirname) {return `filetest -d $dirname`;}proc int existsFilename(string $filename) {return `filetest -f $filename`;}proc string[] getDirnames(string $dirname) {string $subDirnames[];string $filenames[] = `getFileList -fld $dirname`;for ($i = 0; $i < `size $filenames`; $i++) {string $subDirname = $dirname + "/" + $filenames[$i];if (existsDirname($subDirname)) {$subDirnames[`size $subDirnames`] = $subDirname;}}$subDirnames = `sortCaseInsensitive $subDirnames`;return $subDirnames;}proc string[] getFilenames(string $dirname, string $filenamePattern) {string $filenames[] = `getFileList -fs $filenamePattern -fld $dirname`;for ($i = 0; $i < `size $filenames`; $i++) {$filenames[$i] = $dirname + "/" + $filenames[$i];}$filenames = `sortCaseInsensitive $filenames`;return $filenames;}proc string getOpenFilename(string $caption, string $fileFilter) {string $filename;string $filenames[] = `fileDialog2 -cap $caption -ds 2 -ff $fileFilter -fm 1`;if (`size $filenames`) $filename = $filenames[0];return $filename;}proc string getSaveFilename(string $caption, string $fileFilter) {string $filename;string $filenames[] = `fileDialog2 -cap $caption -ds 2 -ff $fileFilter -fm 0`;if (`size $filenames`) $filename = $filenames[0];return $filename;}proc string[] readAllLines(string $filename, string $encoding) {if (!`size $encoding`) $encoding = "utf-8";string $lines[];if (!existsFilename($filename)) return $lines;python("with open('" + $filename + "', 'r', encoding='" + $encoding + "') as f:" + " lines = tuple(s.rstrip('\\r\\n') for s in f.readlines())");$lines = `python("lines")`;return $lines;}proc string readAllText(string $filename, string $encoding) {if (!`size $encoding`) $encoding = "utf-8";string $text;if (!existsFilename($filename)) return $text;python("with open('" + $filename + "', 'r', encoding='" + $encoding + "') as f: text = f.read()");$text = `python("text")`;return $text;}proc int writeAllText(string $filename, string $encoding, string $input) {string $dirname = dirname($filename);if (!existsDirname($dirname)) return false;$input = escapeStringForPythonAtFile($input);if (!`size $encoding`) $encoding = "utf-8";python("with open('" + $filename + "', 'w', encoding='" + $encoding + "') as f:" + " num = f.write('" + $input + "')");return (existsFilename($filename));}proc int writeAllLines(string $filename, string $encoding, string $lines[]) {string $text = stringArrayToString($lines, "\n");if (`size $lines`) $text += "\n";return (writeAllText($filename, $encoding, $text));}proc int makeDirs(string $dirname) {if (existsDirname($dirname)) return true;if (existsFilename($dirname)) return false;python("import os");python("os.makedirs('" + $dirname + "')");return (existsDirname($dirname));}proc int moveDir(string $sourceDirname, string $destDirname) {if (!existsDirname($sourceDirname)) return false;if (existsDirname($destDirname) || existsFilename($destDirname)) return false;python("import os");python("os.rename('" + $sourceDirname + "', '" + $destDirname +"')");return (!existsDirname($sourceDirname) && existsDirname($destDirname));}proc int moveFile(string $sourceFilename, string $destFilename) {if (!existsFilename($sourceFilename)) return false;if (existsDirname($destFilename) || existsFilename($destFilename)) return false;python("import os");python("os.rename('" + $sourceFilename + "', '" + $destFilename +"')");return (!existsFilename($sourceFilename) && existsFilename($destFilename));}proc int deleteDir(string $dirname) {if (!existsDirname($dirname)) return false;python("import os");python("if len(os.listdir('" + $dirname + "')) == 0:" + " os.rmdir('" + $dirname + "')");return (!existsDirname($dirname));}proc int deleteFile(string $filename) {if (!existsFilename($filename)) return false;python("import os");python("os.remove('" + $filename + "')");return (!existsFilename($filename));}
 // ノード
-/*1.0.0*/proc string[] getSelectedNodes() {return `ls -l -sl -typ "joint" -typ "transform"`;}proc string getParentNode(string $n) {string $parent;string $parents[] = `listRelatives -f -p $n`;if (`size $parents` > 0) $parent = $parents[0];return $parent;}
+/*1.4.0*/proc int isType(string $n, string $types[]) {return (`objExists $n` && (!`size $types` || stringArrayContains(`nodeType $n`, $types)));}proc int isUUID(string $input) {string $hex = "[A-F0-9]";string $digit4 = $hex + $hex + $hex + $hex;string $digit8 = $digit4 + $digit4;string $digit12 = $digit8 + $digit4;return (isValidString($input,$digit8 + "-" + $digit4 + "-" + $digit4 + "-" + $digit4 + "-" + $digit12));}proc string toShortName(string $n) {string $shortName;if (!`objExists $n`) return $shortName;$shortName = shortNameOf($n);if (`referenceQuery -inr $n`) {string $namespace = `referenceQuery -ns -shn $n`;if (`size $namespace`) {$shortName = stripPrefixFromName($namespace + ":", $shortName);}}return $shortName;}proc string toUUID(string $n) {string $uuid;if (!`objExists $n`) return $uuid;string $uuids[] = `ls -uid $n`;if (`size $uuids` == 1) $uuid = $uuids[0];return $uuid;}proc string uuidToLongName(string $uuid) {string $longName;if (!isUUID($uuid)) return $longName;string $longNames[] = `ls -l $uuid`;if (`size $longNames` == 1) $longName = $longNames[0];return $longName;}proc string getParentNode(string $n) {if (!`objExists $n`) return "";string $parents[] = `listRelatives -f -p $n`;if (!`size $parents`) return "";return $parents[0];}proc string getRootNode(string $n) {string $rootNode;if (!`objExists $n`) return $rootNode;$rootNode = $n;string $parentNode = getParentNode($rootNode);while (`objExists $parentNode`) {$rootNode = $parentNode;$parentNode = getParentNode($rootNode);}return $rootNode;}proc string[] collectRootNodes(string $nodes[]) {string $rootNodes[];if (!`size $nodes`) return $rootNodes;for ($n in $nodes) {string $rootNode = getRootNode($n);if (`objExists $rootNode`) {$rootNodes[`size $rootNodes`] = $rootNode;}}$rootNodes = stringArrayRemoveDuplicates($rootNodes);return $rootNodes;}proc string[] collectChildNodes(string $n) {string $childNodes[];if (!`objExists $n`) return $childNodes;$childNodes = `listRelatives -f -c $n`;$childNodes = `sort $childNodes`;return $childNodes;}proc string[] collectDescendantNodes(string $n,string $p,string $types[],string $script) {string $descendantNodes[];if (!`objExists $n`) return $descendantNodes;$n = longNameOf($n);$p = longNameOf($p);string $targetNode = $n;string $nextNode = $targetNode;if (`exists $script` && isType($targetNode, $types)) {string $arg1 = "\"" + toUUID($targetNode) + "\"";string $arg2 = "\"" + toUUID($p) + "\"";string $result[] = `eval $script $arg1 $arg2`;if (`size $result` == 2 && isUUID($result[0]) && isUUID($result[1])) {$targetNode = uuidToLongName($result[0]);$nextNode = uuidToLongName($result[1]);}}$descendantNodes[`size $descendantNodes`] = $targetNode;string $childNodes[] = collectChildNodes($nextNode);for ($c in $childNodes) {$descendantNodes = stringArrayCatenate($descendantNodes,collectDescendantNodes($c, $targetNode, $types, $script));}if (`size $types`) {for ($i = `size $descendantNodes` - 1; $i >= 0; $i--) {if (!isType($descendantNodes[$i], $types)) {stringArrayRemoveAtIndex($i, $descendantNodes);}}}return $descendantNodes;}proc string[] collectHierarchyNodes(string $nodes[],string $types[],string $script) {string $hierarchyNodes[];if (!`size $nodes`) return $hierarchyNodes;string $rootNodes[] = collectRootNodes($nodes);for ($rootNode in $rootNodes) {$hierarchyNodes = stringArrayCatenate($hierarchyNodes,collectDescendantNodes($rootNode, "", $types, $script));}return $hierarchyNodes;}
 // 数値
 /*1.0.0*/proc int isInRangeFloat(float $value, float $min, float $max) {return ($min <= $value && $value <= $max);}proc int isInRangeInt(int $value, int $min, int $max) {return ($min <= $value && $value <= $max);}
 // オブザーバ
 /*1.0.0*/global string $nkObservers[];proc string escapeStringParam(string $input) {string $escapedText;int $size = `size $input`;for ($i = 1; $i <= $size; $i++) {string $c = `substring $input $i $i`;switch ($c) {case "\\": $escapedText += "\\\\"; break;case "\"": $escapedText += "\\\""; break;case "\n": $escapedText += "\\n"; break;case "\r": $escapedText += "\\r"; break;case "\t": $escapedText += "\\t"; break;default: $escapedText += $c; break;}}return $escapedText;}proc string[] escapeStringParams(string $input[]) {string $escapedArray[];for ($s in $input) {$escapedArray[`size $escapedArray`] = escapeStringParam($s);}return $escapedArray;}proc string floatParamsToString(float $params[]) {string $param = "{";int $numParams = `size $params`;for ($i = 0; $i < $numParams; $i++) {string $floatString = (string) $params[$i];if (!`gmatch $floatString "*.*"`) $floatString += ".0";$param += $floatString + (($i < $numParams - 1) ? ", " : "");}$param += "}";return $param;}proc string intParamsToString(int $params[]) {string $param = "{}";if (`size $param`) {$param = "{" + intArrayToString($params, ", ") + "}";}return $param;}proc string stringParamsToString(string $params[]) {string $param = "{}";if (`size $param`) {$param = "{\"" + stringArrayToString(escapeStringParams($params), "\", \"") + "\"}";}return $param;}proc clearObservers() {global string $nkObservers[];clear $nkObservers;}proc int isValidEvent(string $event) {return (isValidString($event, "^[^;]+$"));}proc int isValidProc(string $proc) {return (isValidString($proc, "^[a-zA-Z\|:\._][a-zA-Z0-9\|:\._]*$"));}proc int isValidObserver(string $observer) {return (isValidString($observer, "^[^;]+;[a-zA-Z\|:\._][a-zA-Z0-9\|:\._]*$"));}proc string makeObserver(string $event, string $proc) {string $observer;if (isValidEvent($event) && isValidProc($proc)) {$observer = $event + ";" + $proc;}return $observer;}proc string extractEvent(string $observer) {string $event;string $buffer[];if (`tokenize $observer ";" $buffer` == 2) {$event = $buffer[0];}return $event;}proc string extractProc(string $observer) {string $proc;string $buffer[];if (`tokenize $observer ";" $buffer` == 2) {$proc = $buffer[1];}return $proc;}proc int findObserver(string $observer) {global string $nkObservers[];int $index = -1;for ($i = 0; $i < `size $nkObservers`; $i++) {if ($observer == $nkObservers[$i]) {$index = $i;break;}}return $index;}proc int existsObserver(string $observer) {return (findObserver($observer) >= 0);}proc string[] getObserverProcs(string $event) {global string $nkObservers[];string $procs[];if (!isValidEvent($event)) return $procs;for ($observer in $nkObservers) {if (extractEvent($observer) == $event) {$procs[`size $procs`] = extractProc($observer);}}return $procs;}proc int subscribe(string $event, string $proc) {global string $nkObservers[];string $observer = makeObserver($event, $proc);if (!isValidObserver($observer)) return false;if (existsObserver($observer)) return false;$nkObservers[`size $nkObservers`] = $observer;return true;}proc int unsubscribe(string $event, string $proc) {global string $nkObservers[];string $observer = makeObserver($event, $proc);if (!isValidObserver($observer)) return false;int $index = findObserver($observer);if ($index < 0) return false;stringArrayRemoveAtIndex($index, $nkObservers);return true;}proc notify(string $event) {string $procs[] = getObserverProcs($event);for ($proc in $procs) {if (`exists $proc`) {eval $proc;}}}proc notifyFloat(string $event, float $param) {string $procs[] = getObserverProcs($event);for ($proc in $procs) {if (`exists $proc`) {eval $proc $param;}}}proc notifyInt(string $event, int $param) {string $procs[] = getObserverProcs($event);for ($proc in $procs) {if (`exists $proc`) {eval $proc $param;}}}proc notifyString(string $event, string $param) {string $procs[] = getObserverProcs($event);for ($proc in $procs) {if (`exists $proc`) {eval $proc $param;}}}proc notifyFloatArray(string $event, float $params[]) {string $param = floatParamsToString($params);string $procs[] = getObserverProcs($event);for ($proc in $procs) {if (`exists $proc`) {eval ($proc + "(" + $param + ")");}}}proc notifyIntArray(string $event, int $params[]) {string $param = intParamsToString($params);string $procs[] = getObserverProcs($event);for ($proc in $procs) {if (`exists $proc`) {eval ($proc + "(" + $param + ")");}}}proc notifyStringArray(string $event, string $params[]) {string $param = stringParamsToString($params);string $procs[] = getObserverProcs($event);for ($proc in $procs) {if (`exists $proc`) {eval ($proc + "(" + $param + ")");}}}
 // クォータニオン
 /*1.0.0*/proc int reverseRotateOrder(int $order) {int $reverseOrder[] = {5, 3, 4, 1, 2, 0};return $reverseOrder[$order];}proc float[] eulerToQuat(float $r[], int $order) {float $qx = 0.0;float $qy = 0.0;float $qz = 0.0;float $qw = 1.0;float $rx = `deg_to_rad $r[0]`;float $ry = `deg_to_rad $r[1]`;float $rz = `deg_to_rad $r[2]`;float $cx = cos(0.5 * $rx);float $cy = cos(0.5 * $ry);float $cz = cos(0.5 * $rz);float $sx = sin(0.5 * $rx);float $sy = sin(0.5 * $ry);float $sz = sin(0.5 * $rz);switch ($order) {case 0: $qx = $sx * $cy * $cz + $cx * $sy * $sz;$qy = $cx * $sy * $cz - $sx * $cy * $sz;$qz = $cx * $cy * $sz + $sx * $sy * $cz;$qw = $cx * $cy * $cz - $sx * $sy * $sz;break;case 1: $qx = $sx * $cy * $cz + $cx * $sy * $sz;$qy = $cx * $sy * $cz + $sx * $cy * $sz;$qz = $cx * $cy * $sz - $sx * $sy * $cz;$qw = $cx * $cy * $cz - $sx * $sy * $sz;break;case 2: $qx = $sx * $cy * $cz - $cx * $sy * $sz;$qy = $cx * $sy * $cz + $sx * $cy * $sz;$qz = $cx * $cy * $sz + $sx * $sy * $cz;$qw = $cx * $cy * $cz - $sx * $sy * $sz;break;case 3: $qx = $sx * $cy * $cz - $cx * $sy * $sz;$qy = $cx * $sy * $cz - $sx * $cy * $sz;$qz = $cx * $cy * $sz + $sx * $sy * $cz;$qw = $cx * $cy * $cz + $sx * $sy * $sz;break;case 4: $qx = $sx * $cy * $cz + $cx * $sy * $sz;$qy = $cx * $sy * $cz - $sx * $cy * $sz;$qz = $cx * $cy * $sz - $sx * $sy * $cz;$qw = $cx * $cy * $cz + $sx * $sy * $sz;break;case 5: $qx = $sx * $cy * $cz - $cx * $sy * $sz;$qy = $cx * $sy * $cz + $sx * $cy * $sz;$qz = $cx * $cy * $sz - $sx * $sy * $cz;$qw = $cx * $cy * $cz + $sx * $sy * $sz;break;default: break;}return {$qx, $qy, $qz, $qw};}proc float[] quatToEuler(float $q[], int $order) {float $rx = 0.0;float $ry = 0.0;float $rz = 0.0;float $qx = $q[0];float $qy = $q[1];float $qz = $q[2];float $qw = $q[3];float $sx;float $sy;float $sz;int $unlocked;switch ($order) {case 0: $sy = 2 * $qx * $qz + 2 * $qy * $qw;$unlocked = abs($sy) < 0.9999999;$rx = $unlocked ? atan2(-(2 * $qy * $qz - 2 * $qx * $qw), 2 * $qw * $qw + 2 * $qz * $qz - 1) : atan2(2 * $qy * $qz + 2 * $qx * $qw, 2 * $qw * $qw + 2 * $qy * $qy - 1);$ry = asin($sy);$rz = $unlocked ? atan2(-(2 * $qx * $qy - 2 * $qz * $qw), 2 * $qw * $qw + 2 * $qx * $qx - 1) : 0;break;case 1: $sz = 2 * $qx * $qy + 2 * $qz * $qw;$unlocked = abs($sz) < 0.9999999;$rx = $unlocked ? atan2(-(2 * $qy * $qz - 2 * $qx * $qw), 2 * $qw * $qw + 2 * $qy * $qy - 1) : 0;$ry = $unlocked ? atan2(-(2 * $qx * $qz - 2 * $qy * $qw), 2 * $qw * $qw + 2 * $qx * $qx - 1) : atan2(2 * $qx * $qz + 2 * $qy * $qw, 2 * $qw * $qw + 2 * $qz * $qz - 1);$rz = asin($sz);break;case 2: $sx = 2 * $qy * $qz + 2 * $qx * $qw;$unlocked = abs($sx) < 0.9999999;$rx = asin($sx);$ry = $unlocked ? atan2(-(2 * $qx * $qz - 2 * $qy * $qw), 2 * $qw * $qw + 2 * $qz * $qz - 1) : 0;$rz = $unlocked ? atan2(-(2 * $qx * $qy - 2 * $qz * $qw), 2 * $qw * $qw + 2 * $qy * $qy - 1) : atan2(2 * $qx * $qy + 2 * $qz * $qw, 2 * $qw * $qw + 2 * $qx * $qx - 1);break;case 3: $sz = -(2 * $qx * $qy - 2 * $qz * $qw);$unlocked = abs($sz) < 0.9999999;$rx = $unlocked ? atan2(2 * $qy * $qz + 2 * $qx * $qw, 2 * $qw * $qw + 2 * $qy * $qy - 1) : atan2(-(2 * $qy * $qz - 2 * $qx * $qw), 2 * $qw * $qw + 2 * $qz * $qz - 1);$ry = $unlocked ? atan2(2 * $qx * $qz + 2 * $qy * $qw, 2 * $qw * $qw + 2 * $qx * $qx - 1) : 0;$rz = asin($sz);break;case 4: $sx = -(2 * $qy * $qz - 2 * $qx * $qw);$unlocked = abs($sx) < 0.9999999;$rx = asin($sx);$ry = $unlocked ? atan2(2 * $qx * $qz + 2 * $qy * $qw, 2 * $qw * $qw + 2 * $qz * $qz - 1) : atan2(-(2 * $qx * $qz - 2 * $qy * $qw), 2 * $qw * $qw + 2 * $qx * $qx - 1);$rz = $unlocked ? atan2(2 * $qx * $qy + 2 * $qz * $qw, 2 * $qw * $qw + 2 * $qy * $qy - 1) : 0;break;case 5: $sy = -(2 * $qx * $qz - 2 * $qy * $qw);$unlocked = abs($sy) < 0.9999999;$rx = $unlocked ? atan2(2 * $qy * $qz + 2 * $qx * $qw, 2 * $qw * $qw + 2 * $qz * $qz - 1) : 0;$ry = asin($sy);$rz = $unlocked ? atan2(2 * $qx * $qy + 2 * $qz * $qw, 2 * $qw * $qw + 2 * $qx * $qx - 1) : atan2(-(2 * $qx * $qy - 2 * $qz * $qw), 2 * $qw * $qw + 2 * $qy * $qy - 1);break;default: break;}$rx = `rad_to_deg $rx`;$ry = `rad_to_deg $ry`;$rz = `rad_to_deg $rz`;return {$rx, $ry, $rz};}proc float[] angleAxisToQuat(float $degree, float $axis[]) {float $ha = `deg_to_rad $degree` * 0.5;float $s = sin($ha);float $qx = $axis[0] * $s;float $qy = $axis[1] * $s;float $qz = $axis[2] * $s;float $qw = cos($ha);return {$qx, $qy, $qz, $qw};}proc float[] quatAdd(float $q1[], float $q2[]) {float $q1x = $q1[0];float $q1y = $q1[1];float $q1z = $q1[2];float $q1w = $q1[3];float $q2x = $q2[0];float $q2y = $q2[1];float $q2z = $q2[2];float $q2w = $q2[3];float $qx = $q1x + $q2x;float $qy = $q1y + $q2y;float $qz = $q1z + $q2z;float $qw = $q1w + $q2w;return {$qx, $qy, $qz, $qw};}proc float[] quatSubtract(float $q1[], float $q2[]) {float $q1x = $q1[0];float $q1y = $q1[1];float $q1z = $q1[2];float $q1w = $q1[3];float $q2x = $q2[0];float $q2y = $q2[1];float $q2z = $q2[2];float $q2w = $q2[3];float $qx = $q1x - $q2x;float $qy = $q1y - $q2y;float $qz = $q1z - $q2z;float $qw = $q1w - $q2w;return {$qx, $qy, $qz, $qw};}proc float[] quatMultiply(float $q1[], float $q2[]) {float $q1x = $q1[0];float $q1y = $q1[1];float $q1z = $q1[2];float $q1w = $q1[3];float $q2x = $q2[0];float $q2y = $q2[1];float $q2z = $q2[2];float $q2w = $q2[3];float $qx = $q1x * $q2w + $q1w * $q2x + $q1y * $q2z - $q1z * $q2y;float $qy = $q1y * $q2w + $q1w * $q2y + $q1z * $q2x - $q1x * $q2z;float $qz = $q1z * $q2w + $q1w * $q2z + $q1x * $q2y - $q1y * $q2x;float $qw = $q1w * $q2w - $q1x * $q2x - $q1y * $q2y - $q1z * $q2z;return {$qx, $qy, $qz, $qw};}proc float[] quatInverse(float $q[]) {return {$q[0] * -1, $q[1] * -1, $q[2] * -1, $q[3]};}proc float[] rotateVectorByQuat(float $v[], float $q[]) {float $iq[] = quatInverse($q);float $vq[] = {$v[0], $v[1], $v[2], 0};$vq = quatMultiply(quatMultiply($q, $vq), $iq);return {$vq[0], $vq[1], $vq[2]};}proc float[] quatFlip(float $q[], float $axis[]) {float $flipQ[] = angleAxisToQuat(180.0, $axis);return quatMultiply($flipQ, $q);}
+// 文字列
+/*1.0.1*/proc string escapeStringForPythonAtString(string $input) {string $escapedText;int $size = `size $input`;for ($i = 1; $i <= $size; $i++) {string $c = `substring $input $i $i`;switch ($c) {case "\\": $escapedText += "\\\\"; break;case "'": $escapedText += "\\'"; break;case "\n": $escapedText += "\\n"; break;case "\r": $escapedText += "\\r"; break;default: $escapedText += $c; break;}}return $escapedText;}proc string strip(string $input) {return `python("'" + escapeStringForPythonAtString($input) + "'.strip()")`;}proc string regexSearchGroup(string $pattern, string $input, string $flags) {$flags = (`size $flags`) ? "(?" + $flags + ")" : "";$pattern = "'" + $flags + escapeStringForPythonAtString($pattern) + "'";$input = "'" + escapeStringForPythonAtString($input) + "'";python("import re");string $result = `python("(lambda m: m.group() if m else None)(re.search(" + $pattern + ", " + $input + "))")`;return $result;}proc int[] regexSearchSpan(string $pattern, string $input, string $flags) {$flags = (`size $flags`) ? "(?" + $flags + ")" : "";$pattern = "'" + $flags + escapeStringForPythonAtString($pattern) + "'";$input = "'" + escapeStringForPythonAtString($input) + "'";python("import re");int $result[] = `python("(lambda m: m.span() if m else None)(re.search(" + $pattern + ", " + $input + "))")`;return $result;}proc string[] regexMatchGroups(string $pattern, string $input, string $flags) {$flags = (`size $flags`) ? "(?" + $flags + ")" : "";$pattern = "'" + $flags + escapeStringForPythonAtString($pattern) + "'";$input = "'" + escapeStringForPythonAtString($input) + "'";python("import re");string $result[] = `python("tuple([m.group() for m in re.finditer(" + $pattern + ", " + $input + ")])")`;return $result;}proc string[] regexMatchSubGroups(string $pattern, string $input, string $flags) {$flags = (`size $flags`) ? "(?" + $flags + ")" : "";$pattern = "'" + $flags + escapeStringForPythonAtString($pattern) + "'";$input = "'" + escapeStringForPythonAtString($input) + "'";python("import re");string $result[] = `python("sum([m.groups() for m in re.finditer(" + $pattern + ", " + $input + ")], ())")`;return $result;}proc int[] regexMatchSpans(string $pattern, string $input, string $flags) {$flags = (`size $flags`) ? "(?" + $flags + ")" : "";$pattern = "'" + $flags + escapeStringForPythonAtString($pattern) + "'";$input = "'" + escapeStringForPythonAtString($input) + "'";python("import re");int $result[] = `python("sum([m.span() for m in re.finditer(" + $pattern + ", " + $input + ")], ())")`;return $result;}proc string[] regexSplit(string $pattern, string $input, string $flags) {$flags = (`size $flags`) ? "(?" + $flags + ")" : "";$pattern = "'" + $flags + escapeStringForPythonAtString($pattern) + "'";$input = "'" + escapeStringForPythonAtString($input) + "'";python("import re");string $result[] = `python("tuple(re.split(" + $pattern + ", " + $input + "))")`;return $result;}proc string regexReplace(string $pattern,string $replacement,string $input,string $flags) {$flags = (`size $flags`) ? "(?" + $flags + ")" : "";$pattern = "'" + $flags + escapeStringForPythonAtString($pattern) + "'";$replacement = "'" + escapeStringForPythonAtString($replacement) + "'";$input = "'" + escapeStringForPythonAtString($input) + "'";python("import re");string $result = `python("re.sub(" + $pattern + ", " + $replacement + ", " + $input + ")")`;return $result;}proc string getClipboardText() {python("from PySide2 import QtGui");python("cb = QtGui.QClipboard()");return python("cb.text()");}proc setClipboardText(string $text) {python("from PySide2 import QtGui");python("cb = QtGui.QClipboard()");python("cb.setText('" + escapeStringForPythonAtString($text) + "')");}
 // UIコントロール
 /*2.0.0*/global string $nkUIControls[];proc appendUIControls(string $controls[]) {global string $nkUIControls[];for ($control in $controls) {$nkUIControls[`size $nkUIControls`] = $control;}}proc string getUIControl(string $root, string $end) {global string $nkUIControls[];string $path;for ($control in $nkUIControls) {string $buffer[];int $depth = `tokenize $control "|" $buffer`;string $first = ($depth > 0) ? $buffer[0] : "";string $last = ($depth > 0) ? $buffer[$depth - 1] : "";if ($first == $root && $last == $end) {$path = $control;break;}}return $path;}proc removeUIControls(string $root, string $end) {global string $nkUIControls[];string $paths[];for ($control in $nkUIControls) {string $buffer[];int $depth = `tokenize $control "|" $buffer`;string $first = ($depth > 0) ? $buffer[0] : "";string $last = ($depth > 0) ? $buffer[$depth - 1] : "";int $shouldRemove = (!`size $end`) ? $first == $root : $first == $root && $last == $end;if ($shouldRemove) $paths[`size $paths`] = $control;}if (`size $paths` > 0) {$nkUIControls = stringArrayRemove($paths, $nkUIControls);}}proc string uiControlTypeOf(string $control) {string $type = `objectTypeUI $control`;if ($type == "floatingWindow") $type = "window";return $type;}proc int qEnable(string $control) {string $type = uiControlTypeOf($control);if ($type == "window" || $type == "workspaceControl") return true;return `control -q -en $control`;}proc eEnable(int $value, string $control) {string $type = uiControlTypeOf($control);if ($type == "window" || $type == "workspaceControl") return;control -e -en $value $control;}proc int qExists(string $control) {return `control -q -ex $control`;}proc int qVisible(string $control) {return `control -q -vis $control`;}proc eVisible(int $value, string $control) {control -e -vis $value $control;}proc float qFloat(string $type, string $flag, string $control) {return `eval $type "-q" $flag $control`;}proc eFloat(string $type, string $flag, float $value, string $control) {eval $type "-e" $flag $value $control;}proc int qInt(string $type, string $flag, string $control) {return `eval $type "-q" $flag $control`;}proc eInt(string $type, string $flag, int $value, string $control) {eval $type "-e" $flag $value $control;}proc string qString(string $type, string $flag, string $control) {return `eval $type "-q" $flag $control`;}proc eString(string $type, string $flag, string $value, string $control) {eval $type "-e" $flag ("\"" + $value + "\"") $control;}proc float[] qFloatArray(string $type, string $flag, string $control) {return `eval $type "-q" $flag $control`;}proc int[] qIntArray(string $type, string $flag, string $control) {return `eval $type "-q" $flag $control`;}proc string[] qStringArray(string $type, string $flag, string $control) {return `eval $type "-q" $flag $control`;}proc eStringArray(string $type, string $flag, string $values[], string $control) {for ($value in $values) {eString($type, $flag, $value, $control);}}proc eOrderedFloat(string $type, string $flag, float $values[], string $control) {for ($i = 0; $i < `size $values`; $i++) {eFloat($type, ($flag + ($i + 1)), $values[$i], $control);}}proc eOrderedInt(string $type, string $flag, int $values[], string $control) {for ($i = 0; $i < `size $values`; $i++) {eInt($type, ($flag + ($i + 1)), $values[$i], $control);}}proc eOrderedString(string $type, string $flag, string $values[], string $control) {for ($i = 0; $i < `size $values`; $i++) {eString($type, ($flag + ($i + 1)), $values[$i], $control);}}proc int qIndex(string $type, string $flag, string $control) {return (qInt($type, $flag, $control) - 1);}proc eIndex(string $type, string $flag, int $index, string $control) {eInt($type, $flag, ($index + 1), $control);}proc int[] qIndexArray(string $type, string $flag, string $control) {int $indices[] = qIntArray($type, $flag, $control);for ($i = 0; $i < `size $indices`; $i++) $indices[$i] -= 1;return $indices;}proc eIndexArray(string $type, string $flag, int $indices[], string $control) {for ($i in $indices) {eInt($type, $flag, $i + 1, $control);}}proc int qFirstIndex(string $type, string $flag, string $control) {int $indices[] = qIndexArray($type, $flag, $control);return  ((`size $indices`) ? $indices[0] : -1);}proc string qFirstString(string $type, string $flag, string $control) {string $values[] = qStringArray($type, $flag, $control);return  ((`size $values`) ? $values[0] : "");}proc eIntString(string $type, string $flag, int $index, string $value, string $control) {eval $type "-e" $flag $index ("\"" + $value + "\"") $control;}proc eIndexString(string $type, string $flag, int $index, string $value, string $control) {eIntString($type, $flag, $index + 1, $value, $control);}proc executeUIControl(string $type, string $flag, string $control) {eval $type "-e" $flag $control;}proc string getParentableWindow(string $control) {if (uiControlTypeOf($control) == "workspaceControl" && !qInt("workspaceControl", "-fl", $control)) {return "MayaWindow";}else {return $control;}}proc windowClose(string $control) {if (qExists($control)) {string $type = uiControlTypeOf($control);switch ($type) {case "window": deleteUI $control; break;case "workspaceControl": executeUIControl("workspaceControl", "-cl", $control);break;default: break;}}}proc windowPrefRemove(string $type, string $control) {if (qExists($control)) windowClose($control);switch ($type) {case "window": if (qInt("windowPref", "-ex", $control)) {windowPref -r $control;}break;case "workspaceControl": if (qInt("workspaceControlState", "-ex", $control)) {workspaceControlState -r $control;}break;default: break;}}proc string buildWorkspaceControl(string $workspaceControlName,string $label,string $buildProcName,string $buildProcFilename) {string $control = $workspaceControlName;if (!qExists($workspaceControlName)) {string $uiScript = "if (!`exists " + $buildProcName + "`)" + " source \"" + $buildProcFilename + "\"; " + $buildProcName + "();";$control = `workspaceControl -dup false -fl true -l $label -rt false -ui $uiScript$workspaceControlName`;}return $control;}
 
@@ -302,15 +304,15 @@ proc string convertDataVersion(string $value) {
   // print("  currentVersion:" + $currentVersion + "\n"); // debug
   if (!stringArrayRemoveAtIndex(0, $lines)) return $newValue;
   switch ($valueVersion) {
-    case 1:
+    case 0: // テスト用
       switch ($currentVersion) {
-        case 1: $newValue = stringArrayToString($lines, "\n") + "\n"; break;
+        case 1: for ($line in $lines) $newValue += "x" + $line + "\n"; break;
         default: break;
       }
       break;
-    case 100: // テスト用
+    case 1:
       switch ($currentVersion) {
-        case 1: for ($line in $lines) $newValue += "x" + $line + "\n"; break;
+        case 1: $newValue = stringArrayToString($lines, "\n") + "\n"; break;
         default: break;
       }
       break;
@@ -363,16 +365,13 @@ proc float[] makeTransformValues(string $n) {
   int $oXYZ = reverseRotateOrder(0);
 
   float $rq[] = eulerToQuat($r, $o);
-
   float $ra[] = `getAttr ($n + ".rotateAxis")`;
   $ra = eulerToQuat($ra, $oXYZ);
-
   float $jo[] = {0, 0, 0, 1};
   if (`attributeQuery -n $n -ex "jointOrient"`) {
     $jo = `getAttr ($n + ".jointOrient")`;
     $jo = eulerToQuat($jo, $oXYZ);
   }
-
   float $q[] = quatMultiply($jo, quatMultiply($ra, $rq));
 
   // print("  o :" + $o + "\n"); // debug
@@ -511,13 +510,11 @@ proc float[] asIsTransform(string $n, float $m[]) {
 
   float $ra[] = `getAttr ($n + ".rotateAxis")`;
   $ra = quatInverse(eulerToQuat($ra, $oXYZ));
-
   float $jo[] = {0, 0, 0, 1};
   if (`attributeQuery -n $n -ex "jointOrient"`) {
     $jo = `getAttr ($n + ".jointOrient")`;
     $jo = quatInverse(eulerToQuat($jo, $oXYZ));
   }
-
   float $rq[] = quatMultiply($jo, quatMultiply($ra, $q));
   float $r[] = quatToEuler($rq, $o);
 
@@ -603,7 +600,6 @@ proc float[] mirrorTransform(
 
   float $ra[] = `getAttr ($n + ".rotateAxis")`;
   $ra = quatInverse(eulerToQuat($ra, $oXYZ));
-
   float $jo[] = {0, 0, 0, 1};
   if (`attributeQuery -n $n -ex "jointOrient"`) {
     $jo = `getAttr ($n + ".jointOrient")`;
@@ -747,22 +743,33 @@ proc setPoseStackDataAttr(string $n, string $value) {
 /*-
 @param $nodes <string[]>
 @returns <string>
+@remarks 全てのデータが空の場合はマージを行わずにノードを削除する。
 */
 proc string mergeScriptNodes(string $nodes[]) {
   // print("mergeScriptNodes\n"); // debug
   // print("  nodes:{\n    " + stringArrayToString($nodes, ",\n    ") + "\n  }\n"); // debug
+  string $mergedNode;
+  int $numNodes = `size $nodes`;
+  if (!$numNodes) return $mergedNode;
+
   string $value;
   for ($n in $nodes) {
-    if (isValidScriptNode($n)) {
+    if (isValidScriptNode($n) && !isNodeReferenced($n)) {
       $value += convertDataVersion(getPoseStackDataAttr($n));
-      delete $n;
     }
   }
-  string $mergedNode;
+  // print("  value:" + $value + "\n"); // debug
+
   if (`size $value`) {
-    $mergedNode = createScriptNode();
-    $value = getPoseVersion() + "\n" + $value;
-    setPoseStackDataAttr($mergedNode, $value);
+    $mergedNode = ($numNodes == 1) ? $nodes[0] : createScriptNode();
+    if (isValidScriptNode($mergedNode) && !isNodeReferenced($mergedNode)) {
+      setPoseStackDataAttr($mergedNode, getPoseVersion() + "\n" + $value);
+    }
+  }
+
+  for ($n in $nodes) {
+    if ($n == $mergedNode) continue;
+    if (isValidScriptNode($n) && !isNodeReferenced($n)) delete $n;
   }
   return $mergedNode;
 }
@@ -771,6 +778,7 @@ proc string mergeScriptNodes(string $nodes[]) {
 @returns <string[]>
 */
 proc string[] getScriptNodes() {
+  // print("getScriptNodes\n"); // debug
   string $nodes[];
   string $sceneNodes[];
   string $allNodes[] = `ls -l "::nkPoseStackData*"`;
@@ -784,12 +792,16 @@ proc string[] getScriptNodes() {
       $sceneNodes[`size $sceneNodes`] = $n;
     }
   }
+  // print("  referencedNodes:{\n    " + stringArrayToString($nodes, ",\n    ") + "\n  }\n"); // debug
+  // print("       sceneNodes:{\n    " + stringArrayToString($sceneNodes, ",\n    ") + "\n  }\n"); // debug
   if (`size $sceneNodes`) {
     string $mergeNode = mergeScriptNodes($sceneNodes);
     if (isValidScriptNode($mergeNode)) {
       $nodes[`size $nodes`] = $mergeNode;
     }
   }
+  // print("            nodes:{\n    " + stringArrayToString($nodes, ",\n    ") + "\n  }\n"); // debug
+  notifyStringArray("nkPoseStackScriptNodesRetrieved", $nodes);
   return $nodes;
 }
 
@@ -807,14 +819,12 @@ proc string getEditableScriptNode(string $nodes[]) {
       $scriptNodes[`size $scriptNodes`] = $n;
     }
   }
+  // print("  scriptNodes:{\n    " + stringArrayToString($scriptNodes, ",\n    ") + "\n  }\n"); // debug
   int $numScriptNodes = `size $scriptNodes`;
-  switch ($numScriptNodes) {
-    case 0: return "";
-    case 1: return $scriptNodes[0];
-    default:
-      warning -n "nkPoseStack: Multiple editable nodes exist.";
-      return "";
+  if ($numScriptNodes > 1) {
+    warning -n "nkPoseStack: Multiple editable nodes exist.";
   }
+  return (($numScriptNodes == 1) ? $scriptNodes[0] : "");
 }
 
 /*-
@@ -1072,7 +1082,7 @@ proc int replacePose(int $index, string $pose) {
 }
 
 // -----------------------------------------------------------------------------
-// ポーズ
+// ポーズ操作
 // -----------------------------------------------------------------------------
 /*-
 @returns <boolean>
@@ -1347,6 +1357,54 @@ proc int updatePose(int $index) {
 
 /*-
 @param $index <int> 基数`0`の整数。
+@returns <boolean> 成功した場合は`true`、失敗した場合は`false`。
+*/
+proc int deletePose(int $index) {
+  // print("deletePose\n"); // debug
+  // print("  index:" + $index + "\n"); // debug
+  if (!removePose($index)) return false;
+
+  string $poses[] = readAttrPoses({});
+  int $numPoses = `size $poses`;
+  string $selectionMode = "none";
+  if ($numPoses > 0) {
+    $selectionMode = ($index > $numPoses - 1) ? "last" : "keepIndex";
+  }
+  notifyString("nkPoseStackPoseDeleted", $selectionMode);
+  return true;
+}
+
+/*-
+@param $index <int> 基数`0`の整数。
+@returns <boolean> 成功した場合は`true`、失敗した場合は`false`。
+*/
+proc int movePrevPose(int $index) {
+  // print("movePrevPose\n"); // debug
+  // print("  index:" + $index + "\n"); // debug
+  if (!movePose($index, $index - 1)) return false;
+
+  notifyString("nkPoseStackPoseMovedPrev", "prev");
+  return true;
+}
+
+/*-
+@param $index <int> 基数`0`の整数。
+@returns <boolean> 成功した場合は`true`、失敗した場合は`false`。
+*/
+proc int moveNextPose(int $index) {
+  // print("moveNextPose\n"); // debug
+  // print("  index:" + $index + "\n"); // debug
+  if (!movePose($index, $index + 1)) return false;
+
+  notifyString("nkPoseStackPoseMovedNext", "next");
+  return true;
+}
+
+// -----------------------------------------------------------------------------
+// ノード操作
+// -----------------------------------------------------------------------------
+/*-
+@param $index <int> 基数`0`の整数。
 @param $isOpposite <boolean>
 @param $modifier <int> 修飾キーの状態（`getModifiers`）により選択動作を指定する。
 リストに無い値を指定した場合は置き換え動作になる。
@@ -1358,6 +1416,7 @@ proc int updatePose(int $index) {
 | `4` | Ctrl         | 選択解除 |
 | `5` | Shift + Ctrl | 追加選択 |
 @returns <boolean> 成功した場合は`true`、失敗した場合は`false`。
+@remarks 対象ノードが存在しない場合は空のリストで選択動作を行う。
 */
 proc int selectNodes(int $index, int $isOpposite, int $modifier) {
   // print("selectNodes\n"); // debug
@@ -1401,7 +1460,6 @@ proc int selectNodes(int $index, int $isOpposite, int $modifier) {
     }
   }
   // print("  targetNodes:{\n    " + stringArrayToString($targetNodes, "\n    ") + "\n  }\n"); // debug
-  if (!`size $targetNodes`) return false;
 
   switch ($modifier) {
     // Shift
@@ -1489,73 +1547,106 @@ proc int pastePose(int $index, int $isOpposite, string $targetNodes[]) {
   return true;
 }
 
-/*-
-@param $index <int> 基数`0`の整数。
-@returns <boolean> 成功した場合は`true`、失敗した場合は`false`。
-*/
-proc int deletePose(int $index) {
-  // print("deletePose\n"); // debug
-  // print("  index:" + $index + "\n"); // debug
-  if (!removePose($index)) return false;
-
-  string $poses[] = readAttrPoses({});
-  int $numPoses = `size $poses`;
-  string $selectionMode = "none";
-  if ($numPoses > 0) {
-    $selectionMode = ($index > $numPoses - 1) ? "last" : "keepIndex";
-  }
-  notifyString("nkPoseStackPoseDeleted", $selectionMode);
-  return true;
-}
-
-/*-
-@param $index <int> 基数`0`の整数。
-@returns <boolean> 成功した場合は`true`、失敗した場合は`false`。
-*/
-proc int movePrevPose(int $index) {
-  // print("movePrevPose\n"); // debug
-  // print("  index:" + $index + "\n"); // debug
-  if (!movePose($index, $index - 1)) return false;
-
-  notifyString("nkPoseStackPoseMovedPrev", "prev");
-  return true;
-}
-
-/*-
-@param $index <int> 基数`0`の整数。
-@returns <boolean> 成功した場合は`true`、失敗した場合は`false`。
-*/
-proc int moveNextPose(int $index) {
-  // print("moveNextPose\n"); // debug
-  // print("  index:" + $index + "\n"); // debug
-  if (!movePose($index, $index + 1)) return false;
-
-  notifyString("nkPoseStackPoseMovedNext", "next");
-  return true;
-}
-
-// -----------------------------------------------------------------------------
+// /////////////////////////////////////////////////////////////////////////////
 // スクリプトジョブ
-// -----------------------------------------------------------------------------
-// /*-
-// @returns <>
-// */
-// proc registerScriptJob() {
-//   int $newSceneOpenedId = `scriptJob
-//       -e "NewSceneOpened" "nkPoseStackNewSceneOpened"
-//       -p "nkPoseStackWindow"`;
-//   int $postSceneReadId = `scriptJob
-//       -e "PostSceneRead" "nkPoseStackPostSceneRead"
-//       -p "nkPoseStackWindow"`;
-//   print("nkPoseStackNewSceneOpened:" + $newSceneOpenedId + "\n");
-//   print("nkPoseStackPostSceneRead:" + $postSceneReadId + "\n");
-// }
+// /////////////////////////////////////////////////////////////////////////////
+/*-
+@var <string[]>
+*/
+global string $nkPoseStackScriptNodeIds[];
 
-// /*-
-// @returns <>
-// */
-// proc unregisterScriptJob() {
-// }
+/*-
+@var <int[]>
+*/
+global int $nkPoseStackScriptJobIds[];
+
+/*-
+@returns <>
+*/
+proc initializeScriptJobParameters() {
+  // print("initializeScriptJobParameters\n"); // debug
+  global string $nkPoseStackScriptNodeIds[];
+  global int $nkPoseStackScriptJobIds[];
+  clear $nkPoseStackScriptNodeIds;
+  clear $nkPoseStackScriptJobIds;
+}
+
+// -----------------------------------------------------------------------------
+// イベントジョブ
+// -----------------------------------------------------------------------------
+/*-
+@returns <>
+*/
+proc registerEventJob() {
+  // print("registerEventJob\n"); // debug
+  int $newSceneOpenedId = `scriptJob
+      -e "NewSceneOpened" "nkPoseStackNewSceneOpened"
+      -p "nkPoseStackWindow"`;
+  int $postSceneReadId = `scriptJob
+      -e "PostSceneRead" "nkPoseStackPostSceneRead"
+      -p "nkPoseStackWindow"`;
+  // print("  nkPoseStackNewSceneOpened:" + $newSceneOpenedId + "\n"); // debug
+  // print("   nkPoseStackPostSceneRead:" + $postSceneReadId + "\n"); // debug
+}
+
+/*-
+@returns <>
+*/
+proc unregisterEventJob() {
+  // print("unregisterEventJob\n"); // debug
+}
+
+// -----------------------------------------------------------------------------
+// ノードジョブ
+// -----------------------------------------------------------------------------
+/*-
+@param $n <string>
+@returns <>
+*/
+proc registerNodeJob(string $n) {
+  // print("registerNodeJob\n"); // debug
+  // print("  n:" + $n + "\n"); // debug
+  global string $nkPoseStackScriptNodeIds[];
+  global int $nkPoseStackScriptJobIds[];
+  if (!isValidScriptNode($n)) return;
+
+  string $nodeId = toUUID($n);
+  // print("  nodeId:" + $nodeId + "\n"); // debug
+  int $index = stringArrayFind($nodeId, 0, $nkPoseStackScriptNodeIds);
+  // print("   index:" + $index + "\n"); // debug
+  if ($index >= 0) return;
+
+  string $script = "nkPoseStackAttributeDeleted(\"" + $nodeId + "\");";
+  int $jobId = `scriptJob -ad ($n + ".psd") $script -ro true`;
+  // print("   jobId:" + $jobId + "\n"); // debug
+  $index = `size $nkPoseStackScriptNodeIds`;
+  $nkPoseStackScriptNodeIds[$index] = $nodeId;
+  $nkPoseStackScriptJobIds[$index] = $jobId;
+  // print("  nkPoseStackScriptNodeIds:{\n    " + stringArrayToString($nkPoseStackScriptNodeIds, ",\n    ") + "\n  }\n"); // debug
+  // print("   nkPoseStackScriptJobIds:{\n    " + intArrayToString($nkPoseStackScriptJobIds, ",\n    ") + "\n  }\n"); // debug
+}
+
+/*-
+@param $nodeId <string>
+@returns <>
+*/
+proc unregisterNodeJob(string $nodeId) {
+  // print("unregisterNodeJob\n"); // debug
+  // print("  nodeId:" + $nodeId + "\n"); // debug
+  global string $nkPoseStackScriptNodeIds[];
+  global int $nkPoseStackScriptJobIds[];
+
+  int $index = stringArrayFind($nodeId, 0, $nkPoseStackScriptNodeIds);
+  // print("   index:" + $index + "\n"); // debug
+  if ($index < 0) return;
+
+  if (!isInRangeInt($index, 0, `size $nkPoseStackScriptJobIds` - 1)) return;
+
+  stringArrayRemoveAtIndex($index, $nkPoseStackScriptNodeIds);
+  intArrayRemoveAtIndex($index, $nkPoseStackScriptJobIds);
+  // print("  nkPoseStackScriptNodeIds:{\n    " + stringArrayToString($nkPoseStackScriptNodeIds, ",\n    ") + "\n  }\n"); // debug
+  // print("   nkPoseStackScriptJobIds:{\n    " + intArrayToString($nkPoseStackScriptJobIds, ",\n    ") + "\n  }\n"); // debug
+}
 
 // /////////////////////////////////////////////////////////////////////////////
 // プレゼンテーション
@@ -1566,19 +1657,29 @@ proc int moveNextPose(int $index) {
 global int $nkPoseStackEditorPoseIndex;
 
 /*-
-@var <string>
+@var <string> 設定UI用の一時変数。
 */
 global string $nkPoseStackEditorPoseName;
 
 /*-
-@var <string[]>
+@var <string[]> 設定UI用の一時変数。
 */
 global string $nkPoseStackEditorNodes[];
 
 /*-
-@var <string[]>
+@var <string[]> 設定UI用の一時変数。
 */
 global string $nkPoseStackEditorPoseSettings[];
+
+/*-
+@var <string> 設定UI用の一時変数。
+*/
+global string $nkPoseStackEditorSelectPatternA;
+
+/*-
+@var <string> 設定UI用の一時変数。
+*/
+global string $nkPoseStackEditorSelectPatternB;
 
 /*-
 @var <boolean> 設定UIが更新中かどうか。
@@ -1598,12 +1699,16 @@ proc initializeEditorParameters() {
   global string $nkPoseStackEditorPoseName;
   global string $nkPoseStackEditorNodes[];
   global string $nkPoseStackEditorPoseSettings[];
+  global string $nkPoseStackEditorSelectPatternA;
+  global string $nkPoseStackEditorSelectPatternB;
   global int $nkPoseStackEditorIsUIUpdating;
   global int $nkPoseStackNeedUpdateInitParameters[];
   $nkPoseStackEditorPoseIndex = -1;
   $nkPoseStackEditorPoseName = "";
   clear $nkPoseStackEditorNodes;
   clear $nkPoseStackEditorPoseSettings;
+  $nkPoseStackEditorSelectPatternA = "";
+  $nkPoseStackEditorSelectPatternB = "";
   $nkPoseStackEditorIsUIUpdating = false;
   $nkPoseStackNeedUpdateInitParameters = {false, false, false};
 }
@@ -1613,13 +1718,7 @@ proc initializeEditorParameters() {
 @returns <string>
 */
 proc string sanitizeText(string $input) {
-  $input = substituteAllString($input, "!", "_");
-  $input = substituteAllString($input, "=", "_");
-  $input = substituteAllString($input, ";", "_");
-  $input = substituteAllString($input, "[", "_");
-  $input = substituteAllString($input, "]", "_");
-  $input = substituteAllString($input, "/", "_");
-  $input = substituteAllString($input, ",", "_");
+  $input = regexReplace("[\\!=;\\[\\]/,]", "_", $input, "");
   return $input;
 }
 
@@ -1758,7 +1857,7 @@ proc updatePasteSettingUI(int $pasteSetting[]) {
   // print("  pasteSetting:{" + intArrayToString($pasteSetting, ", ") + "}\n"); // debug
   global int $nkPoseStackNeedUpdateInitParameters[];
   string $pasteAttributesCheckBoxGrp = getUIControl("nkPoseStackEditorWindow", "pasteAttributesCheckBoxGrp");
-  int $isSelected = `size $pasteSetting`;
+  int $isSelected = `size $pasteSetting` > 0;
   eEnable($isSelected, $pasteAttributesCheckBoxGrp);
   if ($isSelected) {
     eOrderedInt("checkBoxGrp", "-v", $pasteSetting, $pasteAttributesCheckBoxGrp);
@@ -1776,14 +1875,30 @@ proc updateSelectSettingUI(string $selectSetting[]) {
   // print("updateSelectSettingUI\n"); // debug
   // print("  selectSetting:{" + stringArrayToString($selectSetting, ", ") + "}\n"); // debug
   global int $nkPoseStackNeedUpdateInitParameters[];
+  global string $nkPoseStackEditorSelectPatternA;
+  global string $nkPoseStackEditorSelectPatternB;
   string $selectPatternAText = getUIControl("nkPoseStackEditorWindow", "selectPatternAText");
   string $selectPatternBText = getUIControl("nkPoseStackEditorWindow", "selectPatternBText");
-  int $isSelected = `size $selectSetting`;
+  int $isSelected = `size $selectSetting` > 0;
   eEnable($isSelected, $selectPatternAText);
   eEnable($isSelected, $selectPatternBText);
   if ($isSelected) {
-    eString("textFieldGrp", "-tx", $selectSetting[0], $selectPatternAText);
-    eString("textFieldGrp", "-tx", $selectSetting[1], $selectPatternBText);
+    $nkPoseStackEditorSelectPatternA = $selectSetting[0];
+    $nkPoseStackEditorSelectPatternB = $selectSetting[1];
+    // print("  nkPoseStackEditorSelectPatternA:" + $nkPoseStackEditorSelectPatternA + "\n"); // debug
+    // print("  nkPoseStackEditorSelectPatternB:" + $nkPoseStackEditorSelectPatternB + "\n"); // debug
+    eString(
+      "textFieldGrp",
+      "-tx",
+      $nkPoseStackEditorSelectPatternA,
+      $selectPatternAText
+    );
+    eString(
+      "textFieldGrp",
+      "-tx",
+      $nkPoseStackEditorSelectPatternB,
+      $selectPatternBText
+    );
   }
   if (!$nkPoseStackNeedUpdateInitParameters[1] && $isSelected) {
     $nkPoseStackNeedUpdateInitParameters[1] = true;
@@ -1802,7 +1917,7 @@ proc updateMirrorSettingUI(int $mirrorSetting[]) {
   string $primaryAxisRadioButton = getUIControl("nkPoseStackEditorWindow", "primaryAxisRadioButton");
   string $secondaryAxisRadioButton = getUIControl("nkPoseStackEditorWindow", "secondaryAxisRadioButton");
   string $invertAxisCheckBoxGrp = getUIControl("nkPoseStackEditorWindow", "invertAxisCheckBoxGrp");
-  int $isSelected = `size $mirrorSetting`;
+  int $isSelected = `size $mirrorSetting` > 0;
   eEnable($isSelected, $mirrorAxisRadioButton);
   eEnable($isSelected, $primaryAxisRadioButton);
   eEnable($isSelected, $secondaryAxisRadioButton);
@@ -2003,6 +2118,7 @@ proc string makePoseName(string $n) {
 */
 proc subscribePosesObservers() {
   // print("subscribePosesObservers\n"); // debug
+  subscribe("nkPoseStackScriptNodesRetrieved", "nkPoseStackScriptNodesRetrieved");
   subscribe("nkPoseStackPosesCleared", "nkPoseStackPosesChanged");
   subscribe("nkPoseStackPosesOpened", "nkPoseStackPosesChanged");
   subscribe("nkPoseStackPosesImported", "nkPoseStackPosesChanged");
@@ -2020,6 +2136,7 @@ proc subscribePosesObservers() {
 */
 proc unsubscribePosesObservers() {
   // print("unsubscribePosesObservers\n"); // debug
+  unsubscribe("nkPoseStackScriptNodesRetrieved", "nkPoseStackScriptNodesRetrieved");
   unsubscribe("nkPoseStackPosesCleared", "nkPoseStackPosesChanged");
   unsubscribe("nkPoseStackPosesOpened", "nkPoseStackPosesChanged");
   unsubscribe("nkPoseStackPosesImported", "nkPoseStackPosesChanged");
@@ -2056,24 +2173,24 @@ proc nkPoseStackEditorWindowClosed() {
 /*-
 @returns <>
 */
-proc poseNameTextChanged() {
-  // print("poseNameTextChanged\n"); // debug
+proc poseNameTextEntered() {
+  // print("poseNameTextEntered\n"); // debug
   global string $nkPoseStackEditorPoseName;
   string $poseNameText = getUIControl("nkPoseStackEditorWindow", "poseNameText");
-  string $currentText = qString("textFieldGrp", "-tx", $poseNameText);
-  string $newText = sanitizeText($currentText);
-  int $numNewText = `size $newText`;
-  if ($newText != $currentText || !$numNewText) {
-    int $position = qIndex("textFieldGrp", "-ip", $poseNameText);
-    // print("  position:" + $position + "\n"); // debug
-    if (!$numNewText) {
-      $newText = $nkPoseStackEditorPoseName;
-      $position = -1;
-    }
-    eString("textFieldGrp", "-tx", $newText, $poseNameText);
-    eIndex("textFieldGrp", "-ip", $position, $poseNameText);
-  }
-  $nkPoseStackEditorPoseName = $newText;
+  if (!qExists($poseNameText)) return;
+
+  string $currentValue = qString("textFieldGrp", "-tx", $poseNameText);
+  string $newValue = sanitizeText($currentValue);
+  // print("  currentValue:" + $currentValue + "\n"); // debug
+  // print("  newValue    :" + $newValue + "\n"); // debug
+  int $newValueLength = `size $newValue`;
+  if (!$newValueLength) $newValue = $nkPoseStackEditorPoseName;
+  $nkPoseStackEditorPoseName = $newValue;
+
+  int $position = qIndex("textFieldGrp", "-ip", $poseNameText);
+  // print("  position:" + $position + "\n"); // debug
+  eString("textFieldGrp", "-tx", $newValue, $poseNameText);
+  eIndex("textFieldGrp", "-ip", $position, $poseNameText);
 }
 
 /*-
@@ -2134,45 +2251,51 @@ proc pasteAttributesCheckBoxGrp3Changed() {
 /*-
 @returns <>
 */
-proc selectPatternATextChanged() {
-  // print("selectPatternATextChanged\n"); // debug
+proc selectPatternATextEntered() {
+  // print("selectPatternATextEntered\n"); // debug
+  global string $nkPoseStackEditorSelectPatternA;
   string $selectPatternAText = getUIControl("nkPoseStackEditorWindow", "selectPatternAText");
-  string $currentText = qString("textFieldGrp", "-tx", $selectPatternAText);
-  string $newText = sanitizeText($currentText);
-  int $numNewText = `size $newText`;
-  if ($newText != $currentText || !$numNewText) {
-    int $position = qIndex("textFieldGrp", "-ip", $selectPatternAText);
-    // print("  position:" + $position + "\n"); // debug
-    if (!$numNewText) {
-      $newText = "_";
-      $position = -1;
-    }
-    eString("textFieldGrp", "-tx", $newText, $selectPatternAText);
-    eIndex("textFieldGrp", "-ip", $position, $selectPatternAText);
-  }
-  updatePoseSettings(3);
+  if (!qExists($selectPatternAText)) return;
+
+  string $currentValue = qString("textFieldGrp", "-tx", $selectPatternAText);
+  string $newValue = sanitizeText($currentValue);
+  // print("  currentValue:" + $currentValue + "\n"); // debug
+  // print("  newValue    :" + $newValue + "\n"); // debug
+  int $newValueLength = `size $newValue`;
+  if (!$newValueLength) $newValue = $nkPoseStackEditorSelectPatternA;
+  $nkPoseStackEditorSelectPatternA = $newValue;
+
+  int $position = qIndex("textFieldGrp", "-ip", $selectPatternAText);
+  // print("  position:" + $position + "\n"); // debug
+  eString("textFieldGrp", "-tx", $newValue, $selectPatternAText);
+  eIndex("textFieldGrp", "-ip", $position, $selectPatternAText);
+
+  if ($newValueLength) updatePoseSettings(3);
 }
 
 /*-
 @returns <>
 */
-proc selectPatternBTextChanged() {
-  // print("selectPatternBTextChanged\n"); // debug
+proc selectPatternBTextEntered() {
+  // print("selectPatternBTextEntered\n"); // debug
+  global string $nkPoseStackEditorSelectPatternB;
   string $selectPatternBText = getUIControl("nkPoseStackEditorWindow", "selectPatternBText");
-  string $currentText = qString("textFieldGrp", "-tx", $selectPatternBText);
-  string $newText = sanitizeText($currentText);
-  int $numNewText = `size $newText`;
-  if ($newText != $currentText || !$numNewText) {
-    int $position = qIndex("textFieldGrp", "-ip", $selectPatternBText);
-    // print("  position:" + $position + "\n"); // debug
-    if (!$numNewText) {
-      $newText = "_";
-      $position = -1;
-    }
-    eString("textFieldGrp", "-tx", $newText, $selectPatternBText);
-    eIndex("textFieldGrp", "-ip", $position, $selectPatternBText);
-  }
-  updatePoseSettings(4);
+  if (!qExists($selectPatternBText)) return;
+
+  string $currentValue = qString("textFieldGrp", "-tx", $selectPatternBText);
+  string $newValue = sanitizeText($currentValue);
+  // print("  currentValue:" + $currentValue + "\n"); // debug
+  // print("  newValue    :" + $newValue + "\n"); // debug
+  int $newValueLength = `size $newValue`;
+  if (!$newValueLength) $newValue = $nkPoseStackEditorSelectPatternB;
+  $nkPoseStackEditorSelectPatternB = $newValue;
+
+  int $position = qIndex("textFieldGrp", "-ip", $selectPatternBText);
+  // print("  position:" + $position + "\n"); // debug
+  eString("textFieldGrp", "-tx", $newValue, $selectPatternBText);
+  eIndex("textFieldGrp", "-ip", $position, $selectPatternBText);
+
+  if ($newValueLength) updatePoseSettings(4);
 }
 
 /*-
@@ -2273,6 +2396,7 @@ proc cancelButtonPressed() {
 */
 proc nkPoseStackWindowClosed() {
   // print("nkPoseStackWindowClosed\n"); // debug
+  unregisterEventJob();
   unsubscribePosesObservers();
   removeUIControls("nkPoseStackWindow", "");
   removeUIControls("nkPoseStackEditorWindow", "");
@@ -2371,7 +2495,7 @@ proc addPoseButtonPressed() {
   global string $nkPoseStackEditorPoseSettings[];
   initializeEditorParameters();
 
-  string $nodes[] = getSelectedNodes();
+  string $nodes[] = `ls -l -sl -tr`;
   // print("  nodes:{\n    " + (stringArrayToString($nodes, ",\n    ")) + "\n  }\n"); // debug
   int $numNodes = `size $nodes`;
   if (!$numNodes) return;
@@ -2494,7 +2618,7 @@ proc pasteButtonPressed(int $isOpposite) {
   int $index = qFirstIndex("textScrollList", "-sii", $poseList);
   // print("  index:" + $index + "\n"); // debug
   if ($index == -1) return;
-  string $nodes[] = getSelectedNodes();
+  string $nodes[] = `ls -l -sl -tr`;
   // print("  nodes:{\n    " + (stringArrayToString($nodes, ",\n    ")) + "\n  }\n"); // debug
   if (!`size $nodes`) return;
   pastePose($index, $isOpposite, $nodes);
@@ -2569,6 +2693,7 @@ proc buildEditorWindow() {
     string $outerForm = `formLayout "outerForm"`;
       string $poseNameText = `textFieldGrp
           -adj 2
+          -ann "Illegal Character:\n! = ; [ ] / ,"
           -cat 2 "right" -5
           -cw2 60 10
           -l "Pose Name:"
@@ -2620,6 +2745,7 @@ proc buildEditorWindow() {
             string $selectTextForm = `formLayout "selectTextForm"`;
               string $selectPatternAText = `textFieldGrp
                   -adj 2
+                  -ann "Illegal Character:\n! = ; [ ] / ,"
                   -cat 2 "right" -5
                   -cw2 16 10
                   -en false
@@ -2627,6 +2753,7 @@ proc buildEditorWindow() {
                   "selectPatternAText"`;
               string $selectPatternBText = `textFieldGrp
                   -adj 2
+                  -ann "Illegal Character:\n! = ; [ ] / ,"
                   -cat 2 "right" -5
                   -cw2 16 10
                   -en false
@@ -2730,13 +2857,13 @@ proc buildEditorWindow() {
       $buttonsForm;
 
   window -e -cc "nkPoseStackEventController(\"nkPoseStackEditorWindow\", \"cc\", \"nkPoseStackEditorWindow\");" $nkPoseStackEditorWindow;
-  textFieldGrp -e -tcc "nkPoseStackEventController(\"nkPoseStackEditorWindow\", \"tcc\", \"poseNameText\");" $poseNameText;
+  textFieldGrp -e -cc "nkPoseStackEventController(\"nkPoseStackEditorWindow\", \"cc\", \"poseNameText\");" $poseNameText;
   textScrollList -e -sc "nkPoseStackEventController(\"nkPoseStackEditorWindow\", \"sc\", \"nodeList\");" $nodeList;
   checkBoxGrp -e -cc1 "nkPoseStackEventController(\"nkPoseStackEditorWindow\", \"cc1\", \"pasteAttributesCheckBoxGrp\");" $pasteAttributesCheckBoxGrp;
   checkBoxGrp -e -cc2 "nkPoseStackEventController(\"nkPoseStackEditorWindow\", \"cc2\", \"pasteAttributesCheckBoxGrp\");" $pasteAttributesCheckBoxGrp;
   checkBoxGrp -e -cc3 "nkPoseStackEventController(\"nkPoseStackEditorWindow\", \"cc3\", \"pasteAttributesCheckBoxGrp\");" $pasteAttributesCheckBoxGrp;
-  textFieldGrp -e -tcc "nkPoseStackEventController(\"nkPoseStackEditorWindow\", \"tcc\", \"selectPatternAText\");" $selectPatternAText;
-  textFieldGrp -e -tcc "nkPoseStackEventController(\"nkPoseStackEditorWindow\", \"tcc\", \"selectPatternBText\");" $selectPatternBText;
+  textFieldGrp -e -cc "nkPoseStackEventController(\"nkPoseStackEditorWindow\", \"cc\", \"selectPatternAText\");" $selectPatternAText;
+  textFieldGrp -e -cc "nkPoseStackEventController(\"nkPoseStackEditorWindow\", \"cc\", \"selectPatternBText\");" $selectPatternBText;
   radioButtonGrp -e -onc "nkPoseStackEventController(\"nkPoseStackEditorWindow\", \"onc\", \"mirrorAxisRadioButton\");" $mirrorAxisRadioButton;
   radioButtonGrp -e -onc "nkPoseStackEventController(\"nkPoseStackEditorWindow\", \"onc\", \"primaryAxisRadioButton\");" $primaryAxisRadioButton;
   radioButtonGrp -e -onc "nkPoseStackEventController(\"nkPoseStackEditorWindow\", \"onc\", \"secondaryAxisRadioButton\");" $secondaryAxisRadioButton;
@@ -3075,6 +3202,9 @@ global proc nkPoseStackEventController(
         case "cc":
           switch ($control) {
             case "nkPoseStackEditorWindow": nkPoseStackEditorWindowClosed(); break;
+            case "poseNameText": poseNameTextEntered(); break;
+            case "selectPatternAText": selectPatternATextEntered(); break;
+            case "selectPatternBText": selectPatternBTextEntered(); break;
             default: break;
           }
           break;
@@ -3109,14 +3239,6 @@ global proc nkPoseStackEventController(
         case "sc":
           switch ($control) {
             case "nodeList": nodeListSelected(); break;
-            default: break;
-          }
-          break;
-        case "tcc":
-          switch ($control) {
-            case "poseNameText": poseNameTextChanged(); break;
-            case "selectPatternAText": selectPatternATextChanged(); break;
-            case "selectPatternBText": selectPatternBTextChanged(); break;
             default: break;
           }
           break;
@@ -3174,6 +3296,9 @@ global proc nkPoseStackEventController(
   }
 }
 
+// /////////////////////////////////////////////////////////////////////////////
+// オブザーバ
+// /////////////////////////////////////////////////////////////////////////////
 // -----------------------------------------------------------------------------
 // ドメインオブザーバ
 // -----------------------------------------------------------------------------
@@ -3195,31 +3320,59 @@ global proc nkPoseStackPosesChanged(string $selectionMode) {
   updatePoseList($selectionMode);
 }
 
-// -----------------------------------------------------------------------------
-// システムオブザーバ
-// -----------------------------------------------------------------------------
-// /*-
-// @returns <>
-// */
-// global proc nkPoseStackNewSceneOpened() {
-//   print("nkPoseStackNewSceneOpened\n"); // debug
-// }
-
-// /*-
-// @returns <>
-// */
-// global proc nkPoseStackPostSceneRead() {
-//   print("nkPoseStackPostSceneRead\n"); // debug
-// }
+/*-
+@param $nodes <string[]>
+@returns <>
+*/
+global proc nkPoseStackScriptNodesRetrieved(string $nodes[]) {
+  // print("nkPoseStackScriptNodesRetrieved\n"); // debug
+  // print("  nodes:{\n    " + stringArrayToString($nodes, ",\n    ") + "\n  }\n"); // debug
+  for ($n in $nodes) {
+    if (`size $n`) registerNodeJob($n);
+  }
+}
 
 // -----------------------------------------------------------------------------
+// イベントオブザーバ
+// -----------------------------------------------------------------------------
+/*-
+@returns <>
+*/
+global proc nkPoseStackNewSceneOpened() {
+  // print("nkPoseStackNewSceneOpened\n"); // debug
+  updatePoseList("keepIndex");
+}
+
+/*-
+@returns <>
+*/
+global proc nkPoseStackPostSceneRead() {
+  // print("nkPoseStackPostSceneRead\n"); // debug
+  updatePoseList("keepIndex");
+}
+
+// -----------------------------------------------------------------------------
+// ノードオブザーバ
+// -----------------------------------------------------------------------------
+/*-
+@param $nodeId <string>
+@returns <>
+*/
+global proc nkPoseStackAttributeDeleted(string $nodeId) {
+  // print("nkPoseStackAttributeDeleted\n"); // debug
+  // print("  nodeId:" + $nodeId + "\n"); // debug
+  unregisterNodeJob($nodeId);
+  updatePoseList("keepIndex");
+}
+
+// /////////////////////////////////////////////////////////////////////////////
 // メイン
-// -----------------------------------------------------------------------------
+// /////////////////////////////////////////////////////////////////////////////
 /*-
 @returns <string>
 */
 global proc string nkPoseStackVersion() {
-  return "3.9.0";
+  return "4.0.0";
 }
 
 /*-
@@ -3227,8 +3380,9 @@ global proc string nkPoseStackVersion() {
 */
 global proc nkPoseStack() {
   initializeInitParameters();
+  initializeScriptJobParameters();
   buildMainWindow();
-  // registerScriptJob();
+  registerEventJob();
 }
 
 /*
@@ -3241,34 +3395,19 @@ nkPoseStack;
 // /////////////////////////////////////////////////////////////////////////////
 /*-
 @returns <>
-*/
-proc testNewScene() {
-  file -f -new;
-}
-
-/*-
-@param $filename <string>
-@returns <>
-*/
-proc testOpenScene(string $filename) {
-  file -f -op "v=0;"  -iv  -typ "mayaAscii" -pmt false -o $filename;
-}
-
-/*-
-@returns <>
 @remarks データ変換。
 */
 proc test0() {
-  string $pv = getPoseVersion();
+  string $pv = getPoseVersion() + "\n";
 
   print("test0 start\n");
   string $r;
 
   // serialize
   $r = assertStringEqual("", serialize({})); if (`size $r`) warning $r;
-  $r = assertStringEqual($pv + "\na\n", serialize({"a"})); if (`size $r`) warning $r;
-  $r = assertStringEqual($pv + "\na\nb\n", serialize({"a", "b"})); if (`size $r`) warning $r;
-  $r = assertStringEqual($pv + "\na\nb\n", serialize({"a", "", "b"})); if (`size $r`) warning $r;
+  $r = assertStringEqual($pv + "a\n", serialize({"a"})); if (`size $r`) warning $r;
+  $r = assertStringEqual($pv + "a\nb\n", serialize({"a", "b"})); if (`size $r`) warning $r;
+  $r = assertStringEqual($pv + "a\nb\n", serialize({"a", "", "b"})); if (`size $r`) warning $r;
 
   // deserialize
   $r = assertStringArrayEqual({}, deserialize("")); if (`size $r`) warning $r;
@@ -3394,12 +3533,12 @@ proc test0() {
 
   // convertDataVersion
   {
-    string $pv = getPoseVersion();
+    string $pv = getPoseVersion() + "\n";
 
     $r = assertStringEqual("", convertDataVersion("")); if (`size $r`) warning $r;
-    $r = assertStringEqual("", convertDataVersion($pv + "\n")); if (`size $r`) warning $r;
-    $r = assertStringEqual("a\n", convertDataVersion($pv + "\na\n")); if (`size $r`) warning $r;
-    $r = assertStringEqual("xa\nxb\n", convertDataVersion("100\na\nb\n")); if (`size $r`) warning $r;
+    $r = assertStringEqual("", convertDataVersion($pv)); if (`size $r`) warning $r;
+    $r = assertStringEqual("a\n", convertDataVersion($pv + "a\n")); if (`size $r`) warning $r;
+    $r = assertStringEqual("xa\nxb\n", convertDataVersion("0\na\nb\n")); if (`size $r`) warning $r;
   }
 
   print("test0 end\n");
@@ -3533,12 +3672,42 @@ proc test1() {
 }
 
 /*-
+@var <string>
+*/
+global string $nkPoseStackScriptNodeTestNodes[];
+
+/*-
+@param $nodes <string[]>
+@returns <>
+*/
+global proc nkPoseStackScriptNodeTestObserver(string $nodes[]) {
+  global string $nkPoseStackScriptNodeTestNodes[];
+  string $r = assertStringArrayEqual($nkPoseStackScriptNodeTestNodes, $nodes); if (`size $r`) warning $r;
+  clear $nkPoseStackScriptNodeTestNodes;
+}
+
+/*-
 @returns <>
 @remarks スクリプトノード。
 */
 proc test2() {
+  global string $nkPoseStackScriptNodeTestNodes[];
+
   string $testDirname = `getenv "MAYA_APP_DIR"` + "/dev/nkPoseStack/test";
-  string $scriptNodeFilename = $testDirname + "/2022-scriptNodeTest.ma";
+  string $scriptNodeFilename = $testDirname + "/scriptNodeTest.ma";
+
+  string $pdA = "A=|locatorA_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;\n";
+  string $pdB = "B=|locatorB_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;\n";
+  string $pdC = "C=|locatorC_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;\n";
+  string $pdD = "D=|locatorD_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;\n";
+
+  string $poseA = "A=|locatorA_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;";
+  string $poseB = "B=|locatorB_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;";
+  string $poseC = "C=|locatorC_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;";
+  string $poseD = "D=|locatorD_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;";
+
+  string $poseAr = "!A=|locatorA_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;";
+  string $poseCr = "!C=|locatorC_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;";
 
   print("test2 start\n");
   string $r;
@@ -3580,8 +3749,8 @@ proc test2() {
 
   // getPoseStackDataAttr / setPoseStackDataAttr
   {
-    string $pv = getPoseVersion();
-    string $value = $pv + "\na\nb\n";
+    string $pv = getPoseVersion() + "\n";
+    string $value = $pv + "a\nb\n";
 
     testNewScene();
 
@@ -3601,10 +3770,12 @@ proc test2() {
 
   // mergeScriptNodes
   {
-    string $pv = getPoseVersion();
-    string $valueA = $pv + "\na\n";
-    string $valueB = $pv + "\nb\n";
-    string $valueC = $pv + "\nc\n";
+    string $pv = getPoseVersion() + "\n";
+    string $valueA = $pv + "a\n";
+    string $valueB = $pv + "b\n";
+    string $valueC = $pv + "c\n";
+
+    string $nM;
 
     testNewScene();
 
@@ -3627,24 +3798,42 @@ proc test2() {
     $r = assertStringEqual($valueA, getPoseStackDataAttr($nA)); if (`size $r`) warning $r;
     $r = assertStringEqual($valueB, getPoseStackDataAttr($nB)); if (`size $r`) warning $r;
     $r = assertStringEqual($valueC, getPoseStackDataAttr($nC)); if (`size $r`) warning $r;
-    string $n = mergeScriptNodes({$nA, $nB, $nC, $nT});
-    $r = assertTrue(isValidScriptNode($n)); if (`size $r`) warning $r;
-    $r = assertStringEqual($pv + "\na\nb\nc\n", getPoseStackDataAttr($n)); if (`size $r`) warning $r;
+    $nM = mergeScriptNodes({$nA, $nB, $nC, $nT});
+    $r = assertTrue(isValidScriptNode($nM)); if (`size $r`) warning $r;
+    $r = assertStringEqual($pv + "a\nb\nc\n", getPoseStackDataAttr($nM)); if (`size $r`) warning $r;
     $r = assertFalse(`objExists $nA`); if (`size $r`) warning $r;
     $r = assertFalse(`objExists $nB`); if (`size $r`) warning $r;
     $r = assertFalse(`objExists $nC`); if (`size $r`) warning $r;
     $r = assertTrue(`objExists $nT`); if (`size $r`) warning $r;
 
     if (`objExists $nT`) delete $nT;
-    if (`objExists $n`) delete $n;
+    if (`objExists $nM`) delete $nM;
+
+    testOpenScene($scriptNodeFilename);
+
+    $r = assertTrue(`objExists "nkPoseStackDataA"`); if (`size $r`) warning $r;
+    $r = assertTrue(`objExists "nkPoseStackDataB"`); if (`size $r`) warning $r;
+    $r = assertTrue(`objExists "nkPoseStackDataC"`); if (`size $r`) warning $r;
+    $r = assertTrue(`objExists "nkPoseStackDataD"`); if (`size $r`) warning $r;
+    $r = assertFalse(`objExists "nkPoseStackData"`); if (`size $r`) warning $r;
+    $nM = mergeScriptNodes({"nkPoseStackDataA", "nkPoseStackDataB", "nkPoseStackDataC", "nkPoseStackDataD"});
+    $r = assertTrue(isValidScriptNode($nM)); if (`size $r`) warning $r;
+    $r = assertStringEqual($pv + $pdB + $pdD, getPoseStackDataAttr($nM)); if (`size $r`) warning $r;
+    $r = assertTrue(`objExists "nkPoseStackDataA"`); if (`size $r`) warning $r;
+    $r = assertFalse(`objExists "nkPoseStackDataB"`); if (`size $r`) warning $r;
+    $r = assertTrue(`objExists "nkPoseStackDataC"`); if (`size $r`) warning $r;
+    $r = assertFalse(`objExists "nkPoseStackDataD"`); if (`size $r`) warning $r;
+    $r = assertTrue(`objExists "nkPoseStackData"`); if (`size $r`) warning $r;
   }
 
   // getScriptNodes
   {
-    string $pv = getPoseVersion();
-    string $valueA = $pv + "\na\n";
-    string $valueB = $pv + "\nb\n";
-    string $valueC = $pv + "\nc\n";
+    string $pv = getPoseVersion() + "\n";
+    string $valueA = $pv + "a\n";
+    string $valueB = $pv + "b\n";
+    string $valueC = $pv + "c\n";
+
+    subscribe("nkPoseStackScriptNodesRetrieved", "nkPoseStackScriptNodeTestObserver");
 
     testNewScene();
 
@@ -3657,26 +3846,37 @@ proc test2() {
     $r = assertStringEqual($valueA, getPoseStackDataAttr($nA)); if (`size $r`) warning $r;
     $r = assertStringEqual($valueB, getPoseStackDataAttr($nB)); if (`size $r`) warning $r;
     $r = assertStringEqual($valueC, getPoseStackDataAttr($nC)); if (`size $r`) warning $r;
+
+    $nkPoseStackScriptNodeTestNodes = {"nkPoseStackData"};
     $nodes = getScriptNodes();
+    $r = assertStringArrayEqual({}, $nkPoseStackScriptNodeTestNodes); if (`size $r`) warning $r;
+
     $r = assertIntEqual(1, `size $nodes`); if (`size $r`) warning $r;
+    $r = assertStringArrayEqual({"nkPoseStackData"}, $nodes); if (`size $r`) warning $r;
+    $r = assertTrue(`objExists "nkPoseStackData"`); if (`size $r`) warning $r;
     $r = assertFalse(`objExists $nA`); if (`size $r`) warning $r;
     $r = assertFalse(`objExists $nB`); if (`size $r`) warning $r;
     $r = assertFalse(`objExists $nC`); if (`size $r`) warning $r;
     $r = assertTrue(isValidScriptNode($nodes[0])); if (`size $r`) warning $r;
-    $r = assertStringEqual($pv + "\na\nb\nc\n", getPoseStackDataAttr($nodes[0])); if (`size $r`) warning $r;
+    $r = assertStringEqual($pv + "a\nb\nc\n", getPoseStackDataAttr($nodes[0])); if (`size $r`) warning $r;
 
     testOpenScene($scriptNodeFilename);
 
+    $nkPoseStackScriptNodeTestNodes = {"nkPoseStackDataA", "nkPoseStackDataC", "nkPoseStackData"};
     $nodes = getScriptNodes();
+    $r = assertStringArrayEqual({}, $nkPoseStackScriptNodeTestNodes); if (`size $r`) warning $r;
+
     $r = assertStringArrayEqual({"nkPoseStackDataA", "nkPoseStackDataC", "nkPoseStackData"}, $nodes); if (`size $r`) warning $r;
-    $r = assertStringEqual($pv + "\nb\nd\n", getPoseStackDataAttr($nodes[2])); if (`size $r`) warning $r;
+    $r = assertStringEqual($pv + $pdB + $pdD, getPoseStackDataAttr($nodes[2])); if (`size $r`) warning $r;
+
+    unsubscribe("nkPoseStackScriptNodesRetrieved", "nkPoseStackScriptNodeTestObserver");
   }
 
   // getEditableScriptNode
   {
-    string $pv = getPoseVersion();
-    string $valueA = $pv + "\na\n";
-    string $valueB = $pv + "\nb\n";
+    string $pv = getPoseVersion() + "\n";
+    string $valueA = $pv + "a\n";
+    string $valueB = $pv + "b\n";
 
     testNewScene();
 
@@ -3684,12 +3884,12 @@ proc test2() {
     $r = assertStringArrayEqual({}, getScriptNodes()); if (`size $r`) warning $r;
     string $nA = `rename (createScriptNode()) "nkPoseStackDataA"`;
     setPoseStackDataAttr($nA, $valueA);
-    $r = assertStringEqual("nkPoseStackData", getEditableScriptNode({})); if (`size $r`) warning $r;
-    $r = assertFalse(`objExists $nA`); if (`size $r`) warning $r;
-    $r = assertTrue(`objExists "nkPoseStackData"`); if (`size $r`) warning $r;
+    $r = assertStringEqual("nkPoseStackDataA", getEditableScriptNode({})); if (`size $r`) warning $r;
+    $r = assertTrue(`objExists $nA`); if (`size $r`) warning $r;
+    $r = assertFalse(`objExists "nkPoseStackData"`); if (`size $r`) warning $r;
     string $nB = `rename (createScriptNode()) "nkPoseStackDataB"`;
     setPoseStackDataAttr($nB, $valueB);
-    $r = assertStringEqual("", getEditableScriptNode({"nkPoseStackData", $nB})); if (`size $r`) warning $r; // 警告表示
+    $r = assertStringEqual("", getEditableScriptNode({$nA, $nB})); if (`size $r`) warning $r; // 警告表示
     $r = assertStringEqual("nkPoseStackData", getEditableScriptNode({})); if (`size $r`) warning $r;
     $r = assertFalse(`objExists $nB`); if (`size $r`) warning $r;
     $r = assertTrue(`objExists "nkPoseStackData"`); if (`size $r`) warning $r;
@@ -3737,7 +3937,20 @@ proc test2() {
 */
 proc test3() {
   string $testDirname = `getenv "MAYA_APP_DIR"` + "/dev/nkPoseStack/test";
-  string $scriptNodeFilename = $testDirname + "/2022-scriptNodeTest.ma";
+  string $scriptNodeFilename = $testDirname + "/scriptNodeTest.ma";
+
+  string $pdA = "A=|locatorA_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;\n";
+  string $pdB = "B=|locatorB_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;\n";
+  string $pdC = "C=|locatorC_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;\n";
+  string $pdD = "D=|locatorD_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;\n";
+
+  string $poseA = "A=|locatorA_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;";
+  string $poseB = "B=|locatorB_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;";
+  string $poseC = "C=|locatorC_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;";
+  string $poseD = "D=|locatorD_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;";
+
+  string $poseAr = "!A=|locatorA_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;";
+  string $poseCr = "!C=|locatorC_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;";
 
   print("test3 start\n");
   string $r;
@@ -3751,10 +3964,10 @@ proc test3() {
 
   // readAttrPoses
   {
-    string $pv = getPoseVersion();
-    string $valueA = $pv + "\na\n";
-    string $valueB = $pv + "\nb\n";
-    string $valueC = $pv + "\nc\n";
+    string $pv = getPoseVersion() + "\n";
+    string $valueA = $pv + "a\n";
+    string $valueB = $pv + "b\n";
+    string $valueC = $pv + "c\n";
 
     testNewScene();
 
@@ -3781,13 +3994,13 @@ proc test3() {
 
     testOpenScene($scriptNodeFilename);
 
-    $r = assertStringArrayEqual({"!a", "!c"}, readAttrPoses({"nkPoseStackDataA", "nkPoseStackDataC"})); if (`size $r`) warning $r;
+    $r = assertStringArrayEqual({$poseAr, $poseCr}, readAttrPoses({"nkPoseStackDataA", "nkPoseStackDataC"})); if (`size $r`) warning $r;
     $r = assertTrue(`objExists "nkPoseStackDataA"`); if (`size $r`) warning $r;
     $r = assertTrue(`objExists "nkPoseStackDataB"`); if (`size $r`) warning $r;
     $r = assertTrue(`objExists "nkPoseStackDataC"`); if (`size $r`) warning $r;
     $r = assertTrue(`objExists "nkPoseStackDataD"`); if (`size $r`) warning $r;
     $r = assertFalse(`objExists "nkPoseStackData"`); if (`size $r`) warning $r;
-    $r = assertStringArrayEqual({"!a", "!c", "b", "d"}, readAttrPoses({})); if (`size $r`) warning $r;
+    $r = assertStringArrayEqual({$poseAr, $poseCr, $poseB, $poseD}, readAttrPoses({})); if (`size $r`) warning $r;
     $r = assertTrue(`objExists "nkPoseStackDataA"`); if (`size $r`) warning $r;
     $r = assertFalse(`objExists "nkPoseStackDataB"`); if (`size $r`) warning $r;
     $r = assertTrue(`objExists "nkPoseStackDataC"`); if (`size $r`) warning $r;
@@ -3797,7 +4010,7 @@ proc test3() {
 
   // appendAttrPoses
   {
-    string $pv = getPoseVersion();
+    string $pv = getPoseVersion() + "\n";
 
     testNewScene();
 
@@ -3806,19 +4019,19 @@ proc test3() {
     $r = assertTrue(appendAttrPoses({"a", "b"})); if (`size $r`) warning $r;
     $nodes = getScriptNodes();
     $r = assertIntEqual(1, `size $nodes`); if (`size $r`) warning $r;
-    $r = assertStringEqual($pv + "\na\nb\n", getPoseStackDataAttr($nodes[0])); if (`size $r`) warning $r;
+    $r = assertStringEqual($pv + "a\nb\n", getPoseStackDataAttr($nodes[0])); if (`size $r`) warning $r;
 
     testOpenScene($scriptNodeFilename);
 
     $r = assertTrue(appendAttrPoses({"e", "f"})); if (`size $r`) warning $r;
     $nodes = getScriptNodes();
     $r = assertStringArrayEqual({"nkPoseStackDataA", "nkPoseStackDataC", "nkPoseStackData"}, $nodes); if (`size $r`) warning $r;
-    $r = assertStringEqual($pv + "\nb\nd\ne\nf\n", getPoseStackDataAttr($nodes[2])); if (`size $r`) warning $r;
+    $r = assertStringEqual($pv + $pdB + $pdD + "e\nf\n", getPoseStackDataAttr($nodes[2])); if (`size $r`) warning $r;
   }
 
   // writeAttrPoses
   {
-    string $pv = getPoseVersion();
+    string $pv = getPoseVersion() + "\n";
 
     testNewScene();
 
@@ -3830,7 +4043,7 @@ proc test3() {
     $r = assertTrue(writeAttrPoses({"a", "b"})); if (`size $r`) warning $r;
     $nodes = getScriptNodes();
     $r = assertIntEqual(1, `size $nodes`); if (`size $r`) warning $r;
-    $r = assertStringEqual($pv + "\na\nb\n", getPoseStackDataAttr($nodes[0])); if (`size $r`) warning $r;
+    $r = assertStringEqual($pv + "a\nb\n", getPoseStackDataAttr($nodes[0])); if (`size $r`) warning $r;
     $r = assertTrue(writeAttrPoses({})); if (`size $r`) warning $r;
     $nodes = getScriptNodes();
     $r = assertIntEqual(0, `size $nodes`); if (`size $r`) warning $r;
@@ -3840,15 +4053,15 @@ proc test3() {
     $r = assertTrue(writeAttrPoses({"e", "f"})); if (`size $r`) warning $r;
     $nodes = getScriptNodes();
     $r = assertStringArrayEqual({"nkPoseStackDataA", "nkPoseStackDataC", "nkPoseStackData"}, $nodes); if (`size $r`) warning $r;
-    $r = assertStringEqual($pv + "\ne\nf\n", getPoseStackDataAttr($nodes[2])); if (`size $r`) warning $r;
+    $r = assertStringEqual($pv + "e\nf\n", getPoseStackDataAttr($nodes[2])); if (`size $r`) warning $r;
   }
 
   // makeEditablePoses
   {
-    string $pv = getPoseVersion();
-    string $valueA = $pv + "\n!a\n";
-    string $valueB = $pv + "\nb\n";
-    string $valueC = $pv + "\nc\n";
+    string $pv = getPoseVersion() + "\n";
+    string $valueA = $pv + "!a\n";
+    string $valueB = $pv + "b\n";
+    string $valueC = $pv + "c\n";
     string $poses[];
 
     testNewScene();
@@ -3872,12 +4085,12 @@ proc test3() {
     $nodes = getScriptNodes();
     $r = assertStringArrayEqual({"nkPoseStackDataA", "nkPoseStackDataC", "nkPoseStackData"}, $nodes); if (`size $r`) warning $r;
     $r = assertIntEqual(2, makeEditablePoses($nodes, $poses)); if (`size $r`) warning $r;
-    $r = assertStringArrayEqual({"b", "d"}, $poses); if (`size $r`) warning $r;
+    $r = assertStringArrayEqual({$poseB, $poseD}, $poses); if (`size $r`) warning $r;
   }
 
   // insertPose
   {
-    string $pv = getPoseVersion();
+    string $pv = getPoseVersion() + "\n";
 
     testNewScene();
 
@@ -3890,43 +4103,43 @@ proc test3() {
     $r = assertTrue(insertPose(0, "x")); if (`size $r`) warning $r;
     $nodes = getScriptNodes();
     $r = assertIntEqual(1, `size $nodes`); if (`size $r`) warning $r;
-    $r = assertStringEqual($pv + "\nx\n", getPoseStackDataAttr($nodes[0])); if (`size $r`) warning $r;
+    $r = assertStringEqual($pv + "x\n", getPoseStackDataAttr($nodes[0])); if (`size $r`) warning $r;
     $r = assertTrue(insertPose(-1, "y")); if (`size $r`) warning $r;
     $nodes = getScriptNodes();
     $r = assertIntEqual(1, `size $nodes`); if (`size $r`) warning $r;
-    $r = assertStringEqual($pv + "\ny\nx\n", getPoseStackDataAttr($nodes[0])); if (`size $r`) warning $r;
+    $r = assertStringEqual($pv + "y\nx\n", getPoseStackDataAttr($nodes[0])); if (`size $r`) warning $r;
     $r = assertTrue(writeAttrPoses({"a", "c"})); if (`size $r`) warning $r;
     $nodes = getScriptNodes();
     $r = assertIntEqual(1, `size $nodes`); if (`size $r`) warning $r;
-    $r = assertStringEqual($pv + "\na\nc\n", getPoseStackDataAttr($nodes[0])); if (`size $r`) warning $r;
+    $r = assertStringEqual($pv + "a\nc\n", getPoseStackDataAttr($nodes[0])); if (`size $r`) warning $r;
     $r = assertTrue(insertPose(1, "b")); if (`size $r`) warning $r;
     $nodes = getScriptNodes();
     $r = assertIntEqual(1, `size $nodes`); if (`size $r`) warning $r;
-    $r = assertStringEqual($pv + "\na\nb\nc\n", getPoseStackDataAttr($nodes[0])); if (`size $r`) warning $r;
+    $r = assertStringEqual($pv + "a\nb\nc\n", getPoseStackDataAttr($nodes[0])); if (`size $r`) warning $r;
     $r = assertTrue(insertPose(10, "d")); if (`size $r`) warning $r;
     $nodes = getScriptNodes();
     $r = assertIntEqual(1, `size $nodes`); if (`size $r`) warning $r;
-    $r = assertStringEqual($pv + "\na\nb\nc\nd\n", getPoseStackDataAttr($nodes[0])); if (`size $r`) warning $r;
+    $r = assertStringEqual($pv + "a\nb\nc\nd\n", getPoseStackDataAttr($nodes[0])); if (`size $r`) warning $r;
 
     testOpenScene($scriptNodeFilename);
 
     $r = assertFalse(insertPose(1, "")); if (`size $r`) warning $r;
     $nodes = getScriptNodes();
     $r = assertStringArrayEqual({"nkPoseStackDataA", "nkPoseStackDataC", "nkPoseStackData"}, $nodes); if (`size $r`) warning $r;
-    $r = assertStringEqual($pv + "\nb\nd\n", getPoseStackDataAttr($nodes[2])); if (`size $r`) warning $r;
+    $r = assertStringEqual($pv + $pdB + $pdD, getPoseStackDataAttr($nodes[2])); if (`size $r`) warning $r;
     $r = assertTrue(insertPose(2, "e")); if (`size $r`) warning $r;
     $nodes = getScriptNodes();
     $r = assertStringArrayEqual({"nkPoseStackDataA", "nkPoseStackDataC", "nkPoseStackData"}, $nodes); if (`size $r`) warning $r;
-    $r = assertStringEqual($pv + "\ne\nb\nd\n", getPoseStackDataAttr($nodes[2])); if (`size $r`) warning $r;
+    $r = assertStringEqual($pv + "e\n" + $pdB + $pdD, getPoseStackDataAttr($nodes[2])); if (`size $r`) warning $r;
     $r = assertTrue(insertPose(3, "f")); if (`size $r`) warning $r;
     $nodes = getScriptNodes();
     $r = assertStringArrayEqual({"nkPoseStackDataA", "nkPoseStackDataC", "nkPoseStackData"}, $nodes); if (`size $r`) warning $r;
-    $r = assertStringEqual($pv + "\ne\nf\nb\nd\n", getPoseStackDataAttr($nodes[2])); if (`size $r`) warning $r;
+    $r = assertStringEqual($pv + "e\nf\n" + $pdB + $pdD, getPoseStackDataAttr($nodes[2])); if (`size $r`) warning $r;
   }
 
   // movePose
   {
-    string $pv = getPoseVersion();
+    string $pv = getPoseVersion() + "\n";
 
     testNewScene();
 
@@ -3937,20 +4150,20 @@ proc test3() {
     $r = assertTrue(writeAttrPoses({"a"})); if (`size $r`) warning $r;
     $nodes = getScriptNodes();
     $r = assertIntEqual(1, `size $nodes`); if (`size $r`) warning $r;
-    $r = assertStringEqual($pv + "\na\n", getPoseStackDataAttr($nodes[0])); if (`size $r`) warning $r;
+    $r = assertStringEqual($pv + "a\n", getPoseStackDataAttr($nodes[0])); if (`size $r`) warning $r;
     $r = assertFalse(movePose(0, 1)); if (`size $r`) warning $r;
     $r = assertTrue(writeAttrPoses({"a", "b"})); if (`size $r`) warning $r;
-    $r = assertStringEqual($pv + "\na\nb\n", getPoseStackDataAttr($nodes[0])); if (`size $r`) warning $r;
+    $r = assertStringEqual($pv + "a\nb\n", getPoseStackDataAttr($nodes[0])); if (`size $r`) warning $r;
     $r = assertTrue(movePose(0, 1)); if (`size $r`) warning $r;
-    $r = assertStringEqual($pv + "\nb\na\n", getPoseStackDataAttr($nodes[0])); if (`size $r`) warning $r;
+    $r = assertStringEqual($pv + "b\na\n", getPoseStackDataAttr($nodes[0])); if (`size $r`) warning $r;
     $r = assertTrue(movePose(1, 0)); if (`size $r`) warning $r;
-    $r = assertStringEqual($pv + "\na\nb\n", getPoseStackDataAttr($nodes[0])); if (`size $r`) warning $r;
+    $r = assertStringEqual($pv + "a\nb\n", getPoseStackDataAttr($nodes[0])); if (`size $r`) warning $r;
     $r = assertTrue(writeAttrPoses({"a", "b", "c"})); if (`size $r`) warning $r;
-    $r = assertStringEqual($pv + "\na\nb\nc\n", getPoseStackDataAttr($nodes[0])); if (`size $r`) warning $r;
+    $r = assertStringEqual($pv + "a\nb\nc\n", getPoseStackDataAttr($nodes[0])); if (`size $r`) warning $r;
     $r = assertFalse(movePose(0, -1)); if (`size $r`) warning $r;
-    $r = assertStringEqual($pv + "\na\nb\nc\n", getPoseStackDataAttr($nodes[0])); if (`size $r`) warning $r;
+    $r = assertStringEqual($pv + "a\nb\nc\n", getPoseStackDataAttr($nodes[0])); if (`size $r`) warning $r;
     $r = assertFalse(movePose(2, 3)); if (`size $r`) warning $r;
-    $r = assertStringEqual($pv + "\na\nb\nc\n", getPoseStackDataAttr($nodes[0])); if (`size $r`) warning $r;
+    $r = assertStringEqual($pv + "a\nb\nc\n", getPoseStackDataAttr($nodes[0])); if (`size $r`) warning $r;
 
     testOpenScene($scriptNodeFilename);
 
@@ -3963,20 +4176,20 @@ proc test3() {
     $r = assertFalse(movePose(3, 1)); if (`size $r`) warning $r;
     $nodes = getScriptNodes();
     $r = assertStringArrayEqual({"nkPoseStackDataA", "nkPoseStackDataC", "nkPoseStackData"}, $nodes); if (`size $r`) warning $r;
-    $r = assertStringEqual($pv + "\nb\nd\n", getPoseStackDataAttr($nodes[2])); if (`size $r`) warning $r;
+    $r = assertStringEqual($pv + $pdB + $pdD, getPoseStackDataAttr($nodes[2])); if (`size $r`) warning $r;
     $r = assertTrue(movePose(2, 3)); if (`size $r`) warning $r;
     $nodes = getScriptNodes();
     $r = assertStringArrayEqual({"nkPoseStackDataA", "nkPoseStackDataC", "nkPoseStackData"}, $nodes); if (`size $r`) warning $r;
-    $r = assertStringEqual($pv + "\nd\nb\n", getPoseStackDataAttr($nodes[2])); if (`size $r`) warning $r;
+    $r = assertStringEqual($pv + $pdD + $pdB, getPoseStackDataAttr($nodes[2])); if (`size $r`) warning $r;
     $r = assertTrue(movePose(3, 2)); if (`size $r`) warning $r;
     $nodes = getScriptNodes();
     $r = assertStringArrayEqual({"nkPoseStackDataA", "nkPoseStackDataC", "nkPoseStackData"}, $nodes); if (`size $r`) warning $r;
-    $r = assertStringEqual($pv + "\nb\nd\n", getPoseStackDataAttr($nodes[2])); if (`size $r`) warning $r;
+    $r = assertStringEqual($pv + $pdB + $pdD, getPoseStackDataAttr($nodes[2])); if (`size $r`) warning $r;
   }
 
   // removePose
   {
-    string $pv = getPoseVersion();
+    string $pv = getPoseVersion() + "\n";
 
     testNewScene();
 
@@ -3987,11 +4200,11 @@ proc test3() {
     $r = assertTrue(writeAttrPoses({"a", "b", "c"})); if (`size $r`) warning $r;
     $nodes = getScriptNodes();
     $r = assertIntEqual(1, `size $nodes`); if (`size $r`) warning $r;
-    $r = assertStringEqual($pv + "\na\nb\nc\n", getPoseStackDataAttr($nodes[0])); if (`size $r`) warning $r;
+    $r = assertStringEqual($pv + "a\nb\nc\n", getPoseStackDataAttr($nodes[0])); if (`size $r`) warning $r;
     $r = assertFalse(removePose(-1)); if (`size $r`) warning $r;
     $r = assertFalse(removePose(3)); if (`size $r`) warning $r;
     $r = assertTrue(removePose(1)); if (`size $r`) warning $r;
-    $r = assertStringEqual($pv + "\na\nc\n", getPoseStackDataAttr($nodes[0])); if (`size $r`) warning $r;
+    $r = assertStringEqual($pv + "a\nc\n", getPoseStackDataAttr($nodes[0])); if (`size $r`) warning $r;
     $r = assertTrue(removePose(1)); if (`size $r`) warning $r;
     $r = assertTrue(removePose(0)); if (`size $r`) warning $r;
     $nodes = getScriptNodes();
@@ -4003,9 +4216,9 @@ proc test3() {
     $r = assertFalse(removePose(4)); if (`size $r`) warning $r;
     $nodes = getScriptNodes();
     $r = assertStringArrayEqual({"nkPoseStackDataA", "nkPoseStackDataC", "nkPoseStackData"}, $nodes); if (`size $r`) warning $r;
-    $r = assertStringEqual($pv + "\nb\nd\n", getPoseStackDataAttr($nodes[2])); if (`size $r`) warning $r;
+    $r = assertStringEqual($pv + $pdB + $pdD, getPoseStackDataAttr($nodes[2])); if (`size $r`) warning $r;
     $r = assertTrue(removePose(2)); if (`size $r`) warning $r;
-    $r = assertStringEqual($pv + "\nd\n", getPoseStackDataAttr($nodes[2])); if (`size $r`) warning $r;
+    $r = assertStringEqual($pv + $pdD, getPoseStackDataAttr($nodes[2])); if (`size $r`) warning $r;
     $r = assertTrue(removePose(2)); if (`size $r`) warning $r;
     $nodes = getScriptNodes();
     $r = assertStringArrayEqual({"nkPoseStackDataA", "nkPoseStackDataC"}, $nodes); if (`size $r`) warning $r;
@@ -4013,7 +4226,7 @@ proc test3() {
 
   // replacePose
   {
-    string $pv = getPoseVersion();
+    string $pv = getPoseVersion() + "\n";
 
     testNewScene();
 
@@ -4025,12 +4238,12 @@ proc test3() {
     $r = assertTrue(writeAttrPoses({"a", "b"})); if (`size $r`) warning $r;
     $nodes = getScriptNodes();
     $r = assertIntEqual(1, `size $nodes`); if (`size $r`) warning $r;
-    $r = assertStringEqual($pv + "\na\nb\n", getPoseStackDataAttr($nodes[0])); if (`size $r`) warning $r;
+    $r = assertStringEqual($pv + "a\nb\n", getPoseStackDataAttr($nodes[0])); if (`size $r`) warning $r;
     $r = assertFalse(replacePose(0, "")); if (`size $r`) warning $r;
     $r = assertFalse(replacePose(-1, "x")); if (`size $r`) warning $r;
     $r = assertFalse(replacePose(3, "x")); if (`size $r`) warning $r;
     $r = assertTrue(replacePose(0, "x")); if (`size $r`) warning $r;
-    $r = assertStringEqual($pv + "\nx\nb\n", getPoseStackDataAttr($nodes[0])); if (`size $r`) warning $r;
+    $r = assertStringEqual($pv + "x\nb\n", getPoseStackDataAttr($nodes[0])); if (`size $r`) warning $r;
 
     testOpenScene($scriptNodeFilename);
 
@@ -4038,58 +4251,63 @@ proc test3() {
     $r = assertFalse(replacePose(-1, "x")); if (`size $r`) warning $r;
     $nodes = getScriptNodes();
     $r = assertStringArrayEqual({"nkPoseStackDataA", "nkPoseStackDataC", "nkPoseStackData"}, $nodes); if (`size $r`) warning $r;
-    $r = assertStringEqual($pv + "\nb\nd\n", getPoseStackDataAttr($nodes[2])); if (`size $r`) warning $r;
+    $r = assertStringEqual($pv + $pdB + $pdD, getPoseStackDataAttr($nodes[2])); if (`size $r`) warning $r;
     $r = assertFalse(replacePose(0, "x")); if (`size $r`) warning $r;
-    $r = assertStringEqual($pv + "\nb\nd\n", getPoseStackDataAttr($nodes[2])); if (`size $r`) warning $r;
+    $r = assertStringEqual($pv + $pdB + $pdD, getPoseStackDataAttr($nodes[2])); if (`size $r`) warning $r;
     $r = assertFalse(replacePose(4, "x")); if (`size $r`) warning $r;
-    $r = assertStringEqual($pv + "\nb\nd\n", getPoseStackDataAttr($nodes[2])); if (`size $r`) warning $r;
+    $r = assertStringEqual($pv + $pdB + $pdD, getPoseStackDataAttr($nodes[2])); if (`size $r`) warning $r;
     $r = assertTrue(replacePose(2, "x")); if (`size $r`) warning $r;
-    $r = assertStringEqual($pv + "\nx\nd\n", getPoseStackDataAttr($nodes[2])); if (`size $r`) warning $r;
+    $r = assertStringEqual($pv + "x\n" + $pdD, getPoseStackDataAttr($nodes[2])); if (`size $r`) warning $r;
   }
 
   print("test3 end\n");
 }
 
-/*-
-@returns <>
-*/
-global proc nkPoseStackTestNegativeIndex(int $index) {
-  // print("// nkPoseStackTestNegativeIndex(" + $index + ")\n"); // debug
-  string $r = assertIntEqual(-1, $index); if (`size $r`) warning $r;
-}
+// /*-
+// @returns <>
+// */
+// global proc nkPoseStackTestNegativeIndex(int $index) {
+//   print("// nkPoseStackTestNegativeIndex(" + $index + ")\n"); // debug
+//   string $r = assertIntEqual(-1, $index); if (`size $r`) warning $r;
+// }
 
 /*-
 @var <string>
 */
-global string $nkPoseStackTestSelectionMode;
+global string $nkPoseStackPoseOpsTestSelectionMode;
 
 /*-
-@param $selectionMode <string> 更新後の選択状態。
-| 値          | 説明                             |
-| ----------- | -------------------------------- |
-| `none`      | 選択無し                         |
-| `keepIndex` | 前回の選択インデックスを引き継ぐ |
-| `keepItem`  | 前回の選択アイテムを引き継ぐ     |
-| `last`      | 末尾のアイテムを選択             |
-| `prev`      | 前に一つずらす                   |
-| `next`      | 後に一つずらす                   |
+@param $selectionMode <string>
 @returns <>
 */
-global proc nkPoseStackTestObserver(string $selectionMode) {
-  global string $nkPoseStackTestSelectionMode;
-  string $r = assertStringEqual($nkPoseStackTestSelectionMode, $selectionMode); if (`size $r`) warning $r;
-  $nkPoseStackTestSelectionMode = "";
+global proc nkPoseStackPoseOpsTestObserver(string $selectionMode) {
+  global string $nkPoseStackPoseOpsTestSelectionMode;
+  string $r = assertStringEqual($nkPoseStackPoseOpsTestSelectionMode, $selectionMode); if (`size $r`) warning $r;
+  $nkPoseStackPoseOpsTestSelectionMode = "";
 }
 
 /*-
 @returns <>
-@remarks ポーズ。
+@remarks ポーズ操作。
 */
 proc test4() {
-  global string $nkPoseStackTestSelectionMode;
+  global string $nkPoseStackPoseOpsTestSelectionMode;
 
   string $testDirname = `getenv "MAYA_APP_DIR"` + "/dev/nkPoseStack/test";
-  string $scriptNodeFilename = $testDirname + "/2022-scriptNodeTest.ma";
+  string $scriptNodeFilename = $testDirname + "/scriptNodeTest.ma";
+
+  string $pdA = "A=|locatorA_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;\n";
+  string $pdB = "B=|locatorB_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;\n";
+  string $pdC = "C=|locatorC_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;\n";
+  string $pdD = "D=|locatorD_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;\n";
+
+  string $poseA = "A=|locatorA_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;";
+  string $poseB = "B=|locatorB_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;";
+  string $poseC = "C=|locatorC_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;";
+  string $poseD = "D=|locatorD_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;";
+
+  string $poseAr = "!A=|locatorA_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;";
+  string $poseCr = "!C=|locatorC_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;";
 
   print("test4 start\n");
   string $r;
@@ -4097,16 +4315,16 @@ proc test4() {
 
   // clearPoses
   {
-    subscribe("nkPoseStackPosesCleared", "nkPoseStackTestObserver");
+    subscribe("nkPoseStackPosesCleared", "nkPoseStackPoseOpsTestObserver");
 
     testNewScene();
 
     string $nA = `rename (createScriptNode()) "nkPoseStackDataA"`;
     string $nB = `rename (createScriptNode()) "nkPoseStackDataB"`;
     string $nC = `rename (createScriptNode()) "nkPoseStackDataC"`;
-    $nkPoseStackTestSelectionMode = "none";
+    $nkPoseStackPoseOpsTestSelectionMode = "none";
     $r = assertTrue(clearPoses()); if (`size $r`) warning $r;
-    $r = assertStringEqual("", $nkPoseStackTestSelectionMode); if (`size $r`) warning $r;
+    $r = assertStringEqual("", $nkPoseStackPoseOpsTestSelectionMode); if (`size $r`) warning $r;
     $r = assertFalse(`objExists $nA`); if (`size $r`) warning $r;
     $r = assertFalse(`objExists $nB`); if (`size $r`) warning $r;
     $r = assertFalse(`objExists $nC`); if (`size $r`) warning $r;
@@ -4114,12 +4332,12 @@ proc test4() {
     testOpenScene($scriptNodeFilename);
 
     $r = assertStringArrayEqual({"nkPoseStackDataA", "nkPoseStackDataC", "nkPoseStackData"}, getScriptNodes()); if (`size $r`) warning $r;
-    $nkPoseStackTestSelectionMode = "none";
+    $nkPoseStackPoseOpsTestSelectionMode = "none";
     $r = assertTrue(clearPoses()); if (`size $r`) warning $r;
-    $r = assertStringEqual("", $nkPoseStackTestSelectionMode); if (`size $r`) warning $r;
+    $r = assertStringEqual("", $nkPoseStackPoseOpsTestSelectionMode); if (`size $r`) warning $r;
     $r = assertStringArrayEqual({"nkPoseStackDataA", "nkPoseStackDataC"}, getScriptNodes()); if (`size $r`) warning $r;
 
-    unsubscribe("nkPoseStackPosesCleared", "nkPoseStackTestObserver");
+    unsubscribe("nkPoseStackPosesCleared", "nkPoseStackPoseOpsTestObserver");
   }
 
   // openPoses / importPoses
@@ -4130,55 +4348,55 @@ proc test4() {
     string $openConvertFilename = $testDirname + "/openPosesConvertTest.posestack";
     string $importConvertFilename = $testDirname + "/importPosesConvertTest.posestack";
 
-    string $pv = getPoseVersion();
+    string $pv = getPoseVersion() + "\n";
 
-    subscribe("nkPoseStackPosesOpened", "nkPoseStackTestObserver");
-    subscribe("nkPoseStackPosesImported", "nkPoseStackTestObserver");
+    subscribe("nkPoseStackPosesOpened", "nkPoseStackPoseOpsTestObserver");
+    subscribe("nkPoseStackPosesImported", "nkPoseStackPoseOpsTestObserver");
 
     testNewScene();
 
     $nodes = getScriptNodes();
     $r = assertIntEqual(0, `size $nodes`); if (`size $r`) warning $r;
 
-    $nkPoseStackTestSelectionMode = "none";
+    $nkPoseStackPoseOpsTestSelectionMode = "none";
     $r = assertFalse(openPoses($xFilename)); if (`size $r`) warning $r;
-    $r = assertStringEqual("none", $nkPoseStackTestSelectionMode); if (`size $r`) warning $r;
+    $r = assertStringEqual("none", $nkPoseStackPoseOpsTestSelectionMode); if (`size $r`) warning $r;
     $r = assertTrue(openPoses($openFilename)); if (`size $r`) warning $r;
-    $r = assertStringEqual("", $nkPoseStackTestSelectionMode); if (`size $r`) warning $r;
+    $r = assertStringEqual("", $nkPoseStackPoseOpsTestSelectionMode); if (`size $r`) warning $r;
     $nodes = getScriptNodes();
     $r = assertIntEqual(1, `size $nodes`); if (`size $r`) warning $r;
-    $r = assertStringEqual($pv + "\na\nb\nc\n", getPoseStackDataAttr($nodes[0])); if (`size $r`) warning $r;
-    $nkPoseStackTestSelectionMode = "none";
+    $r = assertStringEqual($pv + "a\nb\nc\n", getPoseStackDataAttr($nodes[0])); if (`size $r`) warning $r;
+    $nkPoseStackPoseOpsTestSelectionMode = "none";
     $r = assertFalse(importPoses($xFilename)); if (`size $r`) warning $r;
-    $r = assertStringEqual("none", $nkPoseStackTestSelectionMode); if (`size $r`) warning $r;
+    $r = assertStringEqual("none", $nkPoseStackPoseOpsTestSelectionMode); if (`size $r`) warning $r;
     $r = assertTrue(importPoses($importFilename)); if (`size $r`) warning $r;
-    $r = assertStringEqual("", $nkPoseStackTestSelectionMode); if (`size $r`) warning $r;
+    $r = assertStringEqual("", $nkPoseStackPoseOpsTestSelectionMode); if (`size $r`) warning $r;
     $nodes = getScriptNodes();
     $r = assertIntEqual(1, `size $nodes`); if (`size $r`) warning $r;
-    $r = assertStringEqual($pv + "\na\nb\nc\nd\ne\n", getPoseStackDataAttr($nodes[0])); if (`size $r`) warning $r;
+    $r = assertStringEqual($pv + "a\nb\nc\nd\ne\n", getPoseStackDataAttr($nodes[0])); if (`size $r`) warning $r;
 
-    $nkPoseStackTestSelectionMode = "none";
+    $nkPoseStackPoseOpsTestSelectionMode = "none";
     $r = assertTrue(openPoses($openConvertFilename)); if (`size $r`) warning $r;
-    $r = assertStringEqual("", $nkPoseStackTestSelectionMode); if (`size $r`) warning $r;
+    $r = assertStringEqual("", $nkPoseStackPoseOpsTestSelectionMode); if (`size $r`) warning $r;
     $nodes = getScriptNodes();
     $r = assertIntEqual(1, `size $nodes`); if (`size $r`) warning $r;
-    $r = assertStringEqual($pv + "\nxa\nxb\nxc\n", getPoseStackDataAttr($nodes[0])); if (`size $r`) warning $r;
-    $nkPoseStackTestSelectionMode = "none";
+    $r = assertStringEqual($pv + "xa\nxb\nxc\n", getPoseStackDataAttr($nodes[0])); if (`size $r`) warning $r;
+    $nkPoseStackPoseOpsTestSelectionMode = "none";
     $r = assertTrue(importPoses($importConvertFilename)); if (`size $r`) warning $r;
-    $r = assertStringEqual("", $nkPoseStackTestSelectionMode); if (`size $r`) warning $r;
+    $r = assertStringEqual("", $nkPoseStackPoseOpsTestSelectionMode); if (`size $r`) warning $r;
     $nodes = getScriptNodes();
     $r = assertIntEqual(1, `size $nodes`); if (`size $r`) warning $r;
-    $r = assertStringEqual($pv + "\nxa\nxb\nxc\nxd\nxe\n", getPoseStackDataAttr($nodes[0])); if (`size $r`) warning $r;
+    $r = assertStringEqual($pv + "xa\nxb\nxc\nxd\nxe\n", getPoseStackDataAttr($nodes[0])); if (`size $r`) warning $r;
 
-    unsubscribe("nkPoseStackPosesOpened", "nkPoseStackTestObserver");
-    unsubscribe("nkPoseStackPosesImported", "nkPoseStackTestObserver");
+    unsubscribe("nkPoseStackPosesOpened", "nkPoseStackPoseOpsTestObserver");
+    unsubscribe("nkPoseStackPosesImported", "nkPoseStackPoseOpsTestObserver");
   }
 
   // savePoses
   {
     string $saveFilename = `getenv "MAYA_APP_DIR"` + "/dev/nkPoseStack/test/savePosesTest.posestack";
 
-    string $pv = getPoseVersion();
+    string $pv = getPoseVersion() + "\n";
 
     testNewScene();
 
@@ -4188,10 +4406,10 @@ proc test4() {
     $r = assertTrue(writeAttrPoses({"f", "g"})); if (`size $r`) warning $r;
     $nodes = getScriptNodes();
     $r = assertIntEqual(1, `size $nodes`); if (`size $r`) warning $r;
-    $r = assertStringEqual($pv + "\nf\ng\n", getPoseStackDataAttr($nodes[0])); if (`size $r`) warning $r;
+    $r = assertStringEqual($pv + "f\ng\n", getPoseStackDataAttr($nodes[0])); if (`size $r`) warning $r;
     $r = assertTrue(savePoses($saveFilename)); if (`size $r`) warning $r;
     $r = assertTrue(existsFilename($saveFilename)); if (`size $r`) warning $r;
-    $r = assertStringEqual($pv + "\nf\ng\n", readAllText($saveFilename, "")); if (`size $r`) warning $r;
+    $r = assertStringEqual($pv + "f\ng\n", readAllText($saveFilename, "")); if (`size $r`) warning $r;
 
     $r = assertTrue(deleteFile($saveFilename)); if (`size $r`) warning $r;
     $r = assertFalse(existsFilename($saveFilename)); if (`size $r`) warning $r;
@@ -4204,9 +4422,9 @@ proc test4() {
     $r = assertTrue(savePoses($saveFilename)); if (`size $r`) warning $r;
     $nodes = getScriptNodes();
     $r = assertStringArrayEqual({"nkPoseStackDataA", "nkPoseStackDataC", "nkPoseStackData"}, $nodes); if (`size $r`) warning $r;
-    $r = assertStringEqual($pv + "\nb\nd\n", getPoseStackDataAttr($nodes[2])); if (`size $r`) warning $r;
+    $r = assertStringEqual($pv + $pdB + $pdD, getPoseStackDataAttr($nodes[2])); if (`size $r`) warning $r;
     $r = assertTrue(existsFilename($saveFilename)); if (`size $r`) warning $r;
-    $r = assertStringEqual($pv + "\nb\nd\n", readAllText($saveFilename, "")); if (`size $r`) warning $r;
+    $r = assertStringEqual($pv + $pdB + $pdD, readAllText($saveFilename, "")); if (`size $r`) warning $r;
 
     $r = assertTrue(deleteFile($saveFilename)); if (`size $r`) warning $r;
     $r = assertFalse(existsFilename($saveFilename)); if (`size $r`) warning $r;
@@ -4222,7 +4440,7 @@ proc test4() {
 
   // addPose
   {
-    subscribe("nkPoseStackPoseAdded", "nkPoseStackTestObserver");
+    subscribe("nkPoseStackPoseAdded", "nkPoseStackPoseOpsTestObserver");
 
     testNewScene();
 
@@ -4237,23 +4455,23 @@ proc test4() {
     string $pA = "a=" + $nA + "[" + $psA + "]1,1,1,0,0,0,1,1,1,1,0,0,0;";
     string $pB = "b=" + $nB + "[" + $psB + "]2,2,2,0,0,0,1,1,1,1,0,0,0;";
 
-    $nkPoseStackTestSelectionMode = "last";
+    $nkPoseStackPoseOpsTestSelectionMode = "last";
     $r = assertFalse(addPose("a", {}, {})); if (`size $r`) warning $r;
-    $r = assertStringEqual("last", $nkPoseStackTestSelectionMode); if (`size $r`) warning $r;
+    $r = assertStringEqual("last", $nkPoseStackPoseOpsTestSelectionMode); if (`size $r`) warning $r;
     $r = assertFalse(addPose("a", {$nA}, {})); if (`size $r`) warning $r;
-    $r = assertStringEqual("last", $nkPoseStackTestSelectionMode); if (`size $r`) warning $r;
+    $r = assertStringEqual("last", $nkPoseStackPoseOpsTestSelectionMode); if (`size $r`) warning $r;
     $r = assertFalse(addPose("", {$nA}, {$psA})); if (`size $r`) warning $r;
-    $r = assertStringEqual("last", $nkPoseStackTestSelectionMode); if (`size $r`) warning $r;
+    $r = assertStringEqual("last", $nkPoseStackPoseOpsTestSelectionMode); if (`size $r`) warning $r;
     $nodes = getScriptNodes();
     $r = assertIntEqual(0, `size $nodes`); if (`size $r`) warning $r;
     $r = assertTrue(addPose("a", {$nA}, {$psA})); if (`size $r`) warning $r;
-    $r = assertStringEqual("", $nkPoseStackTestSelectionMode); if (`size $r`) warning $r;
+    $r = assertStringEqual("", $nkPoseStackPoseOpsTestSelectionMode); if (`size $r`) warning $r;
     $nodes = getScriptNodes();
     $r = assertIntEqual(1, `size $nodes`); if (`size $r`) warning $r;
     $r = assertStringArrayEqual({$pA}, readAttrPoses($nodes)); if (`size $r`) warning $r;
-    $nkPoseStackTestSelectionMode = "last";
+    $nkPoseStackPoseOpsTestSelectionMode = "last";
     $r = assertTrue(addPose("b", {$nB}, {$psB})); if (`size $r`) warning $r;
-    $r = assertStringEqual("", $nkPoseStackTestSelectionMode); if (`size $r`) warning $r;
+    $r = assertStringEqual("", $nkPoseStackPoseOpsTestSelectionMode); if (`size $r`) warning $r;
     $nodes = getScriptNodes();
     $r = assertIntEqual(1, `size $nodes`); if (`size $r`) warning $r;
     $r = assertStringArrayEqual({$pA, $pB}, readAttrPoses($nodes)); if (`size $r`) warning $r;
@@ -4261,12 +4479,12 @@ proc test4() {
     if (`objExists $nA`) delete $nA;
     if (`objExists $nB`) delete $nB;
 
-    unsubscribe("nkPoseStackPoseAdded", "nkPoseStackTestObserver");
+    unsubscribe("nkPoseStackPoseAdded", "nkPoseStackPoseOpsTestObserver");
   }
 
   // editPose
   {
-    subscribe("nkPoseStackPoseEdited", "nkPoseStackTestObserver");
+    subscribe("nkPoseStackPoseEdited", "nkPoseStackPoseOpsTestObserver");
 
     testNewScene();
 
@@ -4285,9 +4503,9 @@ proc test4() {
     string $pE = "e=joint1_L[" + $psE + "]1,1,1,0,0,0,1,1,1,1,0,0,0;";
     string $pF = "f=joint2_L[" + $psF + "]2,2,2,0,0,0,1,1,1,1,0,0,0;";
 
-    $nkPoseStackTestSelectionMode = "keepIndex";
+    $nkPoseStackPoseOpsTestSelectionMode = "keepIndex";
     $r = assertFalse(editPose(0, "c", {$psC})); if (`size $r`) warning $r;
-    $r = assertStringEqual("keepIndex", $nkPoseStackTestSelectionMode); if (`size $r`) warning $r;
+    $r = assertStringEqual("keepIndex", $nkPoseStackPoseOpsTestSelectionMode); if (`size $r`) warning $r;
 
     $r = assertTrue(writeAttrPoses({$pA, $pB})); if (`size $r`) warning $r;
     $nodes = getScriptNodes();
@@ -4296,17 +4514,17 @@ proc test4() {
 
     $r = assertFalse(editPose(-1, "c", {$psC})); if (`size $r`) warning $r;
     $r = assertFalse(editPose(2, "c", {$psC})); if (`size $r`) warning $r;
-    $r = assertStringEqual("keepIndex", $nkPoseStackTestSelectionMode); if (`size $r`) warning $r;
+    $r = assertStringEqual("keepIndex", $nkPoseStackPoseOpsTestSelectionMode); if (`size $r`) warning $r;
 
     $r = assertTrue(editPose(0, "c", {$psC})); if (`size $r`) warning $r;
-    $r = assertStringEqual("", $nkPoseStackTestSelectionMode); if (`size $r`) warning $r;
+    $r = assertStringEqual("", $nkPoseStackPoseOpsTestSelectionMode); if (`size $r`) warning $r;
     $nodes = getScriptNodes();
     $r = assertIntEqual(1, `size $nodes`); if (`size $r`) warning $r;
     $r = assertStringArrayEqual({$pC, $pB}, readAttrPoses($nodes)); if (`size $r`) warning $r;
 
-    $nkPoseStackTestSelectionMode = "keepIndex";
+    $nkPoseStackPoseOpsTestSelectionMode = "keepIndex";
     $r = assertTrue(editPose(1, "d", {$psD})); if (`size $r`) warning $r;
-    $r = assertStringEqual("", $nkPoseStackTestSelectionMode); if (`size $r`) warning $r;
+    $r = assertStringEqual("", $nkPoseStackPoseOpsTestSelectionMode); if (`size $r`) warning $r;
     $nodes = getScriptNodes();
     $r = assertIntEqual(1, `size $nodes`); if (`size $r`) warning $r;
     $r = assertStringArrayEqual({$pC, $pD}, readAttrPoses($nodes)); if (`size $r`) warning $r;
@@ -4316,24 +4534,24 @@ proc test4() {
     $r = assertTrue(appendAttrPoses({$pA, $pB})); if (`size $r`) warning $r;
     $nodes = getScriptNodes();
     $r = assertIntEqual(3, `size $nodes`); if (`size $r`) warning $r;
-    $r = assertStringArrayEqual({"!a", "!c", "b", "d", $pA, $pB}, readAttrPoses({})); if (`size $r`) warning $r;
+    $r = assertStringArrayEqual({$poseAr, $poseCr, $poseB, $poseD, $pA, $pB}, readAttrPoses({})); if (`size $r`) warning $r;
 
-    $nkPoseStackTestSelectionMode = "keepIndex";
+    $nkPoseStackPoseOpsTestSelectionMode = "keepIndex";
     $r = assertFalse(editPose(0, "e", {$psE})); if (`size $r`) warning $r;
-    $r = assertStringEqual("keepIndex", $nkPoseStackTestSelectionMode); if (`size $r`) warning $r;
+    $r = assertStringEqual("keepIndex", $nkPoseStackPoseOpsTestSelectionMode); if (`size $r`) warning $r;
     $r = assertTrue(editPose(4, "e", {$psE})); if (`size $r`) warning $r;
-    $r = assertStringEqual("", $nkPoseStackTestSelectionMode); if (`size $r`) warning $r;
-    $nkPoseStackTestSelectionMode = "keepIndex";
+    $r = assertStringEqual("", $nkPoseStackPoseOpsTestSelectionMode); if (`size $r`) warning $r;
+    $nkPoseStackPoseOpsTestSelectionMode = "keepIndex";
     $r = assertTrue(editPose(5, "f", {$psF})); if (`size $r`) warning $r;
-    $r = assertStringEqual("", $nkPoseStackTestSelectionMode); if (`size $r`) warning $r;
-    $r = assertStringArrayEqual({"!a", "!c", "b", "d", $pE, $pF}, readAttrPoses({})); if (`size $r`) warning $r;
+    $r = assertStringEqual("", $nkPoseStackPoseOpsTestSelectionMode); if (`size $r`) warning $r;
+    $r = assertStringArrayEqual({$poseAr, $poseCr, $poseB, $poseD, $pE, $pF}, readAttrPoses({})); if (`size $r`) warning $r;
 
-    unsubscribe("nkPoseStackPoseEdited", "nkPoseStackTestObserver");
+    unsubscribe("nkPoseStackPoseEdited", "nkPoseStackPoseOpsTestObserver");
   }
 
   // duplicatePose
   {
-    subscribe("nkPoseStackPoseDuplicated", "nkPoseStackTestObserver");
+    subscribe("nkPoseStackPoseDuplicated", "nkPoseStackPoseOpsTestObserver");
 
     testNewScene();
 
@@ -4342,9 +4560,9 @@ proc test4() {
     string $pA = "a=joint1_L[" + $psA + "]1,1,1,0,0,0,1,1,1,1,0,0,0;";
     string $pB = "b=joint2_L[" + $psB + "]2,2,2,0,0,0,1,1,1,1,0,0,0;";
 
-    $nkPoseStackTestSelectionMode = "next";
+    $nkPoseStackPoseOpsTestSelectionMode = "next";
     $r = assertFalse(duplicatePose(0)); if (`size $r`) warning $r;
-    $r = assertStringEqual("next", $nkPoseStackTestSelectionMode); if (`size $r`) warning $r;
+    $r = assertStringEqual("next", $nkPoseStackPoseOpsTestSelectionMode); if (`size $r`) warning $r;
 
     $r = assertTrue(writeAttrPoses({$pA, $pB})); if (`size $r`) warning $r;
     $nodes = getScriptNodes();
@@ -4353,10 +4571,10 @@ proc test4() {
 
     $r = assertFalse(duplicatePose(-1)); if (`size $r`) warning $r;
     $r = assertFalse(duplicatePose(2)); if (`size $r`) warning $r;
-    $r = assertStringEqual("next", $nkPoseStackTestSelectionMode); if (`size $r`) warning $r;
+    $r = assertStringEqual("next", $nkPoseStackPoseOpsTestSelectionMode); if (`size $r`) warning $r;
 
     $r = assertTrue(duplicatePose(0)); if (`size $r`) warning $r;
-    $r = assertStringEqual("", $nkPoseStackTestSelectionMode); if (`size $r`) warning $r;
+    $r = assertStringEqual("", $nkPoseStackPoseOpsTestSelectionMode); if (`size $r`) warning $r;
     $nodes = getScriptNodes();
     $r = assertIntEqual(1, `size $nodes`); if (`size $r`) warning $r;
     $r = assertStringArrayEqual({$pA, $pA, $pB}, readAttrPoses($nodes)); if (`size $r`) warning $r;
@@ -4366,27 +4584,27 @@ proc test4() {
     $r = assertTrue(appendAttrPoses({$pA, $pB})); if (`size $r`) warning $r;
     $nodes = getScriptNodes();
     $r = assertIntEqual(3, `size $nodes`); if (`size $r`) warning $r;
-    $r = assertStringArrayEqual({"!a", "!c", "b", "d", $pA, $pB}, readAttrPoses({})); if (`size $r`) warning $r;
+    $r = assertStringArrayEqual({$poseAr, $poseCr, $poseB, $poseD, $pA, $pB}, readAttrPoses({})); if (`size $r`) warning $r;
 
-    $nkPoseStackTestSelectionMode = "next";
+    $nkPoseStackPoseOpsTestSelectionMode = "next";
     $r = assertTrue(duplicatePose(4)); if (`size $r`) warning $r;
-    $r = assertStringEqual("", $nkPoseStackTestSelectionMode); if (`size $r`) warning $r;
-    $r = assertStringArrayEqual({"!a", "!c", "b", "d", $pA, $pA, $pB}, readAttrPoses({})); if (`size $r`) warning $r;
-    $nkPoseStackTestSelectionMode = "last";
+    $r = assertStringEqual("", $nkPoseStackPoseOpsTestSelectionMode); if (`size $r`) warning $r;
+    $r = assertStringArrayEqual({$poseAr, $poseCr, $poseB, $poseD, $pA, $pA, $pB}, readAttrPoses({})); if (`size $r`) warning $r;
+    $nkPoseStackPoseOpsTestSelectionMode = "last";
     $r = assertTrue(duplicatePose(0)); if (`size $r`) warning $r;
-    $r = assertStringEqual("", $nkPoseStackTestSelectionMode); if (`size $r`) warning $r;
-    $r = assertStringArrayEqual({"!a", "!c", "b", "d", $pA, $pA, $pB, "a"}, readAttrPoses({})); if (`size $r`) warning $r;
-    $nkPoseStackTestSelectionMode = "last";
+    $r = assertStringEqual("", $nkPoseStackPoseOpsTestSelectionMode); if (`size $r`) warning $r;
+    $r = assertStringArrayEqual({$poseAr, $poseCr, $poseB, $poseD, $pA, $pA, $pB, $poseA}, readAttrPoses({})); if (`size $r`) warning $r;
+    $nkPoseStackPoseOpsTestSelectionMode = "last";
     $r = assertTrue(duplicatePose(1)); if (`size $r`) warning $r;
-    $r = assertStringEqual("", $nkPoseStackTestSelectionMode); if (`size $r`) warning $r;
-    $r = assertStringArrayEqual({"!a", "!c", "b", "d", $pA, $pA, $pB, "a", "c"}, readAttrPoses({})); if (`size $r`) warning $r;
+    $r = assertStringEqual("", $nkPoseStackPoseOpsTestSelectionMode); if (`size $r`) warning $r;
+    $r = assertStringArrayEqual({$poseAr, $poseCr, $poseB, $poseD, $pA, $pA, $pB, $poseA, $poseC}, readAttrPoses({})); if (`size $r`) warning $r;
 
-    unsubscribe("nkPoseStackPoseDuplicated", "nkPoseStackTestObserver");
+    unsubscribe("nkPoseStackPoseDuplicated", "nkPoseStackPoseOpsTestObserver");
   }
 
   // updatePose
   {
-    subscribe("nkPoseStackPoseUpdated", "nkPoseStackTestObserver");
+    subscribe("nkPoseStackPoseUpdated", "nkPoseStackPoseOpsTestObserver");
 
     testNewScene();
 
@@ -4398,9 +4616,9 @@ proc test4() {
     string $pA1 = "a=" + $nA + "[" + $psA + "]1,1,1,0,0,0,1,1,1,1,0,0,0;";
     string $pA2 = "a=" + $nA + "[" + $psA + "]2,2,2,0,0,0,1,1,1,1,0,0,0;";
 
-    $nkPoseStackTestSelectionMode = "keepIndex";
+    $nkPoseStackPoseOpsTestSelectionMode = "keepIndex";
     $r = assertFalse(updatePose(0)); if (`size $r`) warning $r;
-    $r = assertStringEqual("keepIndex", $nkPoseStackTestSelectionMode); if (`size $r`) warning $r;
+    $r = assertStringEqual("keepIndex", $nkPoseStackPoseOpsTestSelectionMode); if (`size $r`) warning $r;
 
     $r = assertTrue(addPose("a", {$nA}, {$psA})); if (`size $r`) warning $r;
     $nodes = getScriptNodes();
@@ -4409,10 +4627,10 @@ proc test4() {
 
     $r = assertFalse(updatePose(-1)); if (`size $r`) warning $r;
     $r = assertFalse(updatePose(1)); if (`size $r`) warning $r;
-    $r = assertStringEqual("keepIndex", $nkPoseStackTestSelectionMode); if (`size $r`) warning $r;
+    $r = assertStringEqual("keepIndex", $nkPoseStackPoseOpsTestSelectionMode); if (`size $r`) warning $r;
 
     $r = assertTrue(updatePose(0)); if (`size $r`) warning $r;
-    $r = assertStringEqual("", $nkPoseStackTestSelectionMode); if (`size $r`) warning $r;
+    $r = assertStringEqual("", $nkPoseStackPoseOpsTestSelectionMode); if (`size $r`) warning $r;
     $nodes = getScriptNodes();
     $r = assertIntEqual(1, `size $nodes`); if (`size $r`) warning $r;
     $r = assertStringArrayEqual({$pA1}, readAttrPoses($nodes)); if (`size $r`) warning $r;
@@ -4421,9 +4639,9 @@ proc test4() {
     setAttr ($nA + ".t") 2 2 2;
     $r = assertFloatArrayEqual({2.0, 2.0, 2.0}, `getAttr ($nA + ".t")`, 0.001); if (`size $r`) warning $r;
 
-    $nkPoseStackTestSelectionMode = "keepIndex";
+    $nkPoseStackPoseOpsTestSelectionMode = "keepIndex";
     $r = assertTrue(updatePose(0)); if (`size $r`) warning $r;
-    $r = assertStringEqual("", $nkPoseStackTestSelectionMode); if (`size $r`) warning $r;
+    $r = assertStringEqual("", $nkPoseStackPoseOpsTestSelectionMode); if (`size $r`) warning $r;
     $nodes = getScriptNodes();
     $r = assertIntEqual(1, `size $nodes`); if (`size $r`) warning $r;
     $r = assertStringArrayEqual({$pA2}, readAttrPoses($nodes)); if (`size $r`) warning $r;
@@ -4443,58 +4661,301 @@ proc test4() {
     $r = assertTrue(addPose("a", {$nB}, {$psB})); if (`size $r`) warning $r;
     $nodes = getScriptNodes();
     $r = assertIntEqual(3, `size $nodes`); if (`size $r`) warning $r;
-    $r = assertStringArrayEqual({"b", "d", $pB1}, readAttrPoses({$nodes[2]})); if (`size $r`) warning $r;
+    $r = assertStringArrayEqual({$poseB, $poseD, $pB1}, readAttrPoses({$nodes[2]})); if (`size $r`) warning $r;
 
-    $nkPoseStackTestSelectionMode = "keepIndex";
+    $nkPoseStackPoseOpsTestSelectionMode = "keepIndex";
     $r = assertFalse(updatePose(0)); if (`size $r`) warning $r;
     $r = assertFalse(updatePose(1)); if (`size $r`) warning $r;
-    $r = assertStringEqual("keepIndex", $nkPoseStackTestSelectionMode); if (`size $r`) warning $r;
+    $r = assertStringEqual("keepIndex", $nkPoseStackPoseOpsTestSelectionMode); if (`size $r`) warning $r;
     $nodes = getScriptNodes();
     $r = assertIntEqual(3, `size $nodes`); if (`size $r`) warning $r;
-    $r = assertStringArrayEqual({"b", "d", $pB1}, readAttrPoses({$nodes[2]})); if (`size $r`) warning $r;
+    $r = assertStringArrayEqual({$poseB, $poseD, $pB1}, readAttrPoses({$nodes[2]})); if (`size $r`) warning $r;
 
     $r = assertFloatArrayEqual({1.0, 1.0, 1.0}, `getAttr ($nB + ".t")`, 0.001); if (`size $r`) warning $r;
     setAttr ($nB + ".t") 2 2 2;
     $r = assertFloatArrayEqual({2.0, 2.0, 2.0}, `getAttr ($nB + ".t")`, 0.001); if (`size $r`) warning $r;
 
-    $nkPoseStackTestSelectionMode = "keepIndex";
+    $nkPoseStackPoseOpsTestSelectionMode = "keepIndex";
     $r = assertTrue(updatePose(4)); if (`size $r`) warning $r;
-    $r = assertStringEqual("", $nkPoseStackTestSelectionMode); if (`size $r`) warning $r;
+    $r = assertStringEqual("", $nkPoseStackPoseOpsTestSelectionMode); if (`size $r`) warning $r;
     $nodes = getScriptNodes();
     $r = assertIntEqual(3, `size $nodes`); if (`size $r`) warning $r;
-    $r = assertStringArrayEqual({"b", "d", $pB2}, readAttrPoses({$nodes[2]})); if (`size $r`) warning $r;
+    $r = assertStringArrayEqual({$poseB, $poseD, $pB2}, readAttrPoses({$nodes[2]})); if (`size $r`) warning $r;
 
     if (`objExists $nB`) delete $nB;
 
-    unsubscribe("nkPoseStackPoseUpdated", "nkPoseStackTestObserver");
+    unsubscribe("nkPoseStackPoseUpdated", "nkPoseStackPoseOpsTestObserver");
   }
+
+  // deletePose
+  {
+    subscribe("nkPoseStackPoseDeleted", "nkPoseStackPoseOpsTestObserver");
+
+    testNewScene();
+
+    string $psA = "1,1,0/_L,_R/0,0,1,1,0";
+    string $psB = "1,1,0/_L,_R/0,0,1,1,0";
+    string $psC = "1,1,0/_L,_R/0,0,1,1,0";
+    string $pA = "a=joint1_L[" + $psA + "]1,1,1,0,0,0,1,1,1,1,0,0,0;";
+    string $pB = "b=joint2_L[" + $psB + "]2,2,2,0,0,0,1,1,1,1,0,0,0;";
+    string $pC = "b=joint3_L[" + $psC + "]3,3,3,0,0,0,1,1,1,1,0,0,0;";
+
+    $nkPoseStackPoseOpsTestSelectionMode = "keepIndex";
+    $r = assertFalse(deletePose(0)); if (`size $r`) warning $r;
+    $r = assertStringEqual("keepIndex", $nkPoseStackPoseOpsTestSelectionMode); if (`size $r`) warning $r;
+
+    $r = assertTrue(writeAttrPoses({$pA, $pB, $pC})); if (`size $r`) warning $r;
+    $nodes = getScriptNodes();
+    $r = assertIntEqual(1, `size $nodes`); if (`size $r`) warning $r;
+    $r = assertStringArrayEqual({$pA, $pB, $pC}, readAttrPoses({})); if (`size $r`) warning $r;
+
+    $r = assertFalse(deletePose(-1)); if (`size $r`) warning $r;
+    $r = assertFalse(deletePose(3)); if (`size $r`) warning $r;
+    $r = assertStringEqual("keepIndex", $nkPoseStackPoseOpsTestSelectionMode); if (`size $r`) warning $r;
+
+    $r = assertTrue(deletePose(0)); if (`size $r`) warning $r;
+    $r = assertStringEqual("", $nkPoseStackPoseOpsTestSelectionMode); if (`size $r`) warning $r;
+    $nodes = getScriptNodes();
+    $r = assertIntEqual(1, `size $nodes`); if (`size $r`) warning $r;
+    $r = assertStringArrayEqual({$pB, $pC}, readAttrPoses({})); if (`size $r`) warning $r;
+
+    $nkPoseStackPoseOpsTestSelectionMode = "last";
+    $r = assertTrue(deletePose(1)); if (`size $r`) warning $r;
+    $r = assertStringEqual("", $nkPoseStackPoseOpsTestSelectionMode); if (`size $r`) warning $r;
+    $nodes = getScriptNodes();
+    $r = assertIntEqual(1, `size $nodes`); if (`size $r`) warning $r;
+    $r = assertStringArrayEqual({$pB}, readAttrPoses({})); if (`size $r`) warning $r;
+
+    $nkPoseStackPoseOpsTestSelectionMode = "none";
+    $r = assertTrue(deletePose(0)); if (`size $r`) warning $r;
+    $r = assertStringEqual("", $nkPoseStackPoseOpsTestSelectionMode); if (`size $r`) warning $r;
+    $nodes = getScriptNodes();
+    $r = assertIntEqual(0, `size $nodes`); if (`size $r`) warning $r;
+    $r = assertStringArrayEqual({}, readAttrPoses({})); if (`size $r`) warning $r;
+
+    testOpenScene($scriptNodeFilename);
+
+    $nodes = getScriptNodes();
+    $r = assertIntEqual(3, `size $nodes`); if (`size $r`) warning $r;
+    $r = assertStringArrayEqual({$poseAr, $poseCr, $poseB, $poseD}, readAttrPoses({})); if (`size $r`) warning $r;
+
+    $nkPoseStackPoseOpsTestSelectionMode = "keepIndex";
+    $r = assertFalse(deletePose(-1)); if (`size $r`) warning $r;
+    $r = assertFalse(deletePose(0)); if (`size $r`) warning $r;
+    $r = assertFalse(deletePose(1)); if (`size $r`) warning $r;
+    $r = assertFalse(deletePose(4)); if (`size $r`) warning $r;
+    $r = assertStringEqual("keepIndex", $nkPoseStackPoseOpsTestSelectionMode); if (`size $r`) warning $r;
+
+    $r = assertTrue(deletePose(2)); if (`size $r`) warning $r;
+    $r = assertStringEqual("", $nkPoseStackPoseOpsTestSelectionMode); if (`size $r`) warning $r;
+    $nodes = getScriptNodes();
+    $r = assertIntEqual(3, `size $nodes`); if (`size $r`) warning $r;
+    $r = assertStringArrayEqual({$poseAr, $poseCr, $poseD}, readAttrPoses({})); if (`size $r`) warning $r;
+
+    $nkPoseStackPoseOpsTestSelectionMode = "last";
+    $r = assertTrue(deletePose(2)); if (`size $r`) warning $r;
+    $r = assertStringEqual("", $nkPoseStackPoseOpsTestSelectionMode); if (`size $r`) warning $r;
+    $nodes = getScriptNodes();
+    $r = assertIntEqual(2, `size $nodes`); if (`size $r`) warning $r;
+    $r = assertStringArrayEqual({$poseAr, $poseCr}, readAttrPoses({})); if (`size $r`) warning $r;
+
+    $r = assertFalse(deletePose(0)); if (`size $r`) warning $r;
+    $r = assertFalse(deletePose(1)); if (`size $r`) warning $r;
+    $nodes = getScriptNodes();
+    $r = assertIntEqual(2, `size $nodes`); if (`size $r`) warning $r;
+    $r = assertStringArrayEqual({$poseAr, $poseCr}, readAttrPoses({})); if (`size $r`) warning $r;
+
+    unsubscribe("nkPoseStackPoseDeleted", "nkPoseStackPoseOpsTestObserver");
+  }
+
+  // movePrevPose
+  {
+    subscribe("nkPoseStackPoseMovedPrev", "nkPoseStackPoseOpsTestObserver");
+
+    testNewScene();
+
+    string $psA = "1,1,0/_L,_R/0,0,1,1,0";
+    string $psB = "1,1,0/_L,_R/0,0,1,1,0";
+    string $psC = "1,1,0/_L,_R/0,0,1,1,0";
+    string $pA = "a=joint1_L[" + $psA + "]1,1,1,0,0,0,1,1,1,1,0,0,0;";
+    string $pB = "b=joint2_L[" + $psB + "]2,2,2,0,0,0,1,1,1,1,0,0,0;";
+    string $pC = "b=joint3_L[" + $psC + "]3,3,3,0,0,0,1,1,1,1,0,0,0;";
+
+    $nkPoseStackPoseOpsTestSelectionMode = "prev";
+    $r = assertFalse(movePrevPose(1)); if (`size $r`) warning $r;
+    $r = assertStringEqual("prev", $nkPoseStackPoseOpsTestSelectionMode); if (`size $r`) warning $r;
+
+    $r = assertTrue(writeAttrPoses({$pA, $pB, $pC})); if (`size $r`) warning $r;
+    $nodes = getScriptNodes();
+    $r = assertIntEqual(1, `size $nodes`); if (`size $r`) warning $r;
+    $r = assertStringArrayEqual({$pA, $pB, $pC}, readAttrPoses({})); if (`size $r`) warning $r;
+
+    $r = assertFalse(movePrevPose(-1)); if (`size $r`) warning $r;
+    $r = assertFalse(movePrevPose(0)); if (`size $r`) warning $r;
+    $r = assertFalse(movePrevPose(3)); if (`size $r`) warning $r;
+    $r = assertStringEqual("prev", $nkPoseStackPoseOpsTestSelectionMode); if (`size $r`) warning $r;
+
+    $r = assertTrue(movePrevPose(1)); if (`size $r`) warning $r;
+    $r = assertStringEqual("", $nkPoseStackPoseOpsTestSelectionMode); if (`size $r`) warning $r;
+    $nodes = getScriptNodes();
+    $r = assertIntEqual(1, `size $nodes`); if (`size $r`) warning $r;
+    $r = assertStringArrayEqual({$pB, $pA, $pC}, readAttrPoses({})); if (`size $r`) warning $r;
+
+    $nkPoseStackPoseOpsTestSelectionMode = "prev";
+    $r = assertTrue(movePrevPose(2)); if (`size $r`) warning $r;
+    $r = assertStringEqual("", $nkPoseStackPoseOpsTestSelectionMode); if (`size $r`) warning $r;
+    $nodes = getScriptNodes();
+    $r = assertIntEqual(1, `size $nodes`); if (`size $r`) warning $r;
+    $r = assertStringArrayEqual({$pB, $pC, $pA}, readAttrPoses({})); if (`size $r`) warning $r;
+
+    testOpenScene($scriptNodeFilename);
+
+    $nodes = getScriptNodes();
+    $r = assertIntEqual(3, `size $nodes`); if (`size $r`) warning $r;
+    $r = assertStringArrayEqual({$poseAr, $poseCr, $poseB, $poseD}, readAttrPoses({})); if (`size $r`) warning $r;
+
+    $nkPoseStackPoseOpsTestSelectionMode = "prev";
+    $r = assertFalse(movePrevPose(-1)); if (`size $r`) warning $r;
+    $r = assertFalse(movePrevPose(0)); if (`size $r`) warning $r;
+    $r = assertFalse(movePrevPose(1)); if (`size $r`) warning $r;
+    $r = assertFalse(movePrevPose(2)); if (`size $r`) warning $r;
+    $r = assertFalse(movePrevPose(4)); if (`size $r`) warning $r;
+    $r = assertStringEqual("prev", $nkPoseStackPoseOpsTestSelectionMode); if (`size $r`) warning $r;
+
+    $r = assertTrue(movePrevPose(3)); if (`size $r`) warning $r;
+    $r = assertStringEqual("", $nkPoseStackPoseOpsTestSelectionMode); if (`size $r`) warning $r;
+    $nodes = getScriptNodes();
+    $r = assertIntEqual(3, `size $nodes`); if (`size $r`) warning $r;
+    $r = assertStringArrayEqual({$poseAr, $poseCr, $poseD, $poseB}, readAttrPoses({})); if (`size $r`) warning $r;
+
+    unsubscribe("nkPoseStackPoseMovedPrev", "nkPoseStackPoseOpsTestObserver");
+  }
+
+  // moveNextPose
+  {
+    subscribe("nkPoseStackPoseMovedNext", "nkPoseStackPoseOpsTestObserver");
+
+    testNewScene();
+
+    string $psA = "1,1,0/_L,_R/0,0,1,1,0";
+    string $psB = "1,1,0/_L,_R/0,0,1,1,0";
+    string $psC = "1,1,0/_L,_R/0,0,1,1,0";
+    string $pA = "a=joint1_L[" + $psA + "]1,1,1,0,0,0,1,1,1,1,0,0,0;";
+    string $pB = "b=joint2_L[" + $psB + "]2,2,2,0,0,0,1,1,1,1,0,0,0;";
+    string $pC = "b=joint3_L[" + $psC + "]3,3,3,0,0,0,1,1,1,1,0,0,0;";
+
+    $nkPoseStackPoseOpsTestSelectionMode = "next";
+    $r = assertFalse(moveNextPose(1)); if (`size $r`) warning $r;
+    $r = assertStringEqual("next", $nkPoseStackPoseOpsTestSelectionMode); if (`size $r`) warning $r;
+
+    $r = assertTrue(writeAttrPoses({$pA, $pB, $pC})); if (`size $r`) warning $r;
+    $nodes = getScriptNodes();
+    $r = assertIntEqual(1, `size $nodes`); if (`size $r`) warning $r;
+    $r = assertStringArrayEqual({$pA, $pB, $pC}, readAttrPoses({})); if (`size $r`) warning $r;
+
+    $r = assertFalse(moveNextPose(-1)); if (`size $r`) warning $r;
+    $r = assertFalse(moveNextPose(2)); if (`size $r`) warning $r;
+    $r = assertFalse(moveNextPose(3)); if (`size $r`) warning $r;
+    $r = assertStringEqual("next", $nkPoseStackPoseOpsTestSelectionMode); if (`size $r`) warning $r;
+
+    $r = assertTrue(moveNextPose(1)); if (`size $r`) warning $r;
+    $r = assertStringEqual("", $nkPoseStackPoseOpsTestSelectionMode); if (`size $r`) warning $r;
+    $nodes = getScriptNodes();
+    $r = assertIntEqual(1, `size $nodes`); if (`size $r`) warning $r;
+    $r = assertStringArrayEqual({$pA, $pC, $pB}, readAttrPoses({})); if (`size $r`) warning $r;
+
+    $nkPoseStackPoseOpsTestSelectionMode = "next";
+    $r = assertTrue(moveNextPose(0)); if (`size $r`) warning $r;
+    $r = assertStringEqual("", $nkPoseStackPoseOpsTestSelectionMode); if (`size $r`) warning $r;
+    $nodes = getScriptNodes();
+    $r = assertIntEqual(1, `size $nodes`); if (`size $r`) warning $r;
+    $r = assertStringArrayEqual({$pC, $pA, $pB}, readAttrPoses({})); if (`size $r`) warning $r;
+
+    testOpenScene($scriptNodeFilename);
+
+    $nodes = getScriptNodes();
+    $r = assertIntEqual(3, `size $nodes`); if (`size $r`) warning $r;
+    $r = assertStringArrayEqual({$poseAr, $poseCr, $poseB, $poseD}, readAttrPoses({})); if (`size $r`) warning $r;
+
+    $nkPoseStackPoseOpsTestSelectionMode = "next";
+    $r = assertFalse(moveNextPose(-1)); if (`size $r`) warning $r;
+    $r = assertFalse(moveNextPose(0)); if (`size $r`) warning $r;
+    $r = assertFalse(moveNextPose(1)); if (`size $r`) warning $r;
+    $r = assertFalse(moveNextPose(3)); if (`size $r`) warning $r;
+    $r = assertFalse(moveNextPose(4)); if (`size $r`) warning $r;
+    $r = assertStringEqual("next", $nkPoseStackPoseOpsTestSelectionMode); if (`size $r`) warning $r;
+
+    $r = assertTrue(moveNextPose(2)); if (`size $r`) warning $r;
+    $r = assertStringEqual("", $nkPoseStackPoseOpsTestSelectionMode); if (`size $r`) warning $r;
+    $nodes = getScriptNodes();
+    $r = assertIntEqual(3, `size $nodes`); if (`size $r`) warning $r;
+    $r = assertStringArrayEqual({$poseAr, $poseCr, $poseD, $poseB}, readAttrPoses({})); if (`size $r`) warning $r;
+
+    unsubscribe("nkPoseStackPoseMovedNext", "nkPoseStackPoseOpsTestObserver");
+  }
+
+  print("test4 end\n");
+}
+
+/*-
+@returns <>
+@remarks ノード操作。
+*/
+proc test5() {
+  string $testDirname = `getenv "MAYA_APP_DIR"` + "/dev/nkPoseStack/test";
+  string $scriptNodeFilename = $testDirname + "/scriptNodeTest.ma";
+
+  string $pdA = "A=|locatorA_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;\n";
+  string $pdB = "B=|locatorB_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;\n";
+  string $pdC = "C=|locatorC_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;\n";
+  string $pdD = "D=|locatorD_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;\n";
+
+  string $poseA = "A=|locatorA_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;";
+  string $poseB = "B=|locatorB_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;";
+  string $poseC = "C=|locatorC_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;";
+  string $poseD = "D=|locatorD_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;";
+
+  string $poseAr = "!A=|locatorA_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;";
+  string $poseCr = "!C=|locatorC_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;";
+
+  print("test5 start\n");
+  string $r;
+  string $nodes[];
 
   // selectNodes
   {
     testNewScene();
 
     select -cl;
-    string $nL = `joint -a -ax 0 -ay 0 -az 0 -n "joint1_L" -p 1 1 1 -roo "xyz"`;
+    string $nL = `joint -a -ax 0 -ay 0 -az 0 -n "joint1_L" -p 0 0 0 -roo "xyz"`;
     $nL = longNameOf($nL);
     select -cl;
-    string $nR = `joint -a -ax 0 -ay 0 -az 0 -n "joint1_R" -p -1 1 1 -roo "xyz"`;
+    string $nR = `joint -a -ax 0 -ay 0 -az 0 -n "joint1_R" -p 0 0 0 -roo "xyz"`;
     $nR = longNameOf($nR);
     select -cl;
+    string $nD = `joint -a -ax 0 -ay 0 -az 0 -n "joint1_D" -p 0 0 0 -roo "xyz"`;
+    $nD = longNameOf($nD);
+    select -cl;
 
-    string $psL = "1,1,0/_L,_R/0,0,1,1,0";
-    string $pL = "L=" + $nL + "[" + $psL + "]1,1,1,0,0,0,1,1,1,1,0,0,0;";
+    string $psL = "1,1,0/_L,_R/0,0,1,0,0";
+    string $pL = "L=" + $nL + "[" + $psL + "]0,0,0,0,0,0,1,1,1,1,0,0,0;";
+    string $psD = "1,1,0/_L,_R/0,0,1,0,0";
+    string $pD = "D=" + $nD + "[" + $psD + "]0,0,0,0,0,0,1,1,1,1,0,0,0;";
 
     $r = assertFalse(selectNodes(0, false, 0)); if (`size $r`) warning $r;
     $r = assertStringArrayEqual({}, `ls -l -sl`); if (`size $r`) warning $r;
 
     $r = assertTrue(addPose("L", {$nL}, {$psL})); if (`size $r`) warning $r;
+    $r = assertTrue(addPose("D", {$nD}, {$psD})); if (`size $r`) warning $r;
     $nodes = getScriptNodes();
     $r = assertIntEqual(1, `size $nodes`); if (`size $r`) warning $r;
-    $r = assertStringArrayEqual({$pL}, readAttrPoses($nodes)); if (`size $r`) warning $r;
+    $r = assertStringArrayEqual({$pL, $pD}, readAttrPoses($nodes)); if (`size $r`) warning $r;
 
     $r = assertFalse(selectNodes(-1, false, 0)); if (`size $r`) warning $r;
     $r = assertStringArrayEqual({}, `ls -l -sl`); if (`size $r`) warning $r;
-    $r = assertFalse(selectNodes(1, false, 0)); if (`size $r`) warning $r;
+    $r = assertFalse(selectNodes(2, false, 0)); if (`size $r`) warning $r; // 置き換え
+    $r = assertStringArrayEqual({}, `ls -l -sl`); if (`size $r`) warning $r;
+    $r = assertFalse(selectNodes(2, false, 5)); if (`size $r`) warning $r; // 追加
     $r = assertStringArrayEqual({}, `ls -l -sl`); if (`size $r`) warning $r;
 
     $r = assertTrue(selectNodes(0, false, 0)); if (`size $r`) warning $r; // 置き換え
@@ -4509,6 +4970,11 @@ proc test4() {
     $r = assertStringArrayEqual({$nR, $nL}, `ls -l -sl`); if (`size $r`) warning $r;
     $r = assertTrue(selectNodes(0, true, 4)); if (`size $r`) warning $r; // 反対側を解除
     $r = assertStringArrayEqual({$nL}, `ls -l -sl`); if (`size $r`) warning $r;
+
+    if (`objExists $nD`) delete $nD;
+    $r = assertFalse(`objExists $nD`); if (`size $r`) warning $r;
+    $r = assertTrue(selectNodes(1, false, 0)); if (`size $r`) warning $r; // 置き換え
+    $r = assertStringArrayEqual({}, `ls -l -sl`); if (`size $r`) warning $r;
 
     if (`objExists $nL`) delete $nL;
     if (`objExists $nR`) delete $nR;
@@ -4554,214 +5020,7 @@ proc test4() {
     if (`objExists $nR`) delete $nR;
   }
 
-  // deletePose
-  {
-    subscribe("nkPoseStackPoseDeleted", "nkPoseStackTestObserver");
-
-    testNewScene();
-
-    string $psA = "1,1,0/_L,_R/0,0,1,1,0";
-    string $psB = "1,1,0/_L,_R/0,0,1,1,0";
-    string $psC = "1,1,0/_L,_R/0,0,1,1,0";
-    string $pA = "a=joint1_L[" + $psA + "]1,1,1,0,0,0,1,1,1,1,0,0,0;";
-    string $pB = "b=joint2_L[" + $psB + "]2,2,2,0,0,0,1,1,1,1,0,0,0;";
-    string $pC = "b=joint3_L[" + $psC + "]3,3,3,0,0,0,1,1,1,1,0,0,0;";
-
-    $nkPoseStackTestSelectionMode = "keepIndex";
-    $r = assertFalse(deletePose(0)); if (`size $r`) warning $r;
-    $r = assertStringEqual("keepIndex", $nkPoseStackTestSelectionMode); if (`size $r`) warning $r;
-
-    $r = assertTrue(writeAttrPoses({$pA, $pB, $pC})); if (`size $r`) warning $r;
-    $nodes = getScriptNodes();
-    $r = assertIntEqual(1, `size $nodes`); if (`size $r`) warning $r;
-    $r = assertStringArrayEqual({$pA, $pB, $pC}, readAttrPoses({})); if (`size $r`) warning $r;
-
-    $r = assertFalse(deletePose(-1)); if (`size $r`) warning $r;
-    $r = assertFalse(deletePose(3)); if (`size $r`) warning $r;
-    $r = assertStringEqual("keepIndex", $nkPoseStackTestSelectionMode); if (`size $r`) warning $r;
-
-    $r = assertTrue(deletePose(0)); if (`size $r`) warning $r;
-    $r = assertStringEqual("", $nkPoseStackTestSelectionMode); if (`size $r`) warning $r;
-    $nodes = getScriptNodes();
-    $r = assertIntEqual(1, `size $nodes`); if (`size $r`) warning $r;
-    $r = assertStringArrayEqual({$pB, $pC}, readAttrPoses({})); if (`size $r`) warning $r;
-
-    $nkPoseStackTestSelectionMode = "last";
-    $r = assertTrue(deletePose(1)); if (`size $r`) warning $r;
-    $r = assertStringEqual("", $nkPoseStackTestSelectionMode); if (`size $r`) warning $r;
-    $nodes = getScriptNodes();
-    $r = assertIntEqual(1, `size $nodes`); if (`size $r`) warning $r;
-    $r = assertStringArrayEqual({$pB}, readAttrPoses({})); if (`size $r`) warning $r;
-
-    $nkPoseStackTestSelectionMode = "none";
-    $r = assertTrue(deletePose(0)); if (`size $r`) warning $r;
-    $r = assertStringEqual("", $nkPoseStackTestSelectionMode); if (`size $r`) warning $r;
-    $nodes = getScriptNodes();
-    $r = assertIntEqual(0, `size $nodes`); if (`size $r`) warning $r;
-    $r = assertStringArrayEqual({}, readAttrPoses({})); if (`size $r`) warning $r;
-
-    testOpenScene($scriptNodeFilename);
-
-    $nodes = getScriptNodes();
-    $r = assertIntEqual(3, `size $nodes`); if (`size $r`) warning $r;
-    $r = assertStringArrayEqual({"!a", "!c", "b", "d"}, readAttrPoses({})); if (`size $r`) warning $r;
-
-    $nkPoseStackTestSelectionMode = "keepIndex";
-    $r = assertFalse(deletePose(-1)); if (`size $r`) warning $r;
-    $r = assertFalse(deletePose(0)); if (`size $r`) warning $r;
-    $r = assertFalse(deletePose(1)); if (`size $r`) warning $r;
-    $r = assertFalse(deletePose(4)); if (`size $r`) warning $r;
-    $r = assertStringEqual("keepIndex", $nkPoseStackTestSelectionMode); if (`size $r`) warning $r;
-
-    $r = assertTrue(deletePose(2)); if (`size $r`) warning $r;
-    $r = assertStringEqual("", $nkPoseStackTestSelectionMode); if (`size $r`) warning $r;
-    $nodes = getScriptNodes();
-    $r = assertIntEqual(3, `size $nodes`); if (`size $r`) warning $r;
-    $r = assertStringArrayEqual({"!a", "!c", "d"}, readAttrPoses({})); if (`size $r`) warning $r;
-
-    $nkPoseStackTestSelectionMode = "last";
-    $r = assertTrue(deletePose(2)); if (`size $r`) warning $r;
-    $r = assertStringEqual("", $nkPoseStackTestSelectionMode); if (`size $r`) warning $r;
-    $nodes = getScriptNodes();
-    $r = assertIntEqual(2, `size $nodes`); if (`size $r`) warning $r;
-    $r = assertStringArrayEqual({"!a", "!c"}, readAttrPoses({})); if (`size $r`) warning $r;
-
-    $r = assertFalse(deletePose(0)); if (`size $r`) warning $r;
-    $r = assertFalse(deletePose(1)); if (`size $r`) warning $r;
-    $nodes = getScriptNodes();
-    $r = assertIntEqual(2, `size $nodes`); if (`size $r`) warning $r;
-    $r = assertStringArrayEqual({"!a", "!c"}, readAttrPoses({})); if (`size $r`) warning $r;
-
-    unsubscribe("nkPoseStackPoseDeleted", "nkPoseStackTestObserver");
-  }
-
-  // movePrevPose
-  {
-    subscribe("nkPoseStackPoseMovedPrev", "nkPoseStackTestObserver");
-
-    testNewScene();
-
-    string $psA = "1,1,0/_L,_R/0,0,1,1,0";
-    string $psB = "1,1,0/_L,_R/0,0,1,1,0";
-    string $psC = "1,1,0/_L,_R/0,0,1,1,0";
-    string $pA = "a=joint1_L[" + $psA + "]1,1,1,0,0,0,1,1,1,1,0,0,0;";
-    string $pB = "b=joint2_L[" + $psB + "]2,2,2,0,0,0,1,1,1,1,0,0,0;";
-    string $pC = "b=joint3_L[" + $psC + "]3,3,3,0,0,0,1,1,1,1,0,0,0;";
-
-    $nkPoseStackTestSelectionMode = "prev";
-    $r = assertFalse(movePrevPose(1)); if (`size $r`) warning $r;
-    $r = assertStringEqual("prev", $nkPoseStackTestSelectionMode); if (`size $r`) warning $r;
-
-    $r = assertTrue(writeAttrPoses({$pA, $pB, $pC})); if (`size $r`) warning $r;
-    $nodes = getScriptNodes();
-    $r = assertIntEqual(1, `size $nodes`); if (`size $r`) warning $r;
-    $r = assertStringArrayEqual({$pA, $pB, $pC}, readAttrPoses({})); if (`size $r`) warning $r;
-
-    $r = assertFalse(movePrevPose(-1)); if (`size $r`) warning $r;
-    $r = assertFalse(movePrevPose(0)); if (`size $r`) warning $r;
-    $r = assertFalse(movePrevPose(3)); if (`size $r`) warning $r;
-    $r = assertStringEqual("prev", $nkPoseStackTestSelectionMode); if (`size $r`) warning $r;
-
-    $r = assertTrue(movePrevPose(1)); if (`size $r`) warning $r;
-    $r = assertStringEqual("", $nkPoseStackTestSelectionMode); if (`size $r`) warning $r;
-    $nodes = getScriptNodes();
-    $r = assertIntEqual(1, `size $nodes`); if (`size $r`) warning $r;
-    $r = assertStringArrayEqual({$pB, $pA, $pC}, readAttrPoses({})); if (`size $r`) warning $r;
-
-    $nkPoseStackTestSelectionMode = "prev";
-    $r = assertTrue(movePrevPose(2)); if (`size $r`) warning $r;
-    $r = assertStringEqual("", $nkPoseStackTestSelectionMode); if (`size $r`) warning $r;
-    $nodes = getScriptNodes();
-    $r = assertIntEqual(1, `size $nodes`); if (`size $r`) warning $r;
-    $r = assertStringArrayEqual({$pB, $pC, $pA}, readAttrPoses({})); if (`size $r`) warning $r;
-
-    testOpenScene($scriptNodeFilename);
-
-    $nodes = getScriptNodes();
-    $r = assertIntEqual(3, `size $nodes`); if (`size $r`) warning $r;
-    $r = assertStringArrayEqual({"!a", "!c", "b", "d"}, readAttrPoses({})); if (`size $r`) warning $r;
-
-    $nkPoseStackTestSelectionMode = "prev";
-    $r = assertFalse(movePrevPose(-1)); if (`size $r`) warning $r;
-    $r = assertFalse(movePrevPose(0)); if (`size $r`) warning $r;
-    $r = assertFalse(movePrevPose(1)); if (`size $r`) warning $r;
-    $r = assertFalse(movePrevPose(2)); if (`size $r`) warning $r;
-    $r = assertFalse(movePrevPose(4)); if (`size $r`) warning $r;
-    $r = assertStringEqual("prev", $nkPoseStackTestSelectionMode); if (`size $r`) warning $r;
-
-    $r = assertTrue(movePrevPose(3)); if (`size $r`) warning $r;
-    $r = assertStringEqual("", $nkPoseStackTestSelectionMode); if (`size $r`) warning $r;
-    $nodes = getScriptNodes();
-    $r = assertIntEqual(3, `size $nodes`); if (`size $r`) warning $r;
-    $r = assertStringArrayEqual({"!a", "!c", "d", "b"}, readAttrPoses({})); if (`size $r`) warning $r;
-
-    unsubscribe("nkPoseStackPoseMovedPrev", "nkPoseStackTestObserver");
-  }
-
-  // moveNextPose
-  {
-    subscribe("nkPoseStackPoseMovedNext", "nkPoseStackTestObserver");
-
-    testNewScene();
-
-    string $psA = "1,1,0/_L,_R/0,0,1,1,0";
-    string $psB = "1,1,0/_L,_R/0,0,1,1,0";
-    string $psC = "1,1,0/_L,_R/0,0,1,1,0";
-    string $pA = "a=joint1_L[" + $psA + "]1,1,1,0,0,0,1,1,1,1,0,0,0;";
-    string $pB = "b=joint2_L[" + $psB + "]2,2,2,0,0,0,1,1,1,1,0,0,0;";
-    string $pC = "b=joint3_L[" + $psC + "]3,3,3,0,0,0,1,1,1,1,0,0,0;";
-
-    $nkPoseStackTestSelectionMode = "next";
-    $r = assertFalse(moveNextPose(1)); if (`size $r`) warning $r;
-    $r = assertStringEqual("next", $nkPoseStackTestSelectionMode); if (`size $r`) warning $r;
-
-    $r = assertTrue(writeAttrPoses({$pA, $pB, $pC})); if (`size $r`) warning $r;
-    $nodes = getScriptNodes();
-    $r = assertIntEqual(1, `size $nodes`); if (`size $r`) warning $r;
-    $r = assertStringArrayEqual({$pA, $pB, $pC}, readAttrPoses({})); if (`size $r`) warning $r;
-
-    $r = assertFalse(moveNextPose(-1)); if (`size $r`) warning $r;
-    $r = assertFalse(moveNextPose(2)); if (`size $r`) warning $r;
-    $r = assertFalse(moveNextPose(3)); if (`size $r`) warning $r;
-    $r = assertStringEqual("next", $nkPoseStackTestSelectionMode); if (`size $r`) warning $r;
-
-    $r = assertTrue(moveNextPose(1)); if (`size $r`) warning $r;
-    $r = assertStringEqual("", $nkPoseStackTestSelectionMode); if (`size $r`) warning $r;
-    $nodes = getScriptNodes();
-    $r = assertIntEqual(1, `size $nodes`); if (`size $r`) warning $r;
-    $r = assertStringArrayEqual({$pA, $pC, $pB}, readAttrPoses({})); if (`size $r`) warning $r;
-
-    $nkPoseStackTestSelectionMode = "next";
-    $r = assertTrue(moveNextPose(0)); if (`size $r`) warning $r;
-    $r = assertStringEqual("", $nkPoseStackTestSelectionMode); if (`size $r`) warning $r;
-    $nodes = getScriptNodes();
-    $r = assertIntEqual(1, `size $nodes`); if (`size $r`) warning $r;
-    $r = assertStringArrayEqual({$pC, $pA, $pB}, readAttrPoses({})); if (`size $r`) warning $r;
-
-    testOpenScene($scriptNodeFilename);
-
-    $nodes = getScriptNodes();
-    $r = assertIntEqual(3, `size $nodes`); if (`size $r`) warning $r;
-    $r = assertStringArrayEqual({"!a", "!c", "b", "d"}, readAttrPoses({})); if (`size $r`) warning $r;
-
-    $nkPoseStackTestSelectionMode = "next";
-    $r = assertFalse(moveNextPose(-1)); if (`size $r`) warning $r;
-    $r = assertFalse(moveNextPose(0)); if (`size $r`) warning $r;
-    $r = assertFalse(moveNextPose(1)); if (`size $r`) warning $r;
-    $r = assertFalse(moveNextPose(3)); if (`size $r`) warning $r;
-    $r = assertFalse(moveNextPose(4)); if (`size $r`) warning $r;
-    $r = assertStringEqual("next", $nkPoseStackTestSelectionMode); if (`size $r`) warning $r;
-
-    $r = assertTrue(moveNextPose(2)); if (`size $r`) warning $r;
-    $r = assertStringEqual("", $nkPoseStackTestSelectionMode); if (`size $r`) warning $r;
-    $nodes = getScriptNodes();
-    $r = assertIntEqual(3, `size $nodes`); if (`size $r`) warning $r;
-    $r = assertStringArrayEqual({"!a", "!c", "d", "b"}, readAttrPoses({})); if (`size $r`) warning $r;
-
-    unsubscribe("nkPoseStackPoseMovedNext", "nkPoseStackTestObserver");
-  }
-
-  print("test4 end\n");
+  print("test5 end\n");
 }
 
 /*-
@@ -4774,6 +5033,7 @@ global proc nkPoseStackTest(int $flags[]) {
   if ($flags[2]) test2();
   if ($flags[3]) test3();
   if ($flags[4]) test4();
+  if ($flags[5]) test5();
 }
 
 /*-
@@ -4847,6 +5107,6 @@ global proc nkPoseStackPastePoseTest(
 
 /*
 eval ("source \"" + `getenv "MAYA_APP_DIR"` + "/dev/nkPoseStack/nkPoseStack.mel\"");
-nkPoseStackTest({1, 1, 1, 1, 1});
+nkPoseStackTest({1, 1, 1, 1, 1, 1});
 // nkPoseStackPastePoseTest(0, 0, {1, 1, 0});
 */
