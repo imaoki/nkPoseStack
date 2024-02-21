@@ -4465,6 +4465,13 @@ proc test4() {
   string $nsPoseELr = "!E_L=|referenced_two:e:locatorE_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;";
   string $nsPoseERr = "!E_R=|referenced_two:e:locatorE_R[1,1,0/_L,_R/0,0,1,0,0]-1,0,0,0,0,0,1,1,1,1,0,0,0;";
 
+  string $nsPoseALd = "A_L=|locatorA_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;";
+  string $nsPoseARd = "A_R=|locatorA_R[1,1,0/_L,_R/0,0,1,0,0]-1,0,0,0,0,0,1,1,1,1,0,0,0;";
+  string $nsPoseCLd = "C_L=|referenced_one:c:locatorC_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;";
+  string $nsPoseCRd = "C_R=|referenced_one:c:locatorC_R[1,1,0/_L,_R/0,0,1,0,0]-1,0,0,0,0,0,1,1,1,1,0,0,0;";
+  string $nsPoseELd = "E_L=|referenced_two:e:locatorE_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;";
+  string $nsPoseERd = "E_R=|referenced_two:e:locatorE_R[1,1,0/_L,_R/0,0,1,0,0]-1,0,0,0,0,0,1,1,1,1,0,0,0;";
+
   print("test4 start\n");
   string $r;
   string $nodes[];
@@ -4754,6 +4761,30 @@ proc test4() {
     $r = assertTrue(duplicatePose(1)); if (`size $r`) warning $r;
     $r = assertStringEqual("", $nkPoseStackPoseOpsTestSelectionMode); if (`size $r`) warning $r;
     $r = assertStringArrayEqual({$poseAr, $poseCr, $poseB, $poseD, $pA, $pA, $pB, $poseA, $poseC}, readAttrPoses({})); if (`size $r`) warning $r;
+
+    testOpenScene($nsScriptNodeFilename);
+
+    $r = assertTrue(appendAttrPoses({$pA, $pB})); if (`size $r`) warning $r;
+    $nodes = getScriptNodes();
+    $r = assertIntEqual(4, `size $nodes`); if (`size $r`) warning $r;
+    $r = assertStringArrayEqual({$nsPoseALr, $nsPoseARr, $nsPoseCLr, $nsPoseCRr, $nsPoseELr, $nsPoseERr, $nsPoseDL, $nsPoseDR, $nsPoseBL, $nsPoseBR, $pA, $pB}, readAttrPoses({})); if (`size $r`) warning $r;
+
+    $nkPoseStackPoseOpsTestSelectionMode = "next";
+    $r = assertTrue(duplicatePose(10)); if (`size $r`) warning $r;
+    $r = assertStringEqual("", $nkPoseStackPoseOpsTestSelectionMode); if (`size $r`) warning $r;
+    $r = assertStringArrayEqual({$nsPoseALr, $nsPoseARr, $nsPoseCLr, $nsPoseCRr, $nsPoseELr, $nsPoseERr, $nsPoseDL, $nsPoseDR, $nsPoseBL, $nsPoseBR, $pA, $pA, $pB}, readAttrPoses({})); if (`size $r`) warning $r;
+    $nkPoseStackPoseOpsTestSelectionMode = "last";
+    $r = assertTrue(duplicatePose(0)); if (`size $r`) warning $r;
+    $r = assertStringEqual("", $nkPoseStackPoseOpsTestSelectionMode); if (`size $r`) warning $r;
+    $r = assertStringArrayEqual({$nsPoseALr, $nsPoseARr, $nsPoseCLr, $nsPoseCRr, $nsPoseELr, $nsPoseERr, $nsPoseDL, $nsPoseDR, $nsPoseBL, $nsPoseBR, $pA, $pA, $pB, $nsPoseALd}, readAttrPoses({})); if (`size $r`) warning $r;
+    $nkPoseStackPoseOpsTestSelectionMode = "last";
+    $r = assertTrue(duplicatePose(2)); if (`size $r`) warning $r;
+    $r = assertStringEqual("", $nkPoseStackPoseOpsTestSelectionMode); if (`size $r`) warning $r;
+    $r = assertStringArrayEqual({$nsPoseALr, $nsPoseARr, $nsPoseCLr, $nsPoseCRr, $nsPoseELr, $nsPoseERr, $nsPoseDL, $nsPoseDR, $nsPoseBL, $nsPoseBR, $pA, $pA, $pB, $nsPoseALd, $nsPoseCLd}, readAttrPoses({})); if (`size $r`) warning $r;
+    $nkPoseStackPoseOpsTestSelectionMode = "last";
+    $r = assertTrue(duplicatePose(4)); if (`size $r`) warning $r;
+    $r = assertStringEqual("", $nkPoseStackPoseOpsTestSelectionMode); if (`size $r`) warning $r;
+    $r = assertStringArrayEqual({$nsPoseALr, $nsPoseARr, $nsPoseCLr, $nsPoseCRr, $nsPoseELr, $nsPoseERr, $nsPoseDL, $nsPoseDR, $nsPoseBL, $nsPoseBR, $pA, $pA, $pB, $nsPoseALd, $nsPoseCLd, $nsPoseELd}, readAttrPoses({})); if (`size $r`) warning $r;
 
     unsubscribe("nkPoseStackPoseDuplicated", "nkPoseStackPoseOpsTestObserver");
   }
