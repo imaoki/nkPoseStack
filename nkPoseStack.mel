@@ -304,14 +304,17 @@ proc string convertDataVersion(string $value) {
   // print("  value:" + $value + "\n"); // debug
   string $newValue;
   if (!`size $value`) return $newValue;
+
   string $lines[] = deserialize($value);
   if (`size $lines` < 2) return $newValue;
+
   string $poseVersion = getPoseVersion();
   int $valueVersion = (int) $lines[0];
   int $currentVersion = (int) $poseVersion;
   // print("  valueVersion  :" + $valueVersion + "\n"); // debug
   // print("  currentVersion:" + $currentVersion + "\n"); // debug
   if (!stringArrayRemoveAtIndex(0, $lines)) return $newValue;
+
   switch ($valueVersion) {
     case 0: // テスト用
       switch ($currentVersion) {
@@ -790,6 +793,7 @@ proc string mergeScriptNodes(string $nodes[]) {
   string $value;
   for ($n in $nodes) {
     if (isValidScriptNode($n) && !isNodeReferenced($n)) {
+      // データバージョンの確認とコンバート
       $value += convertDataVersion(getPoseStackDataAttr($n));
     }
   }
@@ -896,13 +900,20 @@ proc string[] readAttrPoses(string $nodes[]) {
   for ($n in $nodes) {
     if (!isValidScriptNode($n)) continue;
     // データバージョンの確認とコンバート
-    string $nPoses[] = deserialize(
-      convertDataVersion(getPoseStackDataAttr($n))
-    );
-    // リファレンスネームスペースの解決
+    string $beforeData = getPoseStackDataAttr($n);
+    string $afterData = convertDataVersion($beforeData);
+    string $nPoses[] = deserialize($afterData);
+
     if (isNodeReferenced($n)) {
+      // リファレンスネームスペースの解決
       resolveNamespace($n, $nPoses);
       stringArrayAddPrefix($nPoses, "!");
+    }
+    else {
+      // バージョンが異なる場合は保存
+      if ($afterData != $beforeData) {
+        setPoseStackDataAttr($n, getPoseVersion() + "\n" + $afterData);
+      }
     }
     // print("  n:" + $n + "\n"); // debug
     // print("    nPoses:{\n      " + stringArrayToString($nPoses, ",\n      ") + "\n    }\n"); // debug
@@ -924,6 +935,7 @@ proc int appendAttrPoses(string $poses[]) {
   if (!isValidScriptNode($editableNode)) $editableNode = createScriptNode();
   if (!isValidScriptNode($editableNode)) return false;
 
+  // データバージョンの確認とコンバート
   string $newPoses[] = deserialize(
     convertDataVersion(getPoseStackDataAttr($editableNode))
   );
@@ -1145,6 +1157,7 @@ proc int openPoses(string $filename) {
   // print("  filename:" + $filename + "\n"); // debug
   if (!existsFilename($filename)) return false;
 
+  // データバージョンの確認とコンバート
   string $poses[] = deserialize(
     convertDataVersion(readAllText($filename, ""))
   );
@@ -1170,6 +1183,7 @@ proc int importPoses(string $filename) {
   // print("  filename:" + $filename + "\n"); // debug
   if (!existsFilename($filename)) return false;
 
+  // データバージョンの確認とコンバート
   string $poses[] = deserialize(
     convertDataVersion(readAllText($filename, ""))
   );
@@ -3410,7 +3424,7 @@ global proc nkPoseStackAttributeDeleted(string $nodeId) {
 @returns <string>
 */
 global proc string nkPoseStackVersion() {
-  return "4.0.4";
+  return "4.0.5";
 }
 
 /*-
@@ -4082,28 +4096,39 @@ proc test3() {
     string $valueA = $pv + "a\n";
     string $valueB = $pv + "b\n";
     string $valueC = $pv + "c\n";
+    string $valueD = "0\nd\n"; // バージョン違い
 
     testNewScene();
 
     string $nA = `rename (createScriptNode()) "nkPoseStackDataA"`;
     string $nB = `rename (createScriptNode()) "nkPoseStackDataB"`;
     string $nC = `rename (createScriptNode()) "nkPoseStackDataC"`;
+    string $nD = `rename (createScriptNode()) "nkPoseStackDataD"`;
     setPoseStackDataAttr($nA, $valueA);
     setPoseStackDataAttr($nB, $valueB);
     setPoseStackDataAttr($nC, $valueC);
+    setPoseStackDataAttr($nD, $valueD);
     $r = assertStringEqual($valueA, getPoseStackDataAttr($nA)); if (`size $r`) warning $r;
     $r = assertStringEqual($valueB, getPoseStackDataAttr($nB)); if (`size $r`) warning $r;
     $r = assertStringEqual($valueC, getPoseStackDataAttr($nC)); if (`size $r`) warning $r;
+    $r = assertStringEqual($valueD, getPoseStackDataAttr($nD)); if (`size $r`) warning $r;
     $r = assertStringArrayEqual({"a", "c"}, readAttrPoses({$nA, $nC})); if (`size $r`) warning $r;
     $r = assertStringArrayEqual({"c", "b"}, readAttrPoses({$nC, $nB})); if (`size $r`) warning $r;
+    $r = assertStringArrayEqual({"xd"}, readAttrPoses({$nD})); if (`size $r`) warning $r;
+    $r = assertStringEqual($valueA, getPoseStackDataAttr($nA)); if (`size $r`) warning $r;
+    $r = assertStringEqual($valueB, getPoseStackDataAttr($nB)); if (`size $r`) warning $r;
+    $r = assertStringEqual($valueC, getPoseStackDataAttr($nC)); if (`size $r`) warning $r;
+    $r = assertStringEqual($pv + "xd\n", getPoseStackDataAttr($nD)); if (`size $r`) warning $r;
     $r = assertTrue(`objExists $nA`); if (`size $r`) warning $r;
     $r = assertTrue(`objExists $nB`); if (`size $r`) warning $r;
     $r = assertTrue(`objExists $nC`); if (`size $r`) warning $r;
+    $r = assertTrue(`objExists $nD`); if (`size $r`) warning $r;
     $r = assertFalse(`objExists "nkPoseStackData"`); if (`size $r`) warning $r;
-    $r = assertStringArrayEqual({"a", "b", "c"}, readAttrPoses({})); if (`size $r`) warning $r;
+    $r = assertStringArrayEqual({"a", "b", "c", "xd"}, readAttrPoses({})); if (`size $r`) warning $r;
     $r = assertFalse(`objExists $nA`); if (`size $r`) warning $r;
     $r = assertFalse(`objExists $nB`); if (`size $r`) warning $r;
     $r = assertFalse(`objExists $nC`); if (`size $r`) warning $r;
+    $r = assertFalse(`objExists $nD`); if (`size $r`) warning $r;
     $r = assertTrue(`objExists "nkPoseStackData"`); if (`size $r`) warning $r;
 
     testOpenScene($scriptNodeFilename);
