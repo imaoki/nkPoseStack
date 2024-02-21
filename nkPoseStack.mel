@@ -113,6 +113,24 @@ proc string makePoseSetting(
 }
 
 /*-
+@param $n <string>
+@param $poseSetting <string>
+@returns <string>
+*/
+proc string makeTransformHeader(string $n, string $poseSetting) {
+  return ($n + "[" + $poseSetting + "]");
+}
+
+/*-
+@param $header <string>
+@param $values <float[]>
+@returns <string>
+*/
+proc string makePoseTransform(string $header, float $values[]) {
+  return ($header + floatArrayToString($values, ","));
+}
+
+/*-
 @param $poseName <string>
 @param $poseTransforms <string[]>
 @returns <string>
@@ -312,24 +330,59 @@ proc string convertDataVersion(string $value) {
   return $newValue;
 }
 
+/*-
+@param $n <string>
+@param $poses <string[]>
+@returns <string[]>
+*/
+proc string[] resolveNamespace(string $n, string $poses[]) {
+  // print("resolveNamespace\n"); // debug
+  // print("  n    :" + $n + "\n"); // debug
+  // print("  poses:{\n    " + stringArrayToString($poses, ",\n    ") + "\n  }\n"); // debug
+  if (!`objExists $n` || !`size $poses`) return $poses;
+
+  string $names[] = `ls -l -sns $n`;
+  if (`size $names` != 2) return $poses;
+
+  string $namespace = $names[1];
+  // print("  namespace:" + $namespace + "\n"); // debug
+  if ($namespace == ":") return $poses;
+
+  string $replacement = "|" + $namespace + ":";
+  for ($i = 0; $i < `size $poses`; $i++) {
+    string $pose = $poses[$i];
+    string $poseName = extractPoseName($pose);
+    string $poseTransforms[] = extractPoseTransforms($pose);
+    // print("  pose:" + $pose + "\n"); // debug
+    // print("    poseName      :" + $poseName + "\n"); // debug
+    // print("    poseTransforms:{\n      " + stringArrayToString($poseTransforms, ",\n      ") + "\n    }\n"); // debug
+    for ($j = 0; $j < `size $poseTransforms`; $j++) {
+      string $poseTransform = $poseTransforms[$j];
+      string $transformNode = extractTransformNode($poseTransform);
+      string $poseSetting = extractPoseSetting($poseTransform);
+      float $transformValues[] = extractTransformValues($poseTransform);
+      // print("    poseTransform:" + $poseTransform + "\n"); // debug
+      // print("      transformNode  :" + $transformNode + "\n"); // debug
+      // print("      poseSetting    :" + $poseSetting + "\n"); // debug
+      // print("      transformValues:{" + floatArrayToString($transformValues, ", ") + "}\n"); // debug
+      $transformNode = regexReplace("\\|", $replacement, $transformNode, "");
+      string $header = makeTransformHeader($transformNode, $poseSetting);
+      $poseTransforms[$j] = makePoseTransform($header, $transformValues);
+    }
+    $poses[$i] = makePose($poseName, $poseTransforms);
+  }
+  return $poses;
+}
+
 // -----------------------------------------------------------------------------
 // トランスフォーム
 // -----------------------------------------------------------------------------
 /*-
 @param $n <string>
-@param $poseSetting <string>
-@returns <string>
-*/
-proc string makeTransformHeader(string $n, string $poseSetting) {
-  return ($n + "[" + $poseSetting + "]");
-}
-
-/*-
-@param $n <string>
 @returns <float[13]>
 */
-proc float[] makeTransformValues(string $n) {
-  // print("makeTransformValues\n"); // debug
+proc float[] getTransformAttributeValues(string $n) {
+  // print("getTransformAttributeValues\n"); // debug
   // print("  n:" + $n + "\n"); // debug
   float $values[] = {
     0, 0, 0,
@@ -381,15 +434,6 @@ proc float[] makeTransformValues(string $n) {
 }
 
 /*-
-@param $header <string>
-@param $values <float[]>
-@returns <string>
-*/
-proc string makePoseTransform(string $header, float $values[]) {
-  return ($header + floatArrayToString($values, ","));
-}
-
-/*-
 @param $nodes <string[]>
 @param $poseSettings <string[]>
 @returns <string[]>
@@ -405,7 +449,7 @@ proc string[] makePoseTransforms(string $nodes[], string $poseSettings[]) {
     // print("  n:" + $n + "\n"); // debug
     if (`objExists $n`) {
       string $header = makeTransformHeader($n, $poseSettings[$i]);
-      float $values[] = makeTransformValues($n);
+      float $values[] = getTransformAttributeValues($n);
       string $poseTransform = makePoseTransform($header, $values);
       $poseTransforms[$i] = $poseTransform;
     }
@@ -851,10 +895,13 @@ proc string[] readAttrPoses(string $nodes[]) {
   if (!`size $nodes`) $nodes = getScriptNodes();
   for ($n in $nodes) {
     if (!isValidScriptNode($n)) continue;
+    // データバージョンの確認とコンバート
     string $nPoses[] = deserialize(
       convertDataVersion(getPoseStackDataAttr($n))
     );
+    // リファレンスネームスペースの解決
     if (isNodeReferenced($n)) {
+      resolveNamespace($n, $nPoses);
       stringArrayAddPrefix($nPoses, "!");
     }
     // print("  n:" + $n + "\n"); // debug
@@ -3363,7 +3410,7 @@ global proc nkPoseStackAttributeDeleted(string $nodeId) {
 @returns <string>
 */
 global proc string nkPoseStackVersion() {
-  return "4.0.3";
+  return "4.0.4";
 }
 
 /*-
@@ -3409,6 +3456,14 @@ proc test0() {
   // makePoseSetting
   $r = assertStringEqual("//", makePoseSetting({}, {}, {})); if (`size $r`) warning $r;
   $r = assertStringEqual("0,1/a,b/2,3", makePoseSetting({0, 1}, {"a", "b"}, {2, 3})); if (`size $r`) warning $r;
+
+  // makeTransformHeader
+  $r = assertStringEqual("[]", makeTransformHeader("", "")); if (`size $r`) warning $r;
+  $r = assertStringEqual("a[b]", makeTransformHeader("a", "b")); if (`size $r`) warning $r;
+
+  // makePoseTransform
+  $r = assertStringEqual("", makePoseTransform("", {})); if (`size $r`) warning $r;
+  $r = assertStringEqual("a0.1,0.2", makePoseTransform("a", {0.1, 0.2})); if (`size $r`) warning $r;
 
   // makePose
   $r = assertStringEqual("", makePose("", {})); if (`size $r`) warning $r;
@@ -3532,6 +3587,32 @@ proc test0() {
     $r = assertStringEqual("xa\nxb\n", convertDataVersion("0\na\nb\n")); if (`size $r`) warning $r;
   }
 
+  // resolveNamespace
+  {
+    testNewScene();
+
+    string $n = `createNode -n "nkPoseStackData" -ss "transform"`;
+    string $nT = `createNode -n "test:nkPoseStackData" -ss "transform"`;
+    string $poseA = "A=|A|a_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;|A|a_R[1,1,0/_L,_R/0,0,1,0,0]-1,0,0,0,0,0,1,1,1,1,0,0,0;";
+    string $poseB = "B=|B|b_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;|B|b_R[1,1,0/_L,_R/0,0,1,0,0]-1,0,0,0,0,0,1,1,1,1,0,0,0;";
+    string $ePoses[] = {$poseA, $poseB};
+    string $aPoses[] = {$poseA, $poseB};
+
+    string $poseAr = "A=|test:A|test:a_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;|test:A|test:a_R[1,1,0/_L,_R/0,0,1,0,0]-1,0,0,0,0,0,1,1,1,1,0,0,0;";
+    string $poseBr = "B=|test:B|test:b_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;|test:B|test:b_R[1,1,0/_L,_R/0,0,1,0,0]-1,0,0,0,0,0,1,1,1,1,0,0,0;";
+    string $posesR[] = {$poseAr, $poseBr};
+
+    $r = assertStringArrayEqual({}, resolveNamespace("", {})); if (`size $r`) warning $r;
+    $r = assertStringArrayEqual({}, resolveNamespace($nT, {})); if (`size $r`) warning $r;
+    $r = assertStringArrayEqual($ePoses, resolveNamespace("", $aPoses)); if (`size $r`) warning $r;
+    $r = assertStringArrayEqual($ePoses, resolveNamespace($n, $aPoses)); if (`size $r`) warning $r;
+    $r = assertStringArrayEqual($posesR, resolveNamespace($nT, $aPoses)); if (`size $r`) warning $r;
+    $r = assertStringArrayEqual($posesR, $aPoses); if (`size $r`) warning $r;
+
+    if (`objExists $n`) delete $n;
+    if (`objExists $nT`) delete $nT;
+  }
+
   print("test0 end\n");
 }
 
@@ -3543,11 +3624,7 @@ proc test1() {
   print("test1 start\n");
   string $r;
 
-  // makeTransformHeader
-  $r = assertStringEqual("[]", makeTransformHeader("", "")); if (`size $r`) warning $r;
-  $r = assertStringEqual("a[b]", makeTransformHeader("a", "b")); if (`size $r`) warning $r;
-
-  // makeTransformValues
+  // getTransformAttributeValues
   {
     select -cl;
     string $n = `joint -a -ax 15 -ay 30 -az 45 -p 2 0 1 -roo "xyz"`;
@@ -3559,14 +3636,10 @@ proc test1() {
       1.0, 1.0, 1.0,
       0.0, 0.0, 0.0
     };
-    $r = assertFloatArrayEqual($eValues, makeTransformValues($n), 0.001); if (`size $r`) warning $r;
+    $r = assertFloatArrayEqual($eValues, getTransformAttributeValues($n), 0.001); if (`size $r`) warning $r;
 
     if (`objExists $n`) delete $n;
   }
-
-  // makePoseTransform
-  $r = assertStringEqual("", makePoseTransform("", {})); if (`size $r`) warning $r;
-  $r = assertStringEqual("a0.1,0.2", makePoseTransform("a", {0.1, 0.2})); if (`size $r`) warning $r;
 
   // makePoseTransforms
   {
@@ -3686,6 +3759,7 @@ proc test2() {
 
   string $testDirname = `getenv "MAYA_APP_DIR"` + "/dev/nkPoseStack/test";
   string $scriptNodeFilename = $testDirname + "/scriptNodeTest.ma";
+  string $nsScriptNodeFilename = $testDirname + "/ns_scriptNodeTest.ma";
 
   string $pdA = "A=|locatorA_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;\n";
   string $pdB = "B=|locatorB_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;\n";
@@ -3699,6 +3773,30 @@ proc test2() {
 
   string $poseAr = "!A=|locatorA_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;";
   string $poseCr = "!C=|locatorC_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;";
+
+  string $nsPdA = "A_L=|locatorA_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;\nA_R=|locatorA_R[1,1,0/_L,_R/0,0,1,0,0]-1,0,0,0,0,0,1,1,1,1,0,0,0;\n";
+  string $nsPdB = "B_L=|locatorB_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;\nB_R=|locatorB_R[1,1,0/_L,_R/0,0,1,0,0]-1,0,0,0,0,0,1,1,1,1,0,0,0;\n";
+  string $nsPdC = "C_L=|c:locatorC_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;\nC_R=|c:locatorC_R[1,1,0/_L,_R/0,0,1,0,0]-1,0,0,0,0,0,1,1,1,1,0,0,0;\n";
+  string $nsPdD = "D_L=|d:locatorD_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;\nD_R=|d:locatorD_R[1,1,0/_L,_R/0,0,1,0,0]-1,0,0,0,0,0,1,1,1,1,0,0,0;\n";
+  string $nsPdE = "E_L=|locatorE_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;\nE_R=|locatorE_R[1,1,0/_L,_R/0,0,1,0,0]-1,0,0,0,0,0,1,1,1,1,0,0,0;\n";
+
+  string $nsPoseAL = "A_L=|locatorA_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;";
+  string $nsPoseAR = "A_R=|locatorA_R[1,1,0/_L,_R/0,0,1,0,0]-1,0,0,0,0,0,1,1,1,1,0,0,0;";
+  string $nsPoseBL = "B_L=|locatorB_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;";
+  string $nsPoseBR = "B_R=|locatorB_R[1,1,0/_L,_R/0,0,1,0,0]-1,0,0,0,0,0,1,1,1,1,0,0,0;";
+  string $nsPoseCL = "C_L=|c:locatorC_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;";
+  string $nsPoseCR = "C_R=|c:locatorC_R[1,1,0/_L,_R/0,0,1,0,0]-1,0,0,0,0,0,1,1,1,1,0,0,0;";
+  string $nsPoseDL = "D_L=|d:locatorD_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;";
+  string $nsPoseDR = "D_R=|d:locatorD_R[1,1,0/_L,_R/0,0,1,0,0]-1,0,0,0,0,0,1,1,1,1,0,0,0;";
+  string $nsPoseEL = "E_L=|locatorE_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;";
+  string $nsPoseER = "E_R=|locatorE_R[1,1,0/_L,_R/0,0,1,0,0]-1,0,0,0,0,0,1,1,1,1,0,0,0;";
+
+  string $nsPoseALr = "!A_L=|locatorA_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;";
+  string $nsPoseARr = "!A_R=|locatorA_R[1,1,0/_L,_R/0,0,1,0,0]-1,0,0,0,0,0,1,1,1,1,0,0,0;";
+  string $nsPoseCLr = "!C_L=|referenced_one:c:locatorC_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;";
+  string $nsPoseCRr = "!C_R=|referenced_one:c:locatorC_R[1,1,0/_L,_R/0,0,1,0,0]-1,0,0,0,0,0,1,1,1,1,0,0,0;";
+  string $nsPoseELr = "!E_L=|referenced_two:e:locatorE_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;";
+  string $nsPoseERr = "!E_R=|referenced_two:e:locatorE_R[1,1,0/_L,_R/0,0,1,0,0]-1,0,0,0,0,0,1,1,1,1,0,0,0;";
 
   print("test2 start\n");
   string $r;
@@ -3929,6 +4027,7 @@ proc test2() {
 proc test3() {
   string $testDirname = `getenv "MAYA_APP_DIR"` + "/dev/nkPoseStack/test";
   string $scriptNodeFilename = $testDirname + "/scriptNodeTest.ma";
+  string $nsScriptNodeFilename = $testDirname + "/ns_scriptNodeTest.ma";
 
   string $pdA = "A=|locatorA_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;\n";
   string $pdB = "B=|locatorB_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;\n";
@@ -3942,6 +4041,30 @@ proc test3() {
 
   string $poseAr = "!A=|locatorA_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;";
   string $poseCr = "!C=|locatorC_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;";
+
+  string $nsPdA = "A_L=|locatorA_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;\nA_R=|locatorA_R[1,1,0/_L,_R/0,0,1,0,0]-1,0,0,0,0,0,1,1,1,1,0,0,0;\n";
+  string $nsPdB = "B_L=|locatorB_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;\nB_R=|locatorB_R[1,1,0/_L,_R/0,0,1,0,0]-1,0,0,0,0,0,1,1,1,1,0,0,0;\n";
+  string $nsPdC = "C_L=|c:locatorC_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;\nC_R=|c:locatorC_R[1,1,0/_L,_R/0,0,1,0,0]-1,0,0,0,0,0,1,1,1,1,0,0,0;\n";
+  string $nsPdD = "D_L=|d:locatorD_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;\nD_R=|d:locatorD_R[1,1,0/_L,_R/0,0,1,0,0]-1,0,0,0,0,0,1,1,1,1,0,0,0;\n";
+  string $nsPdE = "E_L=|locatorE_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;\nE_R=|locatorE_R[1,1,0/_L,_R/0,0,1,0,0]-1,0,0,0,0,0,1,1,1,1,0,0,0;\n";
+
+  string $nsPoseAL = "A_L=|locatorA_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;";
+  string $nsPoseAR = "A_R=|locatorA_R[1,1,0/_L,_R/0,0,1,0,0]-1,0,0,0,0,0,1,1,1,1,0,0,0;";
+  string $nsPoseBL = "B_L=|locatorB_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;";
+  string $nsPoseBR = "B_R=|locatorB_R[1,1,0/_L,_R/0,0,1,0,0]-1,0,0,0,0,0,1,1,1,1,0,0,0;";
+  string $nsPoseCL = "C_L=|c:locatorC_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;";
+  string $nsPoseCR = "C_R=|c:locatorC_R[1,1,0/_L,_R/0,0,1,0,0]-1,0,0,0,0,0,1,1,1,1,0,0,0;";
+  string $nsPoseDL = "D_L=|d:locatorD_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;";
+  string $nsPoseDR = "D_R=|d:locatorD_R[1,1,0/_L,_R/0,0,1,0,0]-1,0,0,0,0,0,1,1,1,1,0,0,0;";
+  string $nsPoseEL = "E_L=|locatorE_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;";
+  string $nsPoseER = "E_R=|locatorE_R[1,1,0/_L,_R/0,0,1,0,0]-1,0,0,0,0,0,1,1,1,1,0,0,0;";
+
+  string $nsPoseALr = "!A_L=|locatorA_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;";
+  string $nsPoseARr = "!A_R=|locatorA_R[1,1,0/_L,_R/0,0,1,0,0]-1,0,0,0,0,0,1,1,1,1,0,0,0;";
+  string $nsPoseCLr = "!C_L=|referenced_one:c:locatorC_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;";
+  string $nsPoseCRr = "!C_R=|referenced_one:c:locatorC_R[1,1,0/_L,_R/0,0,1,0,0]-1,0,0,0,0,0,1,1,1,1,0,0,0;";
+  string $nsPoseELr = "!E_L=|referenced_two:e:locatorE_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;";
+  string $nsPoseERr = "!E_R=|referenced_two:e:locatorE_R[1,1,0/_L,_R/0,0,1,0,0]-1,0,0,0,0,0,1,1,1,1,0,0,0;";
 
   print("test3 start\n");
   string $r;
@@ -3996,6 +4119,23 @@ proc test3() {
     $r = assertFalse(`objExists "nkPoseStackDataB"`); if (`size $r`) warning $r;
     $r = assertTrue(`objExists "nkPoseStackDataC"`); if (`size $r`) warning $r;
     $r = assertFalse(`objExists "nkPoseStackDataD"`); if (`size $r`) warning $r;
+    $r = assertTrue(`objExists "nkPoseStackData"`); if (`size $r`) warning $r;
+
+    testOpenScene($nsScriptNodeFilename);
+
+    $r = assertStringArrayEqual({$nsPoseALr, $nsPoseARr, $nsPoseCLr, $nsPoseCRr}, readAttrPoses({"nkPoseStackDataA", "referenced_one:nkPoseStackDataC"})); if (`size $r`) warning $r;
+    $r = assertTrue(`objExists "nkPoseStackDataA"`); if (`size $r`) warning $r;
+    $r = assertTrue(`objExists "nkPoseStackDataB"`); if (`size $r`) warning $r;
+    $r = assertTrue(`objExists "referenced_one:nkPoseStackDataC"`); if (`size $r`) warning $r;
+    $r = assertTrue(`objExists "imported:nkPoseStackDataD"`); if (`size $r`) warning $r;
+    $r = assertTrue(`objExists "referenced_two:e:nkPoseStackDataE"`); if (`size $r`) warning $r;
+    $r = assertFalse(`objExists "nkPoseStackData"`); if (`size $r`) warning $r;
+    $r = assertStringArrayEqual({$nsPoseALr, $nsPoseARr, $nsPoseCLr, $nsPoseCRr, $nsPoseELr, $nsPoseERr, $nsPoseDL, $nsPoseDR, $nsPoseBL, $nsPoseBR}, readAttrPoses({})); if (`size $r`) warning $r;
+    $r = assertTrue(`objExists "nkPoseStackDataA"`); if (`size $r`) warning $r;
+    $r = assertFalse(`objExists "nkPoseStackDataB"`); if (`size $r`) warning $r;
+    $r = assertTrue(`objExists "referenced_one:nkPoseStackDataC"`); if (`size $r`) warning $r;
+    $r = assertFalse(`objExists "imported:nkPoseStackDataD"`); if (`size $r`) warning $r;
+    $r = assertTrue(`objExists "referenced_two:e:nkPoseStackDataE"`); if (`size $r`) warning $r;
     $r = assertTrue(`objExists "nkPoseStackData"`); if (`size $r`) warning $r;
   }
 
@@ -4286,6 +4426,7 @@ proc test4() {
 
   string $testDirname = `getenv "MAYA_APP_DIR"` + "/dev/nkPoseStack/test";
   string $scriptNodeFilename = $testDirname + "/scriptNodeTest.ma";
+  string $nsScriptNodeFilename = $testDirname + "/ns_scriptNodeTest.ma";
 
   string $pdA = "A=|locatorA_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;\n";
   string $pdB = "B=|locatorB_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;\n";
@@ -4299,6 +4440,30 @@ proc test4() {
 
   string $poseAr = "!A=|locatorA_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;";
   string $poseCr = "!C=|locatorC_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;";
+
+  string $nsPdA = "A_L=|locatorA_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;\nA_R=|locatorA_R[1,1,0/_L,_R/0,0,1,0,0]-1,0,0,0,0,0,1,1,1,1,0,0,0;\n";
+  string $nsPdB = "B_L=|locatorB_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;\nB_R=|locatorB_R[1,1,0/_L,_R/0,0,1,0,0]-1,0,0,0,0,0,1,1,1,1,0,0,0;\n";
+  string $nsPdC = "C_L=|c:locatorC_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;\nC_R=|c:locatorC_R[1,1,0/_L,_R/0,0,1,0,0]-1,0,0,0,0,0,1,1,1,1,0,0,0;\n";
+  string $nsPdD = "D_L=|d:locatorD_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;\nD_R=|d:locatorD_R[1,1,0/_L,_R/0,0,1,0,0]-1,0,0,0,0,0,1,1,1,1,0,0,0;\n";
+  string $nsPdE = "E_L=|locatorE_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;\nE_R=|locatorE_R[1,1,0/_L,_R/0,0,1,0,0]-1,0,0,0,0,0,1,1,1,1,0,0,0;\n";
+
+  string $nsPoseAL = "A_L=|locatorA_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;";
+  string $nsPoseAR = "A_R=|locatorA_R[1,1,0/_L,_R/0,0,1,0,0]-1,0,0,0,0,0,1,1,1,1,0,0,0;";
+  string $nsPoseBL = "B_L=|locatorB_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;";
+  string $nsPoseBR = "B_R=|locatorB_R[1,1,0/_L,_R/0,0,1,0,0]-1,0,0,0,0,0,1,1,1,1,0,0,0;";
+  string $nsPoseCL = "C_L=|c:locatorC_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;";
+  string $nsPoseCR = "C_R=|c:locatorC_R[1,1,0/_L,_R/0,0,1,0,0]-1,0,0,0,0,0,1,1,1,1,0,0,0;";
+  string $nsPoseDL = "D_L=|d:locatorD_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;";
+  string $nsPoseDR = "D_R=|d:locatorD_R[1,1,0/_L,_R/0,0,1,0,0]-1,0,0,0,0,0,1,1,1,1,0,0,0;";
+  string $nsPoseEL = "E_L=|locatorE_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;";
+  string $nsPoseER = "E_R=|locatorE_R[1,1,0/_L,_R/0,0,1,0,0]-1,0,0,0,0,0,1,1,1,1,0,0,0;";
+
+  string $nsPoseALr = "!A_L=|locatorA_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;";
+  string $nsPoseARr = "!A_R=|locatorA_R[1,1,0/_L,_R/0,0,1,0,0]-1,0,0,0,0,0,1,1,1,1,0,0,0;";
+  string $nsPoseCLr = "!C_L=|referenced_one:c:locatorC_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;";
+  string $nsPoseCRr = "!C_R=|referenced_one:c:locatorC_R[1,1,0/_L,_R/0,0,1,0,0]-1,0,0,0,0,0,1,1,1,1,0,0,0;";
+  string $nsPoseELr = "!E_L=|referenced_two:e:locatorE_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;";
+  string $nsPoseERr = "!E_R=|referenced_two:e:locatorE_R[1,1,0/_L,_R/0,0,1,0,0]-1,0,0,0,0,0,1,1,1,1,0,0,0;";
 
   print("test4 start\n");
   string $r;
@@ -4895,6 +5060,7 @@ proc test4() {
 proc test5() {
   string $testDirname = `getenv "MAYA_APP_DIR"` + "/dev/nkPoseStack/test";
   string $scriptNodeFilename = $testDirname + "/scriptNodeTest.ma";
+  string $nsScriptNodeFilename = $testDirname + "/ns_scriptNodeTest.ma";
 
   string $pdA = "A=|locatorA_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;\n";
   string $pdB = "B=|locatorB_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;\n";
@@ -4908,6 +5074,30 @@ proc test5() {
 
   string $poseAr = "!A=|locatorA_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;";
   string $poseCr = "!C=|locatorC_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;";
+
+  string $nsPdA = "A_L=|locatorA_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;\nA_R=|locatorA_R[1,1,0/_L,_R/0,0,1,0,0]-1,0,0,0,0,0,1,1,1,1,0,0,0;\n";
+  string $nsPdB = "B_L=|locatorB_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;\nB_R=|locatorB_R[1,1,0/_L,_R/0,0,1,0,0]-1,0,0,0,0,0,1,1,1,1,0,0,0;\n";
+  string $nsPdC = "C_L=|c:locatorC_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;\nC_R=|c:locatorC_R[1,1,0/_L,_R/0,0,1,0,0]-1,0,0,0,0,0,1,1,1,1,0,0,0;\n";
+  string $nsPdD = "D_L=|d:locatorD_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;\nD_R=|d:locatorD_R[1,1,0/_L,_R/0,0,1,0,0]-1,0,0,0,0,0,1,1,1,1,0,0,0;\n";
+  string $nsPdE = "E_L=|locatorE_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;\nE_R=|locatorE_R[1,1,0/_L,_R/0,0,1,0,0]-1,0,0,0,0,0,1,1,1,1,0,0,0;\n";
+
+  string $nsPoseAL = "A_L=|locatorA_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;";
+  string $nsPoseAR = "A_R=|locatorA_R[1,1,0/_L,_R/0,0,1,0,0]-1,0,0,0,0,0,1,1,1,1,0,0,0;";
+  string $nsPoseBL = "B_L=|locatorB_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;";
+  string $nsPoseBR = "B_R=|locatorB_R[1,1,0/_L,_R/0,0,1,0,0]-1,0,0,0,0,0,1,1,1,1,0,0,0;";
+  string $nsPoseCL = "C_L=|c:locatorC_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;";
+  string $nsPoseCR = "C_R=|c:locatorC_R[1,1,0/_L,_R/0,0,1,0,0]-1,0,0,0,0,0,1,1,1,1,0,0,0;";
+  string $nsPoseDL = "D_L=|d:locatorD_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;";
+  string $nsPoseDR = "D_R=|d:locatorD_R[1,1,0/_L,_R/0,0,1,0,0]-1,0,0,0,0,0,1,1,1,1,0,0,0;";
+  string $nsPoseEL = "E_L=|locatorE_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;";
+  string $nsPoseER = "E_R=|locatorE_R[1,1,0/_L,_R/0,0,1,0,0]-1,0,0,0,0,0,1,1,1,1,0,0,0;";
+
+  string $nsPoseALr = "!A_L=|locatorA_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;";
+  string $nsPoseARr = "!A_R=|locatorA_R[1,1,0/_L,_R/0,0,1,0,0]-1,0,0,0,0,0,1,1,1,1,0,0,0;";
+  string $nsPoseCLr = "!C_L=|referenced_one:c:locatorC_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;";
+  string $nsPoseCRr = "!C_R=|referenced_one:c:locatorC_R[1,1,0/_L,_R/0,0,1,0,0]-1,0,0,0,0,0,1,1,1,1,0,0,0;";
+  string $nsPoseELr = "!E_L=|referenced_two:e:locatorE_L[1,1,0/_L,_R/0,0,1,0,0]1,0,0,0,0,0,1,1,1,1,0,0,0;";
+  string $nsPoseERr = "!E_R=|referenced_two:e:locatorE_R[1,1,0/_L,_R/0,0,1,0,0]-1,0,0,0,0,0,1,1,1,1,0,0,0;";
 
   print("test5 start\n");
   string $r;
@@ -4969,6 +5159,64 @@ proc test5() {
 
     if (`objExists $nL`) delete $nL;
     if (`objExists $nR`) delete $nR;
+
+    testOpenScene($nsScriptNodeFilename);
+
+    string $nAL = "|locatorA_L";
+    string $nAR = "|locatorA_R";
+    string $nBL = "|locatorB_L";
+    string $nBR = "|locatorB_R";
+    string $nCL = "|referenced_one:c:locatorC_L";
+    string $nCR = "|referenced_one:c:locatorC_R";
+    string $nDL = "|imported:d:locatorD_L";
+    string $nDR = "|imported:d:locatorD_R";
+    string $nEL = "|referenced_two:e:locatorE_L";
+    string $nER = "|referenced_two:e:locatorE_R";
+
+    $r = assertTrue(selectNodes(0, false, 0)); if (`size $r`) warning $r; // 置き換え
+    $r = assertStringArrayEqual({$nAL}, `ls -l -sl`); if (`size $r`) warning $r;
+    $r = assertTrue(selectNodes(0, true, 0)); if (`size $r`) warning $r; // 反対側に置き換え
+    $r = assertStringArrayEqual({$nAR}, `ls -l -sl`); if (`size $r`) warning $r;
+    $r = assertTrue(selectNodes(1, false, 0)); if (`size $r`) warning $r; // 置き換え
+    $r = assertStringArrayEqual({$nAR}, `ls -l -sl`); if (`size $r`) warning $r;
+    $r = assertTrue(selectNodes(1, true, 0)); if (`size $r`) warning $r; // 反対側に置き換え
+    $r = assertStringArrayEqual({$nAL}, `ls -l -sl`); if (`size $r`) warning $r;
+
+    $r = assertTrue(selectNodes(2, false, 0)); if (`size $r`) warning $r; // 置き換え
+    $r = assertStringArrayEqual({$nCL}, `ls -l -sl`); if (`size $r`) warning $r;
+    $r = assertTrue(selectNodes(2, true, 0)); if (`size $r`) warning $r; // 反対側に置き換え
+    $r = assertStringArrayEqual({$nCR}, `ls -l -sl`); if (`size $r`) warning $r;
+    $r = assertTrue(selectNodes(3, false, 0)); if (`size $r`) warning $r; // 置き換え
+    $r = assertStringArrayEqual({$nCR}, `ls -l -sl`); if (`size $r`) warning $r;
+    $r = assertTrue(selectNodes(3, true, 0)); if (`size $r`) warning $r; // 反対側に置き換え
+    $r = assertStringArrayEqual({$nCL}, `ls -l -sl`); if (`size $r`) warning $r;
+
+    $r = assertTrue(selectNodes(4, false, 0)); if (`size $r`) warning $r; // 置き換え
+    $r = assertStringArrayEqual({$nEL}, `ls -l -sl`); if (`size $r`) warning $r;
+    $r = assertTrue(selectNodes(4, true, 0)); if (`size $r`) warning $r; // 反対側に置き換え
+    $r = assertStringArrayEqual({$nER}, `ls -l -sl`); if (`size $r`) warning $r;
+    $r = assertTrue(selectNodes(5, false, 0)); if (`size $r`) warning $r; // 置き換え
+    $r = assertStringArrayEqual({$nER}, `ls -l -sl`); if (`size $r`) warning $r;
+    $r = assertTrue(selectNodes(5, true, 0)); if (`size $r`) warning $r; // 反対側に置き換え
+    $r = assertStringArrayEqual({$nEL}, `ls -l -sl`); if (`size $r`) warning $r;
+
+    $r = assertTrue(selectNodes(6, false, 0)); if (`size $r`) warning $r; // 置き換え
+    $r = assertStringArrayEqual({}, `ls -l -sl`); if (`size $r`) warning $r;
+    $r = assertTrue(selectNodes(6, true, 0)); if (`size $r`) warning $r; // 反対側に置き換え
+    $r = assertStringArrayEqual({}, `ls -l -sl`); if (`size $r`) warning $r;
+    $r = assertTrue(selectNodes(7, false, 0)); if (`size $r`) warning $r; // 置き換え
+    $r = assertStringArrayEqual({}, `ls -l -sl`); if (`size $r`) warning $r;
+    $r = assertTrue(selectNodes(7, true, 0)); if (`size $r`) warning $r; // 反対側に置き換え
+    $r = assertStringArrayEqual({}, `ls -l -sl`); if (`size $r`) warning $r;
+
+    $r = assertTrue(selectNodes(8, false, 0)); if (`size $r`) warning $r; // 置き換え
+    $r = assertStringArrayEqual({$nBL}, `ls -l -sl`); if (`size $r`) warning $r;
+    $r = assertTrue(selectNodes(8, true, 0)); if (`size $r`) warning $r; // 反対側に置き換え
+    $r = assertStringArrayEqual({$nBR}, `ls -l -sl`); if (`size $r`) warning $r;
+    $r = assertTrue(selectNodes(9, false, 0)); if (`size $r`) warning $r; // 置き換え
+    $r = assertStringArrayEqual({$nBR}, `ls -l -sl`); if (`size $r`) warning $r;
+    $r = assertTrue(selectNodes(9, true, 0)); if (`size $r`) warning $r; // 反対側に置き換え
+    $r = assertStringArrayEqual({$nBL}, `ls -l -sl`); if (`size $r`) warning $r;
   }
 
   // pastePose
