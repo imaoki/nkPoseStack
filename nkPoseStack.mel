@@ -2766,8 +2766,8 @@ proc buildEditorWindow() {
             -l "Paste"
             -bgs true
             -cll false
-            -mh 7
-            -mw 7
+            -mh 4
+            -mw 4
             "pasteFrame"`;
           string $pasteColumn = `columnLayout
               -adj true
@@ -2787,8 +2787,8 @@ proc buildEditorWindow() {
             -l "Select"
             -bgs true
             -cll false
-            -mh 7
-            -mw 7
+            -mh 4
+            -mw 4
             "selectFrame"`;
           string $selectColumn = `columnLayout
               -adj true
@@ -2819,8 +2819,8 @@ proc buildEditorWindow() {
             -l "Mirror"
             -bgs true
             -cll false
-            -mh 7
-            -mw 7
+            -mh 4
+            -mw 4
             "mirrorFrame"`;
           string $mirrorColumn = `columnLayout
               -adj true
