@@ -2925,30 +2925,6 @@ proc buildEditorWindow() {
   button -e -c "nkPoseStackEventController(\"nkPoseStackEditorWindow\", \"c\", \"applyButton\");" $applyButton;
   button -e -c "nkPoseStackEventController(\"nkPoseStackEditorWindow\", \"c\", \"cancelButton\");" $cancelButton;
 
-  // print("  " + $nkPoseStackEditorWindow + "\n"); // debug
-  // print("  " + $outerForm + "\n"); // debug
-  // print("  " + $poseNameText + "\n"); // debug
-  // print("  " + $nodeList + "\n"); // debug
-  // print("  " + $poseSettingColumn + "\n"); // debug
-  // print("  " + $pasteFrame + "\n"); // debug
-  // print("  " + $pasteColumn + "\n"); // debug
-  // print("  " + $pasteAttributesCheckBoxGrp + "\n"); // debug
-  // print("  " + $selectFrame + "\n"); // debug
-  // print("  " + $selectColumn + "\n"); // debug
-  // print("  " + $selectTextForm + "\n"); // debug
-  // print("  " + $selectPatternAText + "\n"); // debug
-  // print("  " + $selectPatternBText + "\n"); // debug
-  // print("  " + $mirrorFrame + "\n"); // debug
-  // print("  " + $mirrorColumn + "\n"); // debug
-  // print("  " + $mirrorAxisRadioButton + "\n"); // debug
-  // print("  " + $primaryAxisRadioButton + "\n"); // debug
-  // print("  " + $secondaryAxisRadioButton + "\n"); // debug
-  // print("  " + $invertAxisCheckBoxGrp + "\n"); // debug
-  // print("  " + $buttonsForm + "\n"); // debug
-  // print("  " + $okButton + "\n"); // debug
-  // print("  " + $applyButton + "\n"); // debug
-  // print("  " + $cancelButton + "\n"); // debug
-
   appendUIControls({
     $nkPoseStackEditorWindow,
     $poseNameText,
@@ -3184,33 +3160,6 @@ proc buildMainWindow() {
   iconTextButton -e -c "nkPoseStackEventController(\"nkPoseStackWindow\", \"c\", \"deletePoseButton\");" $deletePoseButton;
   iconTextButton -e -c "nkPoseStackEventController(\"nkPoseStackWindow\", \"c\", \"moveUpPoseButton\");" $moveUpPoseButton;
   iconTextButton -e -c "nkPoseStackEventController(\"nkPoseStackWindow\", \"c\", \"moveDownPoseButton\");" $moveDownPoseButton;
-
-  // print("  " + $nkPoseStackWindow + "\n"); // debug
-  // print("  " + $outerForm + "\n"); // debug
-  // print("  " + $menuBar + "\n"); // debug
-  // print("  " + $fileMenu + "\n"); // debug
-  // print("  " + $clearListMenuItem + "\n"); // debug
-  // print("  " + $openListMenuItem + "\n"); // debug
-  // print("  " + $importListMenuItem + "\n"); // debug
-  // print("  " + $saveListAsMenuItem + "\n"); // debug
-  // print("  " + $resetWindowMenuItem + "\n"); // debug
-  // print("  " + $quitMenuItem + "\n"); // debug
-  // print("  " + $helpMenu + "\n"); // debug
-  // print("  " + $aboutMenuItem + "\n"); // debug
-  // print("  " + $topToolRow + "\n"); // debug
-  // print("  " + $bottomToolRow + "\n"); // debug
-  // print("  " + $addPoseButton + "\n"); // debug
-  // print("  " + $editPoseButton + "\n"); // debug
-  // print("  " + $duplicatePoseButton + "\n"); // debug
-  // print("  " + $updatePoseButton + "\n"); // debug
-  // print("  " + $selectSourceButton + "\n"); // debug
-  // print("  " + $selectOppositeButton + "\n"); // debug
-  // print("  " + $pasteSourceButton + "\n"); // debug
-  // print("  " + $pasteOppositeButton + "\n"); // debug
-  // print("  " + $poseList + "\n"); // debug
-  // print("  " + $deletePoseButton + "\n"); // debug
-  // print("  " + $moveUpPoseButton + "\n"); // debug
-  // print("  " + $moveDownPoseButton + "\n"); // debug
 
   appendUIControls({
     $nkPoseStackWindow,
