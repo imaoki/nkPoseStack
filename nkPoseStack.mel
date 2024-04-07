@@ -2451,7 +2451,7 @@ proc nkPoseStackWindowClosed() {
   unregisterEventJob();
   unsubscribePosesObservers();
   removeUIControls("nkPoseStackWindow", "");
-  removeUIControls("nkPoseStackEditorWindow", "");
+  nkPoseStackEditorWindowClosed();
 }
 
 /*-
@@ -3373,7 +3373,7 @@ global proc nkPoseStackAttributeDeleted(string $nodeId) {
 @returns <string>
 */
 global proc string nkPoseStackVersion() {
-  return "4.0.8";
+  return "4.0.9";
 }
 
 /*-
