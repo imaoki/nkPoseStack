@@ -2,7 +2,7 @@
 
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/imaoki/nkPoseStack)](https://github.com/imaoki/nkPoseStack/releases/latest)
 
-ポーズをコピペするツール。
+ポーズをコピペするMELツール。
 
 ![window-main](resource/window-main.png "window-main")
 
